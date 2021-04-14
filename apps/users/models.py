@@ -1,4 +1,9 @@
 from settings import db
-from sqlalchemy.dialects.postgresql import JSONB
 
-# your model here
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    position = db.Column(db.Integer, nullable=False, default=0)
+    weight = db.Column(db.Float, nullable=False, default="")
+    name = db.Column(db.String, default="")
+    symbol = db.Column(db.String, default="")

@@ -1,3 +1,7 @@
 from settings import ma
+from apps.users.models import User
 
-#your schema here
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
