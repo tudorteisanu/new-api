@@ -3,7 +3,6 @@ from config import configType as Config
 
 from common.common import create_dirs, save_logs_to_file
 
-# all urls
 from urls import *
 
 create_dirs()

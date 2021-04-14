@@ -1,9 +1,14 @@
-from settings import db, app, api
-from views import get_data, get_for_edit, create, edit, delete
+from settings import app
+from .views import get_user_data
+from .views import get_user_for_edit
+from .views import  create_user
+from .views import  edit_user
+from .views import  delete_user
 
+resource = 'users'
 
-app.route('/users', methods=['GET'])(get_data)
-app.route('/users/get_for_edit', methods=['GET'])(get_for_edit)
-app.route('/users/create', methods=['PATCH'])(create)
-app.route('/users/edit/<id>', methods=['GET'])(edit)
-app.route('/users/delete/<id>', methods=['POST'])(delete)
+app.route(f'/{resource}', methods=['GET'])(get_user_data)
+app.route(f'/{resource}/<id>/edit', methods=['GET'])(get_user_for_edit)
+app.route(f'/{resource}', methods=['POST'])(create_user)
+app.route(f'/{resource}/<id>', methods=['PATCH'])(edit_user)
+app.route(f'/{resource}', methods=['DELETE'])(delete_user)
