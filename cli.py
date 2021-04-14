@@ -77,8 +77,8 @@ from apps.{name}.schema import {name.capitalize()}Schema
 
 def {name}_get_data():
     headers = [
-        {'{"value": "id", "text": "ID"'},
-        {'"value": "name", "text": "Name"}'},
+        {'{"value": "id", "text": "ID"}'},
+        {'{"value": "name", "text": "Name"}'},
     ]
     
     items = {name.capitalize()}.query.all()

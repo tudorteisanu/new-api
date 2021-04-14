@@ -7,8 +7,8 @@ from apps.products.schema import ProductsSchema
 
 def products_get_data():
     headers = [
-        {"value": "id", "text": "ID",
-        "value": "name", "text": "Name"},
+        {"value": "id", "text": "ID"},
+        {"value": "name", "text": "Name"},
     ]
     
     items = Products.query.all()
