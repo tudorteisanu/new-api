@@ -1,14 +1,10 @@
 from settings import app
-from .views import get_centers_data
-from .views import get_center_for_edit
-from .views import create_center
-from .views import edit_center
-from .views import delete_center
+from .views import  CenterRoute as Route
 
 resource = 'centers'
 
-app.route(f'/{resource}', methods=['GET'])(get_centers_data)
-app.route(f'/{resource}/<id>/edit', methods=['GET'])(get_center_for_edit)
-app.route(f'/{resource}', methods=['POST'])(create_center)
-app.route(f'/{resource}/<id>', methods=['PATCH'])(edit_center)
-app.route(f'/{resource}', methods=['DELETE'])(delete_center)
+app.route(f'/{resource}', methods=['GET'], endpoint=f'{resource}_index')(Route.get_data)
+app.route(f'/{resource}/<id>/edit', methods=['GET'], endpoint=f'{resource}_get_for_edit')(Route.get_for_edit)
+app.route(f'/{resource}', methods=['POST'], endpoint=f'{resource}_create')(Route.create)
+app.route(f'/{resource}/<id>', methods=['PATCH'], endpoint=f'{resource}_edit')(Route.edit)
+app.route(f'/{resource}', methods=['DELETE'], endpoint=f'{resource}_delete')(Route.delete)
