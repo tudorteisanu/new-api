@@ -1,7 +1,7 @@
-from settings import ma
-from apps.users.models import User
+from .models import User
+from marshmallow_sqlalchemy import ModelSchema
 
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
+class UserSchema(ModelSchema):
     class Meta:
         model = User

@@ -5,27 +5,20 @@ from apps.users.models import User
 from apps.users.schema import UserSchema
 
 
-class Struct:
-    def __init__(self, **entries):
-        self.__dict__.update(entries)
-
-
 class UserRoute(object):
     @staticmethod
     def get_data():
         headers = [
             {"value": "id", "text": "ID"},
-            {"value": "position", "text": "Position"},
             {"value": "name", "text": 'Name'},
-            {"value": "weight", "text": "Weight"},
-            {"value": "symbol", "text": 'Symbol'},
-            {"value": "address", "text": 'Address'}
+            {"value": "email", "text": "Email"},
+            {"value": "role", "text": "Role"}
         ]
         
         items = User.query.all()
         
         resp = {
-            "items": UserSchema(many=True).dump(items),
+            "items": UserSchema(many=True, only=("name", "email", "role", 'id')).dump(items),
             "headers": headers
         }
         
@@ -39,19 +32,16 @@ class UserRoute(object):
         if data.get('name'):
             user.name = data.get('name')
         
-        if data.get('position'):
-            user.position = data.get('position')
+        if data.get('email'):
+            user.email = data.get('email')
         
-        if data.get('weight'):
-            user.weight = data.get('weight')
-        
-        if data.get('symbol'):
-            user.symbol = data.get('symbol')
+        if data.get('role'):
+            user.role = data.get('role')
         
         db.session.add(user)
         db.session.commit()
         
-        return UserSchema().dump(user)
+        return UserSchema(only=("name", "email", "role", 'id')).dump(user)
 
     @staticmethod
     def get_for_edit(id):
@@ -63,20 +53,17 @@ class UserRoute(object):
         data = request.json
         user = User.query.get(id)
     
+        if data.get('email'):
+            user.email = data.get('email')
+    
         if data.get('name'):
             user.name = data.get('name')
     
-        if data.get('position'):
-            user.position = data.get('position')
-    
-        if data.get('weight'):
-            user.weight = data.get('weight')
-    
-        if data.get('symbol'):
-            user.symbol = data.get('symbol')
+        if data.get('role'):
+            user.role = data.get('role')
         
         db.session.commit()
-        return UserSchema().dump(user)
+        return UserSchema(only=("name", "email", "role", 'id')).dump(user)
 
     @staticmethod
     def delete(id):
