@@ -2,15 +2,16 @@ from datetime import timedelta
 from os import environ
 
 POSTGRES = {
-    'user': 'postgres',
-    'pw': '123',
-    'db': 'flask_23',
-    'host': 'localhost'
+    'user': 'aolxbrsq',
+    'pw': 'j8U0Zcn_2IIHkD7Po283easg1fNJAx8m',
+    'db': 'aolxbrsq',
+    'host': 'queenie.db.elephantsql.com'
 }
 
+
 class FlaskConfig(object):
-    # SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///app2.db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///app2.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'MY_SERCRET_KEY'
 
@@ -69,7 +70,7 @@ class DevConfig(Config):
 configType = DevConfig
 
 
-class Common():
+class Common:
     # size from big to small
     images_with = [
         {"w": 390, "h": 390},
@@ -81,6 +82,6 @@ class Common():
     categoriesPath = 'static/'
 
 
-class FirebaseConfig(object):
+class FirebaseConfig:
     projectId = 'forex-29cdf'
     fireBaseSendLink = "https://"
