@@ -1,9 +1,8 @@
 from flask import request
-from flask import jsonify
+from flask import jsonify, make_response
 from settings import db
 from apps.clients.models import Client
 from apps.clients.schema import ClientSchema
-from json import  loads
 
 
 class ClientRoute(object):
@@ -84,4 +83,6 @@ class ClientRoute(object):
         user = Client.query.get(id)
         db.session.delete(user)
         db.session.commit()
-        return jsonify({"msg": 'Successfull delete'})
+        return jsonify({"message": 'Successfull delete'})
+        # todo error messages
+        # return jsonify({"message": 'An error occured', "errors": [1,2,3,4]}), 422
