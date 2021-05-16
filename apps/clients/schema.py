@@ -1,4 +1,4 @@
-from .models import Client
+from apps.clients.models import Client
 from marshmallow_sqlalchemy import ModelSchema
 
 

@@ -1,17 +1,10 @@
 from settings import app
-from .views import  AuthRoute
+from apps.auth.views import AuthRoute as Route
 
+resource = 'auth'
 
-class Urls:
-    register = '/register'
-    login = '/login'
-    logout = '/logout'
-    check_token = '/check_token'
-    user = '/users'
-    logs = '/logs'
-
-
-app.route(Urls.register, methods=["GET"])(AuthRoute.register)
-app.route(Urls.login, methods=['GET'])(AuthRoute.login)
-app.route(Urls.logout, methods=['GET'])(AuthRoute.logout)
-app.route(Urls.check_token, methods=['GET'])(AuthRoute.check_token)
+app.route(f'/register', methods=['POST'], endpoint=f'{resource}_register')(Route.register)
+app.route(f'/login', methods=['GET'], endpoint=f'{resource}_login')(Route.login)
+app.route(f'/logout', methods=['GET'], endpoint=f'{resource}_logout')(Route.logout)
+app.route(f'/check_token', methods=['GET'], endpoint=f'{resource}_check_token')(Route.check_token)
+# app.route(f'/{resource}/<id>', methods=['DELETE'], endpoint=f'{resource}_delete')(Route.delete)

@@ -23,8 +23,9 @@ class User(db.Model):
         return 'User {} - {}'.format(self.email, self.id)
 
 
-validations = {
-    "id": 'required,unique',
-    "email": 'required,min:15,max:128',
-    "name": 'required,min:10,max:100'
-}
+class Validations:
+    validations = {
+        "id": 'required,unique',
+        "email": 'required,min:15,max:128',
+        "name": 'required,min:10,max:100'
+    }

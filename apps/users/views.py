@@ -2,7 +2,6 @@ from flask import request
 from flask import jsonify
 from settings import db
 from apps.users.models import User
-from apps.users.models import validations
 from apps.users.schema import UserSchema
 
 
@@ -36,10 +35,6 @@ class UserRoute(object):
     def create():
         data = request.json
         user = User()
-        errors = validate(data)
-
-        if len(errors):
-            return jsonify({'message': "Invalid data", "errors": errors}), 422
         
         if data.get('name'):
             user.name = data.get('name')
@@ -49,9 +44,6 @@ class UserRoute(object):
         
         if data.get('role'):
             user.role = data.get('role')
-        
-        if len(errors) > 0:
-            return jsonify({'message': "Invalid data", "errors": errors}), 422
         
         db.session.add(user)
         db.session.commit()
@@ -67,10 +59,6 @@ class UserRoute(object):
     def edit(id):
         data = request.json
         user = User.query.get(id)
-        errors = validate(data)
-        
-        if len(errors):
-            return jsonify({'message': "Invalid data", "errors": errors}), 422
         
         if data.get('email'):
             user.email = data.get('email')
@@ -89,38 +77,6 @@ class UserRoute(object):
         user = User.query.get(id)
         db.session.delete(user)
         db.session.commit()
-        return 'True'
+        return jsonify({'message': 'Successful deleted!'}), 200
 
-        
-def validate(data):
-    errors = {}
-    for key in validations:
-        field_validations = validations[key].split(',')
-        
-        for validation in field_validations:
-            if validation == 'required' and key not in data:
-                errors[key] = f'Field {key} is required'
-            
-            elif key in data:
-                field = data[key]
-                
-                if validation.startswith('min:'):
-                    minimal_length = int(validation.split(':')[1])
-                    
-                    print(len(field)<minimal_length)
-                    if len(field) < minimal_length:
-                        errors[key] = f'Minimal length is {minimal_length}'
-
-                if validation.startswith('max:'):
-                    maximal_length = int(validation.split(':')[1])
-    
-                    if len(field) > maximal_length:
-                        errors[key] = f'Maximal length is {maximal_length}'
-
-                elif validation.startswith('exact:'):
-                    exact = int(validation.split(':')[1])
-    
-                    if len(field) != exact:
-                        errors[key] = f'Length must be {exact}'
-    return errors
    

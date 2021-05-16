@@ -4,11 +4,14 @@ from logging.handlers import RotatingFileHandler
 from os import path, mkdir
 from settings import app
 
+
 def create_dirs():
     dirs = ['static', 'static/images', 'logs']
-    for dir in dirs:
-        if not path.exists(dir):
-            makedirs(dir)
+    
+    for dir_name in dirs:
+        if not path.exists(dir_name):
+            makedirs(dir_name)
+
 
 def save_logs_to_file():
     if not path.exists('logs'):

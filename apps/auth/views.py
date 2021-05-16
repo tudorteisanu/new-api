@@ -8,16 +8,19 @@ from flask_jwt_extended import create_access_token
 from helpers.auth_utils import auth_required
 
 
+def send_email_link(email):
+    print(f'send link to {email}')
+
+
 class AuthRoute:
     @staticmethod
     def register():
         data = request.args
         current_user = User.query.filter_by(email=data['email']).first()
         if current_user is not None:
-            return 'user_exists'
+            return jsonify({'message': 'user_exists'}), 401
         
         elif current_user is None:
-            
             user = User(
                 name=data['name'],
                 email=data['email'],
@@ -30,8 +33,6 @@ class AuthRoute:
             db.session.commit()
             return jsonify(UserSchema(only=['id', 'name', 'email', 'role']).dump(user))
     
-    # pass
-
     @staticmethod
     def login():
         data = request.args
@@ -49,16 +50,41 @@ class AuthRoute:
                 data['gmail'] = data['email']
                 return jsonify(data)
             
-            abort(401)
+            return jsonify({'message': "user not found"}), 401
         abort(404)
+        
+    @staticmethod
+    def forgot_password_step_1():
+        data = request.args
+        
+        email = data.get('email', None)
+        
+        if email:
+            send_email_link(email)
     
-    def forgot_password(self):
+    @staticmethod
+    def forgot_password_step_2():
         pass
+    
+    @staticmethod
+    def forgot_password_step_3():
+        pass
+    
+    @staticmethod
+    def change_password():
+        data = request.json
+    
+        if check_password_hash(g.user.password_hash, data['password']):
+            return jsonify({'message': "The new password must not be the same as the old one"}), 422
+        else:
+            user = User.query.get(g.user.id)
+            user.password_hash = generate_password_hash(data['password'])
 
     @staticmethod
     @auth_required()
     def logout():
         user = User.query.get(g.user.id)
+        
         if user is not None:
             user.token = None
             db.session.commit()

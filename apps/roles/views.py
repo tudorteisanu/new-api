@@ -1,82 +1,85 @@
 from flask import request
-from flask import jsonify, make_response
+from flask import jsonify
 from settings import db
-from apps.clients.models import Client
-from apps.clients.schema import ClientSchema
+from apps.roles.models import Role as Model
+from apps.roles.schema import RolesSchema as Schema
 
 
-class ClientRoute(object):
+class RolesRoute(object):
     @staticmethod
     def get_data():
         headers = [
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
-            {"value": "text", "text": "Text"},
-            {"value": "email", "text": "Email"}
+            {"value": "guard", "text": "Guard"},
+            {"value": "alias", "text": "Alias"}
         ]
 
         params = request.args
-        filters = {}
         
-        items = Client\
+        items = Model\
             .query\
-            .filter_by(**filters)\
-            .order_by(Client.id.desc())\
+            .order_by(Model.id.desc())\
             .paginate(page=int(params['page']), per_page=int(params['per_page']), error_out=False)
         
-        resp = {
-            "items": ClientSchema(many=True).dump(items.items),
+        response = {
+            "items": Schema(many=True).dump(items.items),
             "pages": items.pages,
             "total": items.total,
             "headers": headers
         }
         
-        return jsonify(resp)
+        return jsonify(response)
     
+    @staticmethod
+    def get_list():
+        items = Model.query.all()
+        return jsonify(Schema(many=True).dump(items))
+       
     @staticmethod
     def create():
         data = request.json
-        user = Client()
+        user = Model()
         
         if data.get('name'):
             user.name = data.get('name')
         
-        if data.get('email'):
-            user.email = data.get('email')
+        if data.get('guard'):
+            user.guard = data.get('guard')
         
-        if data.get('text'):
-            user.text = data.get('text')
+        if data.get('alias'):
+            user.alias = data.get('alias')
         
         db.session.add(user)
         db.session.commit()
         
-        return ClientSchema().dump(user)
+        return Schema().dump(user)
 
     @staticmethod
     def get_for_edit(id):
-        client = Client.query.get(id)
-        return ClientSchema().dump(client)
+        client = Model.query.get(id)
+        return Schema().dump(client)
 
     @staticmethod
     def edit(id):
         data = request.json
-        client = Client.query.get(id)
-    
-        if data.get('email'):
-            client.email = data.get('email')
-    
+        client = Model.query.get(id)
+
         if data.get('name'):
             client.name = data.get('name')
-        
-        if data.get('text'):
-            client.text = data.get('text')
+
+        if data.get('guard'):
+            client.guard = data.get('guard')
+
+        if data.get('alias'):
+            client.alias = data.get('alias')
             
         db.session.commit()
-        return ClientSchema().dump(client)
+        return Schema().dump(client)
 
     @staticmethod
     def delete(id):
-        client = Client.query.get(id)
+        client = Model.query.get(id)
         db.session.delete(client)
         db.session.commit()
         return jsonify({"message": 'Successful delete'})
