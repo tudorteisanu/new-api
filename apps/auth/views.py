@@ -1,4 +1,3 @@
-from flask_restful import Resource
 from settings import db
 from apps.users.models import User
 from apps.users.schema import UserSchema
@@ -6,9 +5,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, jsonify, abort, g
 from flask_jwt_extended import create_access_token
 from helpers.auth_utils import auth_required
+from helpers.send_standart_message import send_message
+import random
 
 
-def send_email_link(email):
+def send_email_link(email, link):
+    body=f'{link}'
+    send_message('Reset password', body=body)
     print(f'send link to {email}')
 
 
@@ -54,20 +57,25 @@ class AuthRoute:
         abort(404)
         
     @staticmethod
-    def forgot_password_step_1():
+    def reset_password_step_1():
         data = request.args
         
         email = data.get('email', None)
         
         if email:
-            send_email_link(email)
+            user = User.query.filter_by(email=email).first()
+            if user:
+                hash = random.getrandbits(128)
+                link = f'http://localhost://5000/reset={hash}'
+                user.reset_code = hash
+                send_email_link(email, link)
     
     @staticmethod
-    def forgot_password_step_2():
+    def reset_password_step_2():
         pass
     
     @staticmethod
-    def forgot_password_step_3():
+    def reset_password_step_3():
         pass
     
     @staticmethod

@@ -18,6 +18,7 @@ class User(db.Model):
     role = db.Column(db.String(12), server_default='user')
     platform = db.Column(db.String, server_default='')
     browser = db.Column(db.String, server_default='')
+    reset_code = db.Column(db.String, server_default='')
     
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)

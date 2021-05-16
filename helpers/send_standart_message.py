@@ -28,3 +28,17 @@ def send_test_message():
         subject='no-reply', sender='Johny', recipients=['teisanutudort@gmail.com'], body='test body')
     
     mail.send(msg)
+
+
+def send_message(subject, body, recipients=['teisanutudort@gmail.com']):
+    # msg_html = render_template(
+    #     "messages/messageBase.html",
+    #     body=body,
+    #     email='',
+    #     phone=''
+    # )
+    
+    msg = Message(
+        subject=subject, sender='Johny', recipients=recipients, body=body)
+    
+    mail.send(msg)
