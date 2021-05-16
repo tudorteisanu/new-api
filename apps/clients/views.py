@@ -11,7 +11,8 @@ class ClientRoute(object):
         headers = [
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
-            {"value": "text", "text": "Text"}
+            {"value": "text", "text": "Text"},
+            {"value": "email", "text": "Email"}
         ]
 
         params = request.args
@@ -26,6 +27,7 @@ class ClientRoute(object):
         resp = {
             "items": ClientSchema(many=True).dump(items.items),
             "pages": items.pages,
+            "total": items.total,
             "headers": headers
         }
         
@@ -42,9 +44,6 @@ class ClientRoute(object):
         if data.get('email'):
             user.email = data.get('email')
         
-        if data.get('role'):
-            user.role = data.get('role')
-        
         if data.get('text'):
             user.text = data.get('text')
         
@@ -55,33 +54,32 @@ class ClientRoute(object):
 
     @staticmethod
     def get_for_edit(id):
-        user = Client.query.get(id)
-        return ClientSchema().dump(user)
+        client = Client.query.get(id)
+        return ClientSchema().dump(client)
 
     @staticmethod
     def edit(id):
         data = request.json
-        user = Client.query.get(id)
+        client = Client.query.get(id)
     
         if data.get('email'):
-            user.email = data.get('email')
+            client.email = data.get('email')
     
         if data.get('name'):
-            user.name = data.get('name')
-    
-        if data.get('role'):
-            user.role = data.get('role')
+            client.name = data.get('name')
         
         if data.get('text'):
-            user.text = data.get('text')
+            client.text = data.get('text')
+            
+            return jsonify({'message': 'Invalid data', 'errors': {'text': "text too short", "name": "Name is too long"}}), 422
         
         db.session.commit()
-        return ClientSchema().dump(user)
+        return ClientSchema().dump(client)
 
     @staticmethod
     def delete(id):
-        user = Client.query.get(id)
-        db.session.delete(user)
+        client = Client.query.get(id)
+        db.session.delete(client)
         db.session.commit()
         return jsonify({"message": 'Successfull delete'})
         # todo error messages
