@@ -12,19 +12,19 @@ def auth_required():
             user = User.query.get(get_jwt_identity())
             
             if not user:
-                resp = jsonify({"msg": "User does not exist"})
+                resp = jsonify({"message": "User does not exist"})
                 resp.status = "401"
                 return resp
             
             token = request.headers.get("Authorization")
-            dekoded_token = decode_token(token)
+            # dekoded_token = decode_token(token)
             
-            role = dekoded_token['user_claims'].get('role')
-            
-            if user.role != role:
-                resp = jsonify({"msg": "invalid role"})
-                resp.status = "401"
-                return resp
+            # role = dekoded_token['user_claims'].get('role')
+            #
+            # if user.role != role:
+            #     resp = jsonify({"msg": "invalid role"})
+            #     resp.status = "401"
+            #     return resp
             
             if user.platform != request.user_agent.platform or user.browser != request.user_agent.browser:
                 resp = jsonify({"msg": "your bad!"})

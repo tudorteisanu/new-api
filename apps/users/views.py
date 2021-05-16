@@ -3,10 +3,12 @@ from flask import jsonify
 from settings import db
 from apps.users.models import User
 from apps.users.schema import UserSchema
+from helpers.auth_utils import auth_required
 
 
 class UserRoute(object):
     @staticmethod
+    @auth_required()
     def get_data():
         headers = [
             {"value": "id", "text": "ID"},
@@ -32,6 +34,7 @@ class UserRoute(object):
         return jsonify(resp)
     
     @staticmethod
+    @auth_required()
     def create():
         data = request.json
         user = User()
@@ -51,11 +54,13 @@ class UserRoute(object):
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
     
     @staticmethod
+    @auth_required()
     def get_for_edit(id):
         user = User.query.get(id)
         return UserSchema().dump(user)
     
     @staticmethod
+    @auth_required()
     def edit(id):
         data = request.json
         user = User.query.get(id)
@@ -73,6 +78,7 @@ class UserRoute(object):
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
     
     @staticmethod
+    @auth_required()
     def delete(id):
         user = User.query.get(id)
         db.session.delete(user)

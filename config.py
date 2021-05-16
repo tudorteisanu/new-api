@@ -18,6 +18,13 @@ class FlaskConfig(object):
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
     JWT_HEADER_TYPE = ""
     
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 465
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = 'it.worker995@gmail.com'
+    MAIL_PASSWORD = 'Light231'
+
 
 class Config(object):
     LANGUAGES = ['ro', 'ru', 'en']

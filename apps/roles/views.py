@@ -3,10 +3,12 @@ from flask import jsonify
 from settings import db
 from apps.roles.models import Role as Model
 from apps.roles.schema import RolesSchema as Schema
+from helpers.auth_utils import auth_required
 
 
 class RolesRoute(object):
     @staticmethod
+    @auth_required()
     def get_data():
         headers = [
             {"value": "id", "text": "ID"},
@@ -30,13 +32,16 @@ class RolesRoute(object):
         }
         
         return jsonify(response)
+
     
     @staticmethod
+    @auth_required()
     def get_list():
         items = Model.query.all()
         return jsonify(Schema(many=True).dump(items))
        
     @staticmethod
+    @auth_required()
     def create():
         data = request.json
         user = Model()
@@ -56,11 +61,13 @@ class RolesRoute(object):
         return Schema().dump(user)
 
     @staticmethod
+    @auth_required()
     def get_for_edit(id):
         client = Model.query.get(id)
         return Schema().dump(client)
 
     @staticmethod
+    @auth_required()
     def edit(id):
         data = request.json
         client = Model.query.get(id)
@@ -78,6 +85,7 @@ class RolesRoute(object):
         return Schema().dump(client)
 
     @staticmethod
+    @auth_required()
     def delete(id):
         client = Model.query.get(id)
         db.session.delete(client)

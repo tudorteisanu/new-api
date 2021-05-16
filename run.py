@@ -15,7 +15,10 @@ def before_request():
             return jsonify({'message': "Invalid data", "errors": errors}), 422
     except:
         pass
-    
+
+from helpers.send_standart_message import send_test_message
+
+app.route('/test')(send_test_message)
 
 create_dirs()
 save_logs_to_file()

@@ -3,10 +3,12 @@ from flask import jsonify, make_response
 from settings import db
 from apps.clients.models import Client
 from apps.clients.schema import ClientSchema
+from helpers.auth_utils import auth_required
 
 
 class ClientRoute(object):
     @staticmethod
+    @auth_required()
     def get_data():
         headers = [
             {"value": "id", "text": "ID"},
@@ -34,6 +36,7 @@ class ClientRoute(object):
         return jsonify(resp)
     
     @staticmethod
+    @auth_required()
     def create():
         data = request.json
         user = Client()
@@ -53,11 +56,13 @@ class ClientRoute(object):
         return ClientSchema().dump(user)
 
     @staticmethod
+    @auth_required()
     def get_for_edit(id):
         client = Client.query.get(id)
         return ClientSchema().dump(client)
 
     @staticmethod
+    @auth_required()
     def edit(id):
         data = request.json
         client = Client.query.get(id)
@@ -75,6 +80,7 @@ class ClientRoute(object):
         return ClientSchema().dump(client)
 
     @staticmethod
+    @auth_required()
     def delete(id):
         client = Client.query.get(id)
         db.session.delete(client)

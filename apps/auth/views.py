@@ -71,6 +71,7 @@ class AuthRoute:
         pass
     
     @staticmethod
+    @auth_required()
     def change_password():
         data = request.json
     
