@@ -11,3 +11,8 @@ class Client(db.Model):
         return 'Client {} - {}'.format(self.name, self.id)
 
 
+validations = {
+    "text": 'required,exact:9',
+    "email": 'required,min:15,max:128',
+    "name": 'required,min:10,max:100'
+}

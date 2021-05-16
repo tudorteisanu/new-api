@@ -1,7 +1,7 @@
 from flask import request
 from flask import jsonify, make_response
 from settings import db
-from apps.clients.models import Client
+from apps.clients.models import Client, validations
 from apps.clients.schema import ClientSchema
 
 
@@ -37,6 +37,11 @@ class ClientRoute(object):
     def create():
         data = request.json
         user = Client()
+
+        errors = validate(data)
+
+        if len(errors):
+            return jsonify({'message': "Invalid data", "errors": errors}), 422
         
         if data.get('name'):
             user.name = data.get('name')
@@ -61,6 +66,11 @@ class ClientRoute(object):
     def edit(id):
         data = request.json
         client = Client.query.get(id)
+
+        errors = validate(data)
+
+        if len(errors):
+            return jsonify({'message': "Invalid data", "errors": errors}), 422
     
         if data.get('email'):
             client.email = data.get('email')
@@ -71,8 +81,6 @@ class ClientRoute(object):
         if data.get('text'):
             client.text = data.get('text')
             
-            return jsonify({'message': 'Invalid data', 'errors': {'text': "text too short", "name": "Name is too long"}}), 422
-        
         db.session.commit()
         return ClientSchema().dump(client)
 
@@ -82,5 +90,36 @@ class ClientRoute(object):
         db.session.delete(client)
         db.session.commit()
         return jsonify({"message": 'Successfull delete'})
-        # todo error messages
-        # return jsonify({"message": 'An error occured', "errors": [1,2,3,4]}), 422
+
+
+def validate(data):
+    errors = {}
+    for key in validations:
+        field_validations = validations[key].split(',')
+        
+        for validation in field_validations:
+            if validation == 'required' and key not in data:
+                errors[key] = f'Field {key} is required'
+            
+            elif key in data:
+                field = data[key]
+                
+                if validation.startswith('min:'):
+                    minimal_length = int(validation.split(':')[1])
+                    
+                    print(len(field) < minimal_length)
+                    if len(field) < minimal_length:
+                        errors[key] = f'Minimal length is {minimal_length}'
+                
+                if validation.startswith('max:'):
+                    maximal_length = int(validation.split(':')[1])
+                    
+                    if len(field) > maximal_length:
+                        errors[key] = f'Maximal length is {maximal_length}'
+                
+                elif validation.startswith('exact:'):
+                    exact = int(validation.split(':')[1])
+                    
+                    if len(field) != exact:
+                        errors[key] = f'Length must be {exact}'
+    return errors

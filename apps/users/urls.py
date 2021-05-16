@@ -1,5 +1,5 @@
 from settings import app
-from .views import  UserRoute as Route
+from apps.users.views import UserRoute as Route
 
 resource = 'users'
 
