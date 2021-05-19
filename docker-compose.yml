@@ -1,0 +1,24 @@
+version: '2'
+services:
+    api:
+        build: .
+
+        environment:
+          - VIRTUAL_HOST=api.flask.loc
+
+        ports:
+            - "5000:5000"
+
+        volumes:
+            - .:/code
+
+        networks:
+          - backend
+          - proxy_proxy
+
+
+networks:
+  backend:
+    driver: bridge
+  proxy_proxy:
+    external: true
