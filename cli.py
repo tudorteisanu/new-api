@@ -1,15 +1,16 @@
 import unittest
 import os
 import click
-from settings import app
+from config.settings import app
 from flask.cli import AppGroup
 
 user_cli = AppGroup('user')
 
+
 @app.cli.command("new")
 @click.argument("name")
 def create_app(name):
-    filename = "apps/" + str(name)
+    filename = "modules/" + str(name)
     os.makedirs(filename, exist_ok=True)
     if os.path.exists(filename):
         create_files(name, filename)
@@ -30,6 +31,7 @@ app.cli.add_command(user_cli)
 В начале
 export FLASK_APP=cli.py
 '''
+
 
 def create_files(name, filename):
     files = ['models.py', 'urls.py', 'schema.py', 'views.py']
@@ -61,7 +63,7 @@ app.route('/{name}', methods=['DELETE'])({name}_delete)
 )
 
     with open(filename + '/schema.py', "w") as t:
-        t.write(f'from settings import ma\nfrom apps.{name}.models import {name.capitalize()} \
+        t.write(f'from settings import ma\nfrom modules.{name}.models import {name.capitalize()} \
         \n\n\nclass {name.capitalize()}Schema(ma.SQLAlchemyAutoSchema):\n \
         \n\tclass Meta: \
         \n\t\tmodel = {name.capitalize()}')
@@ -71,8 +73,8 @@ app.route('/{name}', methods=['DELETE'])({name}_delete)
 f'''from flask import request
 from flask import jsonify
 from settings import db
-from apps.{name}.models import {name.capitalize()}
-from apps.{name}.schema import {name.capitalize()}Schema
+from modules.{name}.models import {name.capitalize()}
+from modules.{name}.schema import {name.capitalize()}Schema
 
 
 def {name}_get_data():
@@ -135,7 +137,7 @@ def {name}_delete():
     print('app <{}> created succesful!'.format(name))
 
 
-def import_tests(rootDir='apps', models='tests'):
+def import_tests(rootDir='modules', models='tests'):
     if os.path.exists(rootDir):
         for item in os.listdir(rootDir):
             model = rootDir + '/'+item+'/'+models+'.py'
@@ -144,4 +146,4 @@ def import_tests(rootDir='apps', models='tests'):
             print('='*nr, text, '='*nr)
             os.system('python -m unittest {}'.format(model))
     else:
-        print('no apps found')
+        print('no modules found')

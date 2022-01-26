@@ -1,6 +1,4 @@
 *.pyc
 logs/
-static/
 venv/
 env/
-migrations/

@@ -8,18 +8,19 @@ from flask_socketio import SocketIO
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
+from config.flask_config import FlaskConfig
+from flask_login import LoginManager
 # import redis as Redis
 
-app = Flask(__name__)
-
-api = Api(app)
-
-app.config['SECRET_KEY'] = 'mysecret'
+app = Flask(__name__, template_folder='../templates', static_folder="../static")
+app.config.from_object(FlaskConfig)
+api = Api(app, catch_all_404s=True, prefix='/api/v1')
 socketio = SocketIO(app)
 jwt = JWTManager(app)
 CORS(app)
-app.config.from_object('config.FlaskConfig')
 db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)

@@ -1,4 +1,4 @@
-from settings import mail
+from config.settings import mail
 from flask_mail import Message
 from flask import render_template
 

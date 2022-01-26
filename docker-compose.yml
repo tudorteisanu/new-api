@@ -4,7 +4,7 @@ services:
         build: .
 
         environment:
-          - VIRTUAL_HOST=api.flask.loc
+          - VIRTUAL_HOST=api.server.loc
 
         ports:
             - "5000:5000"

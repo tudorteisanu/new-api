@@ -1,5 +1,5 @@
-from settings import app
-from apps.auth.views import AuthRoute as Route
+from config.settings import app
+from modules.auth.views import AuthRoute as Route
 
 resource = 'auth'
 

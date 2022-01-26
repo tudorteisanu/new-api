@@ -1,31 +1,32 @@
-from settings import app
-from config import configType as Config
-from flask import jsonify
-from helpers.validation import validate
-from helpers.common import create_dirs, save_logs_to_file
+from config.settings import app
+from config.flask_config import FlaskConfig
+from config.settings import login_manager
+from modules.users.models import User
+from flask import render_template
+from flask_jwt_extended import decode_token
+from datetime import datetime
+from flask_login import logout_user
 
-import urls
 
-@app.before_request
-def before_request():
-    try:
-        errors = validate()
-    
-        if len(errors):
-            return jsonify({'message': "Invalid data", "errors": errors}), 422
-    except:
-        pass
+@login_manager.request_loader
+def load_user_from_request(request):
+    if request.headers.get('Authorization', None):
+        token = decode_token(request.headers.get('Authorization'))
+        token_expiry = datetime.fromtimestamp(token['exp'])
 
-from helpers.send_standart_message import send_test_message
+        if token_expiry < datetime.now():
+            logout_user()
+            return {"message": "token_expire"}
+        return User.query.get(token['identity'])
+    return None
 
-app.route('/test')(send_test_message)
 
-create_dirs()
-save_logs_to_file()
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 
 if __name__ == '__main__':
-    app.run(Config.HOST, Config.PORT, Config.DEBUG)
+    import urls
 
-
-
+    app.run(FlaskConfig.HOST, FlaskConfig.PORT, FlaskConfig.DEBUG)

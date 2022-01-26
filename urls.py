@@ -1,4 +1,2 @@
-import apps.users.urls
-import apps.clients.urls
-import apps.auth.urls
-import apps.roles.urls
+import modules.users.controller
+import modules.auth.controller

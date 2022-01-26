@@ -1,8 +1,8 @@
-from settings import manager
+from config.settings import manager
 import os
 
 
-def make_models(rootDir='apps', models='models'):
+def make_models(rootDir='modules', models='models'):
     if os.path.exists(rootDir):
         classes = []
         

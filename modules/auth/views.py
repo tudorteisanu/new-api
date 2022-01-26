@@ -1,6 +1,6 @@
-from settings import db
-from apps.users.models import User
-from apps.users.schema import UserSchema
+from config.settings import db
+from modules.users.models import User
+from modules.users.schema import UserSchema
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, jsonify, abort, g
 from flask_jwt_extended import create_access_token
@@ -98,7 +98,7 @@ class AuthRoute:
             user.token = None
             db.session.commit()
         
-        return jsonify({"msg": 'success'})
+        return jsonify({"message": 'success'})
 
     @staticmethod
     @auth_required()

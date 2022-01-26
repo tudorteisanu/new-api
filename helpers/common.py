@@ -2,7 +2,7 @@ from os import makedirs
 from logging import Formatter, INFO
 from logging.handlers import RotatingFileHandler
 from os import path, mkdir
-from settings import app
+from config.settings import app
 
 
 def create_dirs():

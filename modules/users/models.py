@@ -1,5 +1,9 @@
-from settings import db
+from flask_login import UserMixin
+
+from config.settings import db
 from datetime import datetime as dt
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token
 
 
 def get_timestamp():
@@ -8,25 +12,22 @@ def get_timestamp():
     return int(time)
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(128))
     password_hash = db.Column(db.String(256))
-    token = db.Column(db.String)
-    old_token = db.Column(db.String)
     name = db.Column(db.String(128))
     role = db.Column(db.String(12), server_default='user')
-    platform = db.Column(db.String, server_default='')
-    browser = db.Column(db.String, server_default='')
     reset_code = db.Column(db.String, server_default='')
-    
+
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)
 
+    def hash_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-class Validations:
-    validations = {
-        "id": 'required,unique',
-        "email": 'required,min:15,max:128',
-        "name": 'required,min:10,max:100'
-    }
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def create_token(self):
+        return create_access_token(self.id)
