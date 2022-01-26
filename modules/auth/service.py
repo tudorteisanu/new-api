@@ -5,6 +5,9 @@ from flask_restful import Resource
 from flask_login import login_user, logout_user
 from modules.auth.serializer import LoginSerializer
 from json import loads
+from config.settings import app, db
+from flask import render_template
+from helpers.auth_utils import auth_required
 
 
 class LoginResource(Resource):
@@ -38,3 +41,42 @@ class LogoutResource(Resource):
         return {"message": "success"}, 200
 
 
+class RegisterResource(Resource):
+    @staticmethod
+    def post():
+        data = request.json or request.form or loads(request.data)
+
+        current_user = User.query.filter_by(email=data['email']).first()
+        if current_user is not None:
+            return {'message': 'user_exists'}, 401
+
+        elif current_user is None:
+            user = User(
+                name=data['name'],
+                email=data['email'],
+            )
+
+            user.hash_password(data['password'])
+
+            if data and data.get('role', None) is not None:
+                user.role = data['role']
+
+            db.session.add(user)
+            db.session.commit()
+            return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+
+@app.route('/')
+# @auth_required()
+def index():
+    return render_template('index.html')

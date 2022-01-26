@@ -1,3 +1,10 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(
+            45deg, #0e1930, #818381);
+}
+
 .container {
     width: 100vw;
     height: 100vh;
@@ -10,9 +17,85 @@
     padding: 40px;
     background: aliceblue;
     width: 300px;
-    height: 200px;
     display: flex;
     align-items: center;
     flex-direction: column;
     justify-content: center;
+    border-radius: 5px;
+}
+
+.login__input {
+    margin-top: 10px;
+    width: 100%;
+}
+
+input {
+    padding: 8px;
+    width: 100%;
+}
+
+button {
+    padding: 8px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.align-center {
+    align-items: center !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+.justify-start {
+    justify-content: flex-start !important;
+}
+
+.justify-end {
+    justify-content: flex-end !important;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.error {
+    border: 1px solid red;
+    color: red;
+}
+
+.hidden {
+    display: none;
+}
+
+.error__text {
+    padding: 8px;
+    margin: 0;
+}
+
+.background {
+    background: radial-gradient(red, transparent);
+}
+
+.full-size {
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+.main-text {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+h2 {
+    margin: 0;
 }

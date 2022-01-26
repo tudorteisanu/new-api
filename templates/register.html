@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="static/styles/style.css">
+</head>
+<body>
+<script>
+
+    async function register(event) {
+        event.preventDefault()
+
+        const email = document.getElementById('login')?.value;
+        const password = document.getElementById('password')?.value;
+        const name = document.getElementById('name')?.value;
+
+        const response = await fetch('http://localhost:5000/api/v1/register', {
+            method: 'post',
+            headers: {
+                contentType: 'application/json'
+            },
+            body: JSON.stringify({email, password, name})
+        }).then((response) => {
+            return response.json();
+        })
+
+        const error = document.getElementById('error')
+        const errorText = document.getElementById('error-text')
+
+        if (response.hasOwnProperty('message')) {
+            error.classList.remove('hidden')
+            errorText.innerHTML = response.message
+        } else {
+            error.classList.add('hidden')
+            errorText.innerHTML = ''
+        }
+    }
+
+</script>
+<div class="container">
+    <div id="form" class="login">
+        <h2>
+            Register
+        </h2>
+        <div class="login__input">
+            <div>
+                Name
+            </div>
+            <div class="d-flex">
+                <input type="email" id="name" name="name" value="Tudor">
+            </div>
+        </div>
+        <div class="login__input">
+            <div>
+                Email
+            </div>
+            <div class="d-flex">
+                <input type="email" id="login" name="email" value="teisanutudort@gmail.com">
+            </div>
+        </div>
+        <div class="login__input">
+            <div>
+                Password
+            </div>
+            <div class="d-flex">
+                <input type="password" id="password" name="password" value="11111111">
+            </div>
+        </div>
+        <div class="login__input">
+            <div>
+                Repeat Password
+            </div>
+            <div class="d-flex">
+                <input type="password" name="password_confirmation" value="11111111">
+            </div>
+        </div>
+        <div id="error" class="login__input error hidden">
+            <p id="error-text" class="error__text">
+                Error
+            </p>
+        </div>
+        <div class="login__input d-flex justify-end">
+            <a href="/login" >
+                Login
+            </a>
+        </div>
+        <div class="login__input">
+            <div class="d-flex">
+                <button class="full-width" id="submit-btn" onclick="register(event)">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
