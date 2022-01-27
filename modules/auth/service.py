@@ -11,6 +11,7 @@ from config.settings import login_manager
 from flask_jwt_extended import decode_token
 from datetime import datetime
 from flask_login import current_user
+from services.auth_utils import auth_required
 
 
 class LoginResource(Resource):
