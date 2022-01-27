@@ -1,0 +1,39 @@
+on:
+  push:
+    branches:
+      - master
+      
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+name: Deploy CCI dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Set up key
+        run: |
+          set -eu
+          mkdir "$HOME/.ssh"
+          echo "${{ secrets.key }}" > "$HOME/.ssh/key"
+          chmod 600 "$HOME/.ssh/key"
+          
+      - name: Sync files
+        shell: bash
+        env:
+          USER: ${{ secrets.user }}
+          HOST: ${{ secrets.host }}
+          DIST: ${{ secrets.dist }}
+        run: rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" -avzO --no-perms --delete * $USER@$HOST:$DIST
+        
+      - name: Setup api
+        env:
+          USER: ${{ secrets.user }}
+          HOST: ${{ secrets.host }}
+          DIST: ${{ secrets.dist }}
+        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "deploy.sh"
