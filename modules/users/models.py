@@ -3,6 +3,7 @@ from datetime import timedelta
 import random
 
 from flask_login import UserMixin
+from sqlalchemy.orm import backref
 
 from config.flask_config import FlaskConfig
 from services.mail import send_email_link
@@ -10,6 +11,7 @@ from config.settings import db
 from datetime import datetime as dt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
+from modules.auth.models import UserAuthTokens
 
 
 def get_timestamp():
@@ -26,6 +28,7 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(12), server_default='user')
     reset_code = db.Column(db.String, server_default='')
     reset_code_expire = db.Column(db.DateTime, server_default=None)
+    token = db.relationship("UserAuthTokens", uselist=False)
 
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)
@@ -42,7 +45,24 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def create_token(self):
-        return create_access_token(self.id)
+        token = create_access_token(self.id)
+        user_token = UserAuthTokens.query.filter_by(user_id=self.id).first()
+        if user_token:
+            user_token.set_token(token)
+            db.session.commit()
+        else:
+            user_token = UserAuthTokens(user_id=self.id, access_token=token)
+            db.session.add(user_token)
+            db.session.commit()
+        return token
+
+    def create_access_token(self):
+        user_token = UserAuthTokens.query.filter_by(user_id=self.id).first()
+
+        if not user_token:
+            user_token = UserAuthTokens(user_id=self.id)
+            db.session.add(user_token)
+            db.session.commit()
 
     def remove_expired_token(self):
         self.reset_code = None
@@ -54,3 +74,8 @@ class User(UserMixin, db.Model):
         self.reset_code = token
         self.reset_code_expire = datetime.now() + timedelta(minutes=60)
         send_email_link(self.email, link)
+
+    def remove_token(self):
+        user_token = UserAuthTokens.query.filter_by(user_id=self.id).first()
+        user_token.access_token = None
+        db.session.commit()

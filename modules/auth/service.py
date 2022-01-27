@@ -3,11 +3,14 @@ from modules.users.models import User
 from modules.users.schema import UserSchema
 from flask_restful import Resource
 from flask_login import login_user, logout_user
-from modules.auth.serializer import LoginSerializer, RegisterSerializer
+from modules.auth.serializer import LoginSerializer
+from modules.auth.serializer import RegisterSerializer
+from modules.auth.serializer import ChangePasswordSerializer
 from config.settings import db
 from config.settings import login_manager
 from flask_jwt_extended import decode_token
 from datetime import datetime
+from flask_login import current_user
 
 
 class LoginResource(Resource):
@@ -27,18 +30,58 @@ class LoginResource(Resource):
 
         if user.check_password(data['password']):
             login_user(user)
-            user_data = UserSchema(exclude=['password_hash']).dump(user)
-            user_data['token'] = user.create_token()
+            user.create_token()
+            user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
+            db.session.commit()
+            user_data['token'] = user_data['token']['access_token']
             return user_data, 200
         else:
             return {'message': "Invalid password"}, 422
 
 
+class RegisterResource(Resource):
+    @staticmethod
+    def post():
+        data = request.json
+        serializer = RegisterSerializer(data)
+
+        if not serializer.is_valid():
+            return serializer.errors, 422
+
+        user = User.query.filter_by(email=data['email']).first()
+
+        if user is not None:
+            return {'message': 'user_exists'}, 401
+
+        user = User(
+            name=data['name'],
+            email=data['email'],
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        user.hash_password(data['password'])
+
+        user.create_access_token()
+
+        if data and data.get('role', None) is not None:
+            user.role = data['role']
+
+        db.session.commit()
+        return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
+
+
 class LogoutResource(Resource):
     @staticmethod
     def post():
-        logout_user()
-        return {"message": "success"}, 200
+        try:
+            user = User.query.get(current_user.id)
+            user.remove_token()
+            logout_user()
+            return {"message": "success"}, 200
+        except:
+            return {"message": "Unauthorized"}, 401
 
 
 class ForgotPasswordResource(Resource):
@@ -89,43 +132,54 @@ class ResetPasswordResource(Resource):
             return {'message': 'success'}, 200
 
 
-class RegisterResource(Resource):
+class ChangePasswordResource(Resource):
     @staticmethod
     def post():
         data = request.json
-        serializer = RegisterSerializer(data)
+
+        serializer = ChangePasswordSerializer(data)
 
         if not serializer.is_valid():
             return serializer.errors, 422
 
-        current_user = User.query.filter_by(email=data['email']).first()
-        if current_user is not None:
-            return {'message': 'user_exists'}, 401
+        old_password = data.get('old_password', None)
+        new_password = data.get('new_password', None)
+        password_confirmation = data.get('password_confirmation', None)
 
-        elif current_user is None:
-            user = User(
-                name=data['name'],
-                email=data['email'],
-            )
+        if new_password != password_confirmation:
+            return {'message': 'Passwords don\'t mutch'}, 404
 
-            user.hash_password(data['password'])
+        user = User.query.get(current_user.id)
 
-            if data and data.get('role', None) is not None:
-                user.role = data['role']
+        if not user:
+            return {'message': 'User not found'}, 404
 
-            db.session.add(user)
-            db.session.commit()
-            return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
+        if not user.check_password(old_password):
+            return {'message': 'Invalid password'}, 404
+
+        if old_password == new_password:
+            return {'message': 'Old password and new password should be different'}, 404
+
+        user.hash_password(new_password)
+        db.session.commit()
+        return {'message': 'success'}, 200
 
 
 @login_manager.request_loader
 def load_user_from_request(flask_request):
     if flask_request.headers.get('Authorization', None):
-        token = decode_token(flask_request.headers.get('Authorization').split(' ')[1])
+        access_token = flask_request.headers.get('Authorization').split(' ')[1]
+        token = decode_token(access_token)
         token_expiry = datetime.fromtimestamp(token['exp'])
 
         if token_expiry < datetime.now():
             logout_user()
-            return {"message": "token_expire"}
-        return User.query.get(token['identity'])
+            return None
+
+        user = User.query.get(token['identity'])
+
+        if not user or not user.token.access_token or user.token.access_token != access_token:
+            return None
+
+        return user
     return None
