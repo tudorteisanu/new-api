@@ -24,9 +24,3 @@ def send_test_message():
     
     mail.send(msg)
 
-
-def send_message(subject, body, recipients=['teisanutudort@gmail.com']):
-    msg = Message(
-        subject=subject, sender='Johny', recipients=recipients, body=body)
-    
-    mail.send(msg)

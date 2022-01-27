@@ -1,68 +1,28 @@
-from config.settings import db
-from modules.users.models import User
-from modules.users.schema import UserSchema
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import request, jsonify, g
-from helpers.auth_utils import auth_required
-from helpers.send_standart_message import send_message
-import random
+from flask import render_template
+from config.settings import app
 
 
-def send_email_link(email, link):
-    body = f'{link}'
-    send_message('Reset password', body=body)
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 
-class AuthRoute:
-    @staticmethod
-    def register():
-        data = request.args
-        current_user = User.query.filter_by(email=data['email']).first()
-        if current_user is not None:
-            return jsonify({'message': 'user_exists'}), 401
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
-        elif current_user is None:
-            user = User(
-                name=data['name'],
-                email=data['email'],
-                password_hash=generate_password_hash(data['password'])
-            )
 
-            if data and data.get('role', None) is not None:
-                user.role = data['role']
-            db.session.add(user)
-            db.session.commit()
-            return jsonify(UserSchema(only=['id', 'name', 'email', 'role']).dump(user))
+@app.route('/forgot_password')
+def forgot_password():
+    return render_template('forgot_password.html')
 
-    @staticmethod
-    def reset_password_step_1():
-        data = request.args
 
-        email = data.get('email', None)
+@app.route('/reset_password')
+def reset_password():
+    return render_template('reset_password.html')
 
-        if email:
-            user = User.query.filter_by(email=email).first()
-            if user:
-                hash = random.getrandbits(128)
-                link = f'http://localhost://5000/reset={hash}'
-                user.reset_code = hash
-                send_email_link(email, link)
 
-    @staticmethod
-    def reset_password_step_2():
-        pass
-
-    @staticmethod
-    def reset_password_step_3():
-        pass
-
-    @staticmethod
-    @auth_required()
-    def change_password():
-        data = request.json
-
-        if check_password_hash(g.user.password_hash, data['password']):
-            return jsonify({'message': "The new password must not be the same as the old one"}), 422
-        else:
-            user = User.query.get(g.user.id)
-            user.password_hash = generate_password_hash(data['password'])
+@app.route('/')
+# @auth_required()
+def index():
+    return render_template('index.html')

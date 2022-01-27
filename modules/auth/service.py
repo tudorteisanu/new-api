@@ -1,13 +1,14 @@
+import random
 from flask import request
+from config.flask_config import FlaskConfig
+from config.mail import send_email_link
 from modules.users.models import User
 from modules.users.schema import UserSchema
 from flask_restful import Resource
 from flask_login import login_user, logout_user
 from modules.auth.serializer import LoginSerializer
 from json import loads
-from config.settings import app, db
-from flask import render_template
-from helpers.auth_utils import auth_required
+from config.settings import db
 
 
 class LoginResource(Resource):
@@ -41,6 +42,54 @@ class LogoutResource(Resource):
         return {"message": "success"}, 200
 
 
+class ForgotPasswordResource(Resource):
+    @staticmethod
+    def post():
+        data = loads(request.data)
+        email = data.get('email', None)
+
+        if email:
+            user = User.query.filter_by(email=email).first()
+
+            if not user:
+                return {'message': 'User not found'}, 404
+
+            user.generate_reset_password_code()
+            db.session.commit()
+            return {'message': 'success'}, 200
+
+
+class CheckResetTokenResource(Resource):
+    @staticmethod
+    def post():
+        data = request.args
+        reset_code = data.get('token', None)
+
+        if reset_code:
+            user = User.query.filter_by(reset_code=reset_code).first()
+            if not user:
+                return {}
+            return {'message': 'success'}, 200
+
+
+class ResetPasswordResource(Resource):
+    @staticmethod
+    def post():
+        data = loads(request.data)
+        password = data.get('password', None)
+        reset_code = data.get('token', None)
+
+        if reset_code:
+            user = User.query.filter_by(reset_code=reset_code).first()
+
+            if not user:
+                return {'message': 'User not found'}, 404
+            user.hash_password(password)
+            user.remove_expired_token()
+            db.session.commit()
+            return {'message': 'success'}, 200
+
+
 class RegisterResource(Resource):
     @staticmethod
     def post():
@@ -66,17 +115,3 @@ class RegisterResource(Resource):
             return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
 
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-
-@app.route('/')
-# @auth_required()
-def index():
-    return render_template('index.html')

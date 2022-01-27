@@ -7,7 +7,6 @@ from flask_script import Manager
 from flask_socketio import SocketIO
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
-from flask_mail import Mail
 from config.flask_config import FlaskConfig
 from flask_login import LoginManager
 # import redis as Redis
@@ -25,6 +24,5 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 ma = Marshmallow(app)
-mail = Mail(app)
 
 # redis = Redis.StrictRedis(host='127.0.0.1', port=6379, db=2)
