@@ -7,7 +7,7 @@ from services.auth_utils import auth_required
 from flask_restful import Resource
 from flask_simple_serializer.response import Response
 from flask_simple_serializer.status_codes import HTTP_400_BAD_REQUEST
-
+from sqlalchemy import exc
 from modules.users.serializer import CreateUserSerializer
 
 
@@ -59,10 +59,13 @@ class UsersResource(Resource):
             user.role = data.get('role')
 
         user.hash_password(data.get('password'))
-        db.session.add(user)
-        db.session.commit()
-
-        return UserSchema(only=("name", "email", "role", 'id')).dump(user)
+        try:
+            db.session.add(user)
+            db.session.commit()
+            return UserSchema(only=("name", "email", "role", 'id')).dump(user)
+        except exc.IntegrityError:
+            print(exc.IntegrityError)
+            return {"message": 'email exists'}, 422
 
 
 class UsersOneResource(Resource):

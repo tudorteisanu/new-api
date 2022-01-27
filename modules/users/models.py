@@ -22,7 +22,7 @@ def get_timestamp():
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(128))
+    email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
     role = db.Column(db.String(12), server_default='user')

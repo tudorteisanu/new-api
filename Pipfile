@@ -44,6 +44,7 @@ flake8 = "*"
 passlib = "*"
 flask-simple-serializer = "*"
 flask-login = "*"
+django-rest-framework = "*"
 
 [dev-packages]
 
