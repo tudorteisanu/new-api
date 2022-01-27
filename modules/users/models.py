@@ -10,7 +10,6 @@ from config.settings import db
 from datetime import datetime as dt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
-from modules.users.schema import UserSchema
 
 
 def get_timestamp():
@@ -50,6 +49,3 @@ class User(UserMixin, db.Model):
         self.reset_code = token
         self.reset_code_expire = datetime.now() + timedelta(minutes=60)
         send_email_link(self.email, link)
-
-    def serialize(self, **kwargs):
-        return UserSchema(kwargs).dump(self)

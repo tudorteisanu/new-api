@@ -1,5 +1,6 @@
 from flask import request
 from modules.users.models import User
+from modules.users.schema import UserSchema
 from flask_restful import Resource
 from flask_login import login_user, logout_user
 from modules.auth.serializer import LoginSerializer
@@ -23,7 +24,7 @@ class LoginResource(Resource):
 
         if user.check_password(data['password']):
             login_user(user)
-            user_data = user.serialize(exclude=['password_hash'])
+            user_data = UserSchema(exclude=['password_hash']).dump(user)
             user_data['token'] = user.create_token()
             return user_data, 200
 
@@ -107,6 +108,6 @@ class RegisterResource(Resource):
 
             db.session.add(user)
             db.session.commit()
-            return user.serialize(only=['id', 'name', 'email', 'role'])
+            return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
 
 
