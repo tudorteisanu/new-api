@@ -5,7 +5,7 @@ import random
 from flask_login import UserMixin
 
 from config.flask_config import FlaskConfig
-from config.mail import send_email_link
+from services.mail import send_email_link
 from config.settings import db
 from datetime import datetime as dt
 from werkzeug.security import generate_password_hash, check_password_hash

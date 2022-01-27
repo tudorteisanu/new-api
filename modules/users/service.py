@@ -3,10 +3,10 @@ from flask import jsonify
 from config.settings import db
 from modules.users.models import User
 from modules.users.schema import UserSchema
-from helpers.auth_utils import auth_required
+from services.auth_utils import auth_required
 from flask_restful import Resource
 from flask_simple_serializer.response import Response
-from flask_simple_serializer.status_codes import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from flask_simple_serializer.status_codes import HTTP_400_BAD_REQUEST
 
 from modules.users.serializer import CreateUserSerializer
 
