@@ -35,7 +35,7 @@
         } else {
             error.classList.add('hidden')
             errorText.innerHTML = ''
-            // document.location.href = '/'
+            document.location.href = '/'
         }
     }
 </script>
@@ -66,9 +66,14 @@
             </p>
         </div>
         <div class="login__input d-flex justify-end">
-            <a href="/register" >
-                Register
-            </a>
+            <div>
+                <a href="/forgot_password">
+                    Forgot password?
+                </a>
+                <a style="margin-left: 8px" href="/register">
+                    Register
+                </a>
+            </div>
         </div>
         <div class="login__input">
             <div class="d-flex">
