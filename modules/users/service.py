@@ -47,25 +47,11 @@ class UsersResource(Resource):
         if not serializer.is_valid():
             return Response(serializer.errors, status_code=HTTP_400_BAD_REQUEST)
 
-        user = User()
-
-        if data.get('name'):
-            user.name = data.get('name')
-
-        if data.get('email'):
-            user.email = data.get('email')
-
-        if data.get('role'):
-            user.role = data.get('role')
-
-        user.hash_password(data.get('password'))
         try:
-            db.session.add(user)
-            db.session.commit()
+            user = User(data)
             return UserSchema(only=("name", "email", "role", 'id')).dump(user)
         except exc.IntegrityError:
-            print(exc.IntegrityError)
-            return {"message": 'email exists'}, 422
+            return {"message": 'User with same email exists.'}, 422
 
 
 class UsersOneResource(Resource):
@@ -84,7 +70,6 @@ class UsersOneResource(Resource):
             return {'message': "User not found"}, 404
 
         user.update(data)
-        db.session.commit()
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
 
     @staticmethod

@@ -89,30 +89,36 @@ class ForgotPasswordResource(Resource):
     @staticmethod
     def post():
         data = request.json
+        if not data:
+            return {"message": 'Email is required'}, 422
+
         email = data.get('email', None)
 
-        if email:
-            user = User.query.filter_by(email=email).first()
+        if not email:
+            return {"message": 'Email is required'}, 422
 
-            if not user:
-                return {'message': 'User not found'}, 404
+        user = User.query.filter_by(email=email).first()
 
-            user.generate_reset_password_code()
-            db.session.commit()
-            return {'message': 'success'}, 200
+        if not user:
+            return {'message': 'User not found'}, 404
+
+        user.generate_reset_password_code()
+        db.session.commit()
+        return {'message': 'success'}, 200
 
 
 class CheckResetTokenResource(Resource):
     @staticmethod
     def post():
         data = request.json
-        reset_code = data.get('token', None)
 
-        if reset_code:
-            user = User.query.filter_by(reset_code=reset_code).first()
-            if not user:
-                return {}
-            return {'message': 'success'}, 200
+        if not data or not data.get('token', None):
+            return {'message': 'Reset code is required'}, 400
+
+        user = User.query.filter_by(reset_code=data.get('token', None)).first()
+        if not user:
+            return {}
+        return {'message': 'success'}, 200
 
 
 class ResetPasswordResource(Resource):
@@ -122,15 +128,17 @@ class ResetPasswordResource(Resource):
         password = data.get('password', None)
         reset_code = data.get('token', None)
 
-        if reset_code:
-            user = User.query.filter_by(reset_code=reset_code).first()
+        if not reset_code:
+            return {'message': 'Reset code is required'}, 400
 
-            if not user:
-                return {'message': 'User not found'}, 404
-            user.hash_password(password)
-            user.remove_expired_token()
-            db.session.commit()
-            return {'message': 'success'}, 200
+        user = User.query.filter_by(reset_code=reset_code).first()
+
+        if not user:
+            return {'message': 'User not found'}, 404
+        user.hash_password(password)
+        user.remove_expired_token()
+        db.session.commit()
+        return {'message': 'success'}, 200
 
 
 class ChangePasswordResource(Resource):

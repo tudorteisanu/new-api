@@ -30,13 +30,22 @@ class User(UserMixin, db.Model):
     reset_code_expire = db.Column(db.DateTime, server_default=None)
     token = db.relationship("UserAuthTokens", uselist=False)
 
+    def __init__(self, data, exclude=['password_hash', 'token', "id", 'reset_code', 'reset_code_expire']):
+        for (key, value) in data.items():
+            if hasattr(self, key) and key not in exclude:
+                setattr(self, key, value)
+        self.hash_password(data.get('password'))
+        db.session.add(self)
+        db.session.commit()
+
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)
 
-    def update(self, data):
+    def update(self, data, exclude=['password_hash']):
         for (key, value) in data.items():
-            if hasattr(self, key):
+            if hasattr(self, key) and key not in exclude:
                 setattr(self, key, value)
+        db.session.commit()
 
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
