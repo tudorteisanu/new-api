@@ -30,8 +30,8 @@ class LoginResource(Resource):
             user_data = UserSchema(exclude=['password_hash']).dump(user)
             user_data['token'] = user.create_token()
             return user_data, 200
-
-        return {'message': "user not found"}, 401
+        else:
+            return {'message': "Invalid password"}, 422
 
 
 class LogoutResource(Resource):
