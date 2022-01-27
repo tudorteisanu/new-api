@@ -30,6 +30,11 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)
 
+    def update(self, data):
+        for (key, value) in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
 

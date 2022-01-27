@@ -3,8 +3,11 @@ from modules.users.models import User
 from modules.users.schema import UserSchema
 from flask_restful import Resource
 from flask_login import login_user, logout_user
-from modules.auth.serializer import LoginSerializer
+from modules.auth.serializer import LoginSerializer, RegisterSerializer
 from config.settings import db
+from config.settings import login_manager
+from flask_jwt_extended import decode_token
+from datetime import datetime
 
 
 class LoginResource(Resource):
@@ -90,6 +93,10 @@ class RegisterResource(Resource):
     @staticmethod
     def post():
         data = request.json
+        serializer = RegisterSerializer(data)
+
+        if not serializer.is_valid():
+            return serializer.errors, 422
 
         current_user = User.query.filter_by(email=data['email']).first()
         if current_user is not None:
@@ -111,3 +118,14 @@ class RegisterResource(Resource):
             return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
 
 
+@login_manager.request_loader
+def load_user_from_request(flask_request):
+    if flask_request.headers.get('Authorization', None):
+        token = decode_token(flask_request.headers.get('Authorization').split(' ')[1])
+        token_expiry = datetime.fromtimestamp(token['exp'])
+
+        if token_expiry < datetime.now():
+            logout_user()
+            return {"message": "token_expire"}
+        return User.query.get(token['identity'])
+    return None

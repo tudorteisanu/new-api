@@ -77,16 +77,10 @@ class UsersOneResource(Resource):
     def patch(user_id):
         data = request.json
         user = User.query.get(user_id)
+        if not user:
+            return {'message': "User not found"}, 404
 
-        if data.get('email'):
-            user.email = data.get('email')
-
-        if data.get('name'):
-            user.name = data.get('name')
-
-        if data.get('role'):
-            user.role = data.get('role')
-
+        user.update(data)
         db.session.commit()
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
 
