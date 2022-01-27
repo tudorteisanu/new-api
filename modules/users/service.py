@@ -39,7 +39,7 @@ class UsersResource(Resource):
         return jsonify(resp)
 
     @staticmethod
-    # @auth_required()
+    @auth_required()
     def post():
         data = request.json
         serializer = CreateUserSerializer(data)
@@ -91,7 +91,7 @@ class UsersOneResource(Resource):
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
 
     @staticmethod
-    # @auth_required()
+    @auth_required()
     def delete(user_id):
         user = User.query.get(user_id)
 

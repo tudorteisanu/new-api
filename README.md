@@ -1,11 +1,13 @@
-# flask-api
+# Flask-api
 
 ### Install requirements
 ``` pipenv install```
 
-### activate virtualenv
+### Activate virtualenv
 ```pipenv shell```
 
+### Apply migrations
+```python manage.py db upgrade```
+
 ### run server
-```python run.py
-```
+```python run.py```

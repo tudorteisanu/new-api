@@ -10,5 +10,3 @@ api.add_resource(LogoutResource, '/logout')
 api.add_resource(RegisterResource, '/register')
 api.add_resource(ForgotPasswordResource, '/forgot_password')
 api.add_resource(ResetPasswordResource, '/reset_password')
-
-import modules.auth.views

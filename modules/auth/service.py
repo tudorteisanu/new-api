@@ -1,20 +1,15 @@
-import random
 from flask import request
-from config.flask_config import FlaskConfig
-from config.mail import send_email_link
 from modules.users.models import User
-from modules.users.schema import UserSchema
 from flask_restful import Resource
 from flask_login import login_user, logout_user
 from modules.auth.serializer import LoginSerializer
-from json import loads
 from config.settings import db
 
 
 class LoginResource(Resource):
     @staticmethod
     def post():
-        data = request.json or request.form or loads(request.data)
+        data = request.json
 
         serializer = LoginSerializer(data)
 
@@ -28,7 +23,7 @@ class LoginResource(Resource):
 
         if user.check_password(data['password']):
             login_user(user)
-            user_data = UserSchema(exclude=['password_hash']).dump(user)
+            user_data = user.serialize(exclude=['password_hash'])
             user_data['token'] = user.create_token()
             return user_data, 200
 
@@ -45,7 +40,7 @@ class LogoutResource(Resource):
 class ForgotPasswordResource(Resource):
     @staticmethod
     def post():
-        data = loads(request.data)
+        data = request.json
         email = data.get('email', None)
 
         if email:
@@ -62,7 +57,7 @@ class ForgotPasswordResource(Resource):
 class CheckResetTokenResource(Resource):
     @staticmethod
     def post():
-        data = request.args
+        data = request.json
         reset_code = data.get('token', None)
 
         if reset_code:
@@ -75,7 +70,7 @@ class CheckResetTokenResource(Resource):
 class ResetPasswordResource(Resource):
     @staticmethod
     def post():
-        data = loads(request.data)
+        data = request.json
         password = data.get('password', None)
         reset_code = data.get('token', None)
 
@@ -93,7 +88,7 @@ class ResetPasswordResource(Resource):
 class RegisterResource(Resource):
     @staticmethod
     def post():
-        data = request.json or request.form or loads(request.data)
+        data = request.json
 
         current_user = User.query.filter_by(email=data['email']).first()
         if current_user is not None:
@@ -112,6 +107,6 @@ class RegisterResource(Resource):
 
             db.session.add(user)
             db.session.commit()
-            return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
+            return user.serialize(only=['id', 'name', 'email', 'role'])
 
 
