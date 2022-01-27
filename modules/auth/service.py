@@ -134,9 +134,9 @@ class ResetPasswordResource(Resource):
 
 class ChangePasswordResource(Resource):
     @staticmethod
+    @auth_required()
     def post():
         data = request.json
-
         serializer = ChangePasswordSerializer(data)
 
         if not serializer.is_valid():
@@ -147,7 +147,7 @@ class ChangePasswordResource(Resource):
         password_confirmation = data.get('password_confirmation', None)
 
         if new_password != password_confirmation:
-            return {'message': 'Passwords don\'t mutch'}, 404
+            return {'message': 'Passwords don\'t much'}, 404
 
         user = User.query.get(current_user.id)
 
