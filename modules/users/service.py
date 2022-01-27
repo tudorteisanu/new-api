@@ -94,7 +94,7 @@ class UsersOneResource(Resource):
 
         db.session.delete(user)
         db.session.commit()
-        return {'message': 'Successful deleted!'}, 204
+        return {'message': 'Successful deleted'}, 200
 
 
 class UsersListResource(Resource):
