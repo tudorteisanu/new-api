@@ -37,12 +37,15 @@ class LoginResource(Resource):
 
         user = User.query.filter_by(email=data['email']).first()
 
-        if not user or not user.is_active:
+        if not user:
             return {"message": 'User not found'}, 404
 
         if user.check_password(data['password']):
             if not user.confirmed_at:
                 return {'message': "User not confirmed"}, 422
+
+            if not user.is_active:
+                return {'message': "User not found"}, 404
 
             user.create_token()
             user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
