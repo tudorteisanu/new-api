@@ -37,7 +37,7 @@ class LoginResource(Resource):
 
         user = User.query.filter_by(email=data['email']).first()
 
-        if not user:
+        if not user or not user.is_active:
             return {"message": 'User not found'}, 404
 
         if user.check_password(data['password']):
@@ -156,7 +156,7 @@ class ForgotPasswordResource(Resource):
 
         user = User.query.filter_by(email=email).first()
 
-        if not user:
+        if not user or not user.is_active:
             return {'message': 'User not found'}, 404
 
         token = generate_confirmation_token(user.email)
@@ -280,7 +280,7 @@ def load_user_from_header(header_val):
 
             user = User.query.get(token['identity'])
 
-            if not user or not user.token.access_token or user.token.access_token != access_token:
+            if not user or not user.is_active or not user.token.access_token or user.token.access_token != access_token:
                 return None
 
             return user
