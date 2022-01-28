@@ -10,7 +10,7 @@ def get_timestamp():
 
 class UserAuthTokens(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, )
     access_token = db.Column(db.String(512), nullable=True)
 
     def set_token(self, token):

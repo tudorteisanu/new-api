@@ -20,10 +20,12 @@ class FlaskConfig(object):
 
     MAIL_SERVER = environ.get('MAIL_SERVER')
     MAIL_PORT = environ.get('MAIL_PORT')
-    MAIL_USE_TLS=False
-    MAIL_USE_SSL=True
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
     MAIL_USERNAME = environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = environ.get('MAIL_PASSWORD')
+    MAIL_DEBUG = False
+    SECURITY_PASSWORD_SALT = 'some_salt'
 
     DEBUG = bool(environ.get('DEBUG'))
     PORT = environ.get('PORT')

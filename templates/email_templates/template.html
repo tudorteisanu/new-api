@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="">
+    <div id=":ph" class="ii gt" jslog="20277; u014N:xr6bB; 4:W251bGwsbnVsbCxbXV0.">
+        <table style="color:#404d59;background:#edf2f7" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tbody>
+            <tr>
+                <td style="padding:30px 0 0 0" align="center">
+                    <div style="font-family:'Arial',sans-serif; margin-top: 30px;">
+                        <table border="0" cellspacing="0" cellpadding="0" style="min-width: 320px;">
+                            <tbody>
+                            <tr>
+                                <td style="background:#fff;border-radius:20px;max-width:600px" align="left">
+                                    <div>
+                                        <h2 style="padding:0 35px;text-align:center;color:#fff;background:#5877a9;margin:0 0 20px 0;line-height:70px;border-top-right-radius:20px;border-top-left-radius:20px">
+                                            Приветствуем,
+                                            <strong>{{data.recipient}}</strong>!
+                                        </h2>
+                                        <div style="padding:0 35px 35px">
+                                            <div>
+                                                {{data.message}}
+                                            </div>
+                                            {% if data.link %}
+                                            <div>
+                                                <a href="{{data.link.url}}" target="_blank">{{data.link.message}}</a>
+                                            </div>
+                                            {% endif %}
+                                            <hr style="margin-top:20px">
+                                            <h4 style="margin:0 0 10px 0">
+                                                Контакты
+                                            </h4>
+                                            {% if data.contacts.phone %}
+                                            <div>
+                                                Телефон
+                                                <strong>{{data.contacts.phone}}</strong>
+                                            </div>
+                                            {% endif %}
+                                            {% if data.contacts.email %}
+                                            <div>
+                                                Email:
+                                                <strong>
+                                                    <a href="mailto:test@domain.com"
+                                                       target="_blank">{{data.contacts.email}}</a>
+                                                </strong>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% if data.sender %}
+                            <tr>
+                                <td align="center">
+                                    <h2 style="padding-top:20px">
+                                        С уважением, {{ data.sender }}
+                                    </h2>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

@@ -1,5 +1,6 @@
-from flask import render_template
+from flask import render_template, redirect
 from config.settings import app
+from flask_login import login_required, logout_user
 
 
 @app.route('/login')
@@ -12,6 +13,12 @@ def register():
     return render_template('register.html')
 
 
+@app.route('/change_password')
+@login_required
+def change_password():
+    return render_template('change_password.html')
+
+
 @app.route('/forgot_password')
 def forgot_password():
     return render_template('forgot_password.html')
@@ -22,7 +29,14 @@ def reset_password():
     return render_template('reset_password.html')
 
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+
 @app.route('/')
-# @auth_required()
+@login_required
 def index():
     return render_template('index.html')

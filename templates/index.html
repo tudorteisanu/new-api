@@ -10,11 +10,23 @@
 </head>
 <body>
 <div class="d-flex align-center justify-center full-size">
-<div class="background full-width full-height d-flex align-center justify-center">
-<h1 class="main-text">
-    Mr. Theodor!
-</h1>
-</div>
+    <div style="position: fixed; top: 0; right: 0">
+        <div style="margin-top: 10px; margin-right: 10px">
+            <a href="{{url_for('change_password')}}">
+                <button>change password</button>
+            </a>
+        </div>
+        <div style="margin-top: 10px; margin-right: 10px">
+            <a href="{{url_for('logout')}}">
+                <button>Logout</button>
+            </a>
+        </div>
+    </div>
+    <div class="background full-width full-height d-flex align-center justify-center">
+        <h1 class="main-text">
+            Hello, {{current_user.name}}
+        </h1>
+    </div>
 </div>
 </body>
 </html>
