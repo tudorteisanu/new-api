@@ -1,4 +1,4 @@
-from  modules.users.models import User
+from modules.users.models import User
 from marshmallow_sqlalchemy import ModelSchema, fields
 from modules.auth.schema import UserAuthTokensSchema
 

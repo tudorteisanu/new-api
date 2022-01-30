@@ -1,44 +1,67 @@
 from flask import request, url_for
-
-from flask import g
-from flask.sessions import SecureCookieSessionInterface
-from flask_login import user_loaded_from_header
-from config.flask_config import FlaskConfig
-from modules.users.models import User
-from modules.users.schema import UserSchema
+from flask import redirect
 from flask_restful import Resource
 from flask_login import logout_user, login_user
-from modules.auth.serializer import LoginSerializer
-from modules.auth.serializer import RegisterSerializer
-from modules.auth.serializer import ChangePasswordSerializer
-from config.settings import db, app
-from config.settings import login_manager
-from flask_jwt_extended import decode_token
-from datetime import datetime
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from datetime import datetime, timedelta
 from flask_login import current_user
+
+from config.flask_config import FlaskConfig
+from config.settings import db
+from config.settings import login_manager
+
 from services.auth_utils import auth_required
 from services.mail.mail import send_email_link
 from services.mail.mail import send_forgot_password_email
 from services.mail.mail import send_info_email
-
 from services.mail.token import generate_confirmation_token, confirm_token
-from flask import redirect
+
+from modules.users.models import UserResource as User
+from modules.users.schema import UserSchema
+
+from modules.auth.serializer import LoginSerializer
+from modules.auth.serializer import RegisterSerializer
+from modules.auth.serializer import ChangePasswordSerializer
+from modules.auth.serializer import ForgotPasswordSerializer
+from modules.auth.serializer import ResetPasswordSerializer
+from modules.auth.serializer import ConfirmEmailSerializer
 
 
-class LoginResource(Resource):
+class BaseResource(Resource):
+    __abstract__ = True
+    auth = False
+
+    def __init__(self):
+        if self.auth:
+            verify_jwt_in_request()
+            load_user(get_jwt_identity())
+
+
+class LoginResource(BaseResource):
     @staticmethod
     def post():
         data = request.json
-
         serializer = LoginSerializer(data)
 
         if not serializer.is_valid():
             return serializer.errors, 422
 
-        user = User.query.filter_by(email=data['email']).first()
+        user = User.find_one(email=data['email'])
 
         if not user:
             return {"message": 'User not found'}, 404
+
+        if user.login_blocked_time:
+            if user.login_blocked_time > datetime.now():
+                difference = user.login_blocked_time - datetime.now()
+                return {
+                    "message": f"Возможность входа в аккаунт временно заблокированно. Осталось времени блокировки: {parse_minutes(difference.seconds)}."
+                }
+            else:
+                user.update({
+                    "login_attempts": 3,
+                    "login_blocked_time": None
+                })
 
         if user.check_password(data['password']):
             if not user.confirmed_at:
@@ -49,16 +72,36 @@ class LoginResource(Resource):
 
             user.create_token()
             user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
-            db.session.commit()
             user_data['token'] = user_data['token']['access_token']
             login_user(user)
             db.session.commit()
+
+            if user.login_attempts != 3:
+                user.update({
+                    "login_attempts": 3
+                })
+
+            if user.reset_password_at:
+                user.update({
+                    "reset_password_at": None,
+                    "reset_code": None
+                })
+
             return user_data, 200
         else:
-            return {'message': "Invalid password"}, 422
+            user.update({
+                "login_attempts": user.login_attempts - 1
+            })
+
+            if user.login_attempts == 0:
+                user.update({
+                    "login_blocked_time": datetime.now() + timedelta(minutes=15)
+                })
+            return {
+                       'message': f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"}, 422
 
 
-class RegisterResource(Resource):
+class RegisterResource(BaseResource):
     @staticmethod
     def post():
         data = request.json
@@ -67,53 +110,40 @@ class RegisterResource(Resource):
         if not serializer.is_valid():
             return serializer.errors, 422
 
-        user = User.query.filter_by(email=data['email']).first()
-
-        if user is not None:
+        if User.find_one(email=data['email']) is not None:
             return {'message': 'user_exists'}, 401
 
-        user = User(
-            name=data['name'],
-            email=data['email'],
-        )
-
-        db.session.add(user)
-        db.session.commit()
-
+        user = User.create(data)
         user.hash_password(data['password'])
-
         user.create_access_token()
-
-        if data and data.get('role', None) is not None:
-            user.role = data['role']
-
         token = generate_confirmation_token(user.email)
-
         send_email_link(user.email,
                         f'{FlaskConfig.BACKEND_ADDRESS}/confirm_email?token={token}',
                         user.name)
-        db.session.commit()
         return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
 
 
-class ConfirmEmailResource(Resource):
+class ConfirmEmailResource(BaseResource):
     @staticmethod
     def get():
         try:
-            token = request.args.get('token', None)
+            data = request.args
+            serializer = ConfirmEmailSerializer(data)
 
-            if not token:
-                return {'message': 'token required'}, 404
+            if not serializer.is_valid():
+                return serializer.errors, 422
 
+            token = data.get('token', None)
             email = confirm_token(token)
 
             if not email:
                 return {"message": "Invalid token"}, 404
 
-            user = User.query.filter_by(email=email).first()
+            user = User.find_one(email=email)
 
             if user.confirmed_at:
                 return {"message": "Not found"}, 404
+
             user.update({
                 "confirmed_at": datetime.now().isoformat(),
                 "is_active": True
@@ -129,14 +159,16 @@ class ConfirmEmailResource(Resource):
             return redirect(FlaskConfig.FRONTEND_ADDRESS)
 
         except Exception as e:
-            return {'message': "Internal server error", "error": e}
+            print(e)
+            return {'message': "Internal server error", "error": "ww"}
 
 
-class LogoutResource(Resource):
+class LogoutResource(BaseResource):
     @staticmethod
+    @auth_required()
     def post():
         try:
-            user = User.query.get(current_user.id)
+            user = User.get(current_user.id)
             user.remove_token()
             logout_user()
             return {"message": "success"}, 200
@@ -149,18 +181,23 @@ class ForgotPasswordResource(Resource):
     @staticmethod
     def post():
         data = request.json
-        if not data:
-            return {"message": 'Email is required'}, 422
+        serializer = ForgotPasswordSerializer(data)
 
-        email = data.get('email', None)
+        if not serializer.is_valid():
+            return serializer.errors, 422
 
-        if not email:
-            return {"message": 'Email is required'}, 422
+        user = User.find_one(email=data.get('email'))
 
-        user = User.query.filter_by(email=email).first()
-
-        if not user or not user.is_active:
+        if not user:
             return {'message': 'User not found'}, 404
+
+        if user.reset_password_at is not None and user.reset_password_at > datetime.now():
+            difference = user.reset_password_at - datetime.now()
+            time = parse_minutes(difference.seconds)
+
+            return {
+                "message": f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить"
+                           f" повторно через {time}"}
 
         token = generate_confirmation_token(user.email)
 
@@ -168,7 +205,8 @@ class ForgotPasswordResource(Resource):
                                    f'{FlaskConfig.FRONTEND_ADDRESS}/reset_password?token={token}',
                                    user.name)
 
-        user.update({"reset_code": token, 'is_active': False})
+        user.update(
+            {"reset_code": token, "reset_password_at": datetime.now() + timedelta(minutes=5)})
         return {'message': 'success'}, 200
 
 
@@ -176,17 +214,19 @@ class CheckResetTokenResource(Resource):
     @staticmethod
     def post():
         data = request.json
+
+        serializer = ForgotPasswordSerializer(data)
+
+        if not serializer.is_valid():
+            return serializer.errors, 422
+
         token = data.get('token', None)
-
-        if not data or not token:
-            return {'message': 'Reset code is required'}, 400
-
         email = confirm_token(token)
 
         if not email:
             return {"message": "Invalid token"}, 422
 
-        user = User.query.filter_by(email=email).first()
+        user = User.find_one(email=email)
 
         if not user or not user.reset_code or user.reset_code != token:
             return {"message": "Invalid token"}, 422
@@ -199,20 +239,21 @@ class ResetPasswordResource(Resource):
     def post():
         try:
             data = request.json
+            serializer = ResetPasswordSerializer(data)
+
+            if not serializer.is_valid():
+                return serializer.errors, 422
+
             password = data.get('password', None)
-            reset_code = data.get('token', None)
-
-            if not reset_code:
-                return {'message': 'Reset code is required'}, 400
-
-            email = confirm_token(reset_code)
+            token = data.get('token', None)
+            email = confirm_token(token)
 
             if not email:
                 return {"message": "Invalid token"}, 422
 
-            user = User.query.filter_by(email=email).first()
+            user = User.find_one(email=email)
 
-            if not user or not user.reset_code or user.reset_code != reset_code:
+            if not user or not user.reset_code or user.reset_code != token:
                 return {"message": "Invalid token"}, 422
 
             user.hash_password(password)
@@ -268,54 +309,30 @@ class ChangePasswordResource(Resource):
         return {'message': 'success'}, 200
 
 
-@login_manager.header_loader
-def load_user_from_header(header_val):
-    header_val = header_val.replace('Basic ', '', 1)
-    try:
-        if request.headers.get('Authorization', None):
-            access_token = request.headers.get('Authorization').split(' ')[1]
-            token = decode_token(access_token)
-            token_expiry = datetime.fromtimestamp(token['exp'])
-
-            if token_expiry < datetime.now():
-                logout_user()
-                return None
-
-            user = User.query.get(token['identity'])
-
-            if not user or not user.is_active or not user.token.access_token or user.token.access_token != access_token:
-                return None
-
-            return user
-
-    except TypeError:
-        pass
-
-    return User.query.filter_by(api_key=header_val).first()
-
-
-class CustomSessionInterface(SecureCookieSessionInterface):
-    """Prevent creating session from API requests."""
-
-    def save_session(self, *args, **kwargs):
-        if g.get('login_via_header'):
-            return
-        return super(CustomSessionInterface, self).save_session(*args,
-                                                                **kwargs)
-
-
-app.session_interface = CustomSessionInterface()
-
-
-@user_loaded_from_header.connect
-def user_loaded_from_header(self, user=None):
-    g.login_via_header = True
+def parse_minutes(seconds):
+    return f"{seconds // 60:02d}:{seconds % 60:02d}"
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return User.get(user_id)
 
+
+# @login_manager.request_loader
+# def load_user(request):
+#     token = request.headers.get('Authorization')
+#     print(request.headers)
+#     if token is None:
+#         token = request.args.get('token')
+#
+#     if token is not None:
+#         username,password = token.split(":") # naive token
+#         user_entry = User.get(username)
+#         if (user_entry is not None):
+#             user = User(user_entry[0],user_entry[1])
+#             if (user.password == password):
+#                 return user
+#     return None
 
 @login_manager.unauthorized_handler
 def unauthorized():

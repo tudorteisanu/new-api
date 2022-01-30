@@ -79,9 +79,7 @@ class UsersOneResource(Resource):
 
         if not user:
             return {'message': "User not exists"}, 404
-
-        db.session.delete(user)
-        db.session.commit()
+        user.delete()
         return {'message': 'Successful deleted'}, 200
 
 

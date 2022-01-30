@@ -1,14 +1,8 @@
 from config.settings import db
-from datetime import datetime as dt
+from services.database import Base
 
 
-def get_timestamp():
-    now = dt.now().timestamp()
-    time = str(now).split('.')[0]
-    return int(time)
-
-
-class UserAuthTokens(db.Model):
+class UserAuthTokens(Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, )
     access_token = db.Column(db.String(512), nullable=True)
@@ -18,4 +12,3 @@ class UserAuthTokens(db.Model):
 
     def remove_token(self):
         self.access_token = None
-

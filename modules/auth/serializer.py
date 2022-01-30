@@ -18,3 +18,16 @@ class ChangePasswordSerializer(Serializer):
     new_password = StringField('new_password', [validators.InputRequired(), validators.Length(min=8, max=256)])
     password_confirmation = StringField('password_confirmation',
                                         [validators.InputRequired(), validators.Length(min=8, max=256)])
+
+
+class ForgotPasswordSerializer(Serializer):
+    email = StringField('email', [validators.InputRequired()])
+
+
+class ResetPasswordSerializer(Serializer):
+    token = StringField('token', [validators.InputRequired()])
+    password = StringField('password', [validators.InputRequired()])
+
+
+class ConfirmEmailSerializer(Serializer):
+    token = StringField('token', [validators.InputRequired()])
