@@ -36,4 +36,4 @@ jobs:
           USER: ${{ secrets.user }}
           HOST: ${{ secrets.host }}
           DIST: ${{ secrets.dist }}
-        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "$DIST/deploy.sh"
+        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "cd $DIST && ./deploy.sh"
