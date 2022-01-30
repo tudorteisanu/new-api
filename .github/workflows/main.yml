@@ -2,12 +2,8 @@ on:
   push:
     branches:
       - master
-      
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
-name: Deploy CCI dev
+name: Deploy Flask-api dev
 
 jobs:
   deploy:
