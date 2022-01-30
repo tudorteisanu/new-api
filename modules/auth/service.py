@@ -197,8 +197,8 @@ class ForgotPasswordResource(BaseResource):
             time = parse_minutes(difference.seconds)
 
             return {
-                "message": f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить"
-                           f" повторно через {time}"}, 422
+                       "message": f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить"
+                                  f" повторно через {time}"}, 422
 
         token = generate_confirmation_token(user.email)
 
@@ -235,7 +235,7 @@ class CheckResetTokenResource(BaseResource):
         return {'message': 'success'}, 200
 
 
-class ResetPasswordResource(Resource):
+class ResetPasswordResource(BaseResource):
     @staticmethod
     def post():
         try:
@@ -271,7 +271,7 @@ class ResetPasswordResource(Resource):
             return {"message": "Internal Server Error"}, 500
 
 
-class ChangePasswordResource(Resource):
+class ChangePasswordResource(BaseResource):
     @staticmethod
     @auth_required()
     def post():
@@ -288,7 +288,7 @@ class ChangePasswordResource(Resource):
         if new_password != password_confirmation:
             return {'message': 'Passwords don\'t much'}, 404
 
-        user = User.query.get(current_user.id)
+        user = User.get(current_user.id)
 
         if not user:
             return {'message': 'User not found'}, 404
@@ -299,9 +299,11 @@ class ChangePasswordResource(Resource):
         if old_password == new_password:
             return {'message': 'Old password and new password should be different'}, 404
 
-        user.update({
-            'password_hash': user.hash_password(new_password)
-        })
+        # user.update({
+        #     'password_hash':
+        # })
+
+        user.hash_password(new_password)
 
         send_info_email(**{
             "subject": 'Изменение пароля!',
@@ -309,7 +311,7 @@ class ChangePasswordResource(Resource):
             "recipient": user.email,
             "name": user.name
         })
-        return {'message': 'success', 'password_hash': user.password_hash}, 200
+        return {'message': 'success'}, 200
 
 
 def parse_minutes(seconds):

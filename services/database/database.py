@@ -53,6 +53,10 @@ class Base(db.Model):
     updated_at = db.Column(db.DateTime, default=get_timestamp)
     blocked_columns = ['created_at', 'updated_at']
     db = db
+    commit = db.session.commit
+    add = db.session.add
+    delete = db.session.delete
+    session = db.session
 
     def __repr__(self):
         return f'{__name__} - {self.id}'
@@ -92,7 +96,7 @@ class Base(db.Model):
                     setattr(self, key, value)
 
             self.updated_at = get_timestamp()
-            db.session.commit()
+            self.commit()
             return self
         except Exception as e:
             raise e
@@ -105,16 +109,16 @@ class Base(db.Model):
                 if hasattr(self, key) and key not in exclude:
                     setattr(self, key, value)
 
-            db.session.add(self)
-            db.session.commit()
+            self.add(self)
+            self.commit()
             return self
         except Exception as e:
             raise e
 
     def delete(self):
         try:
-            db.session.delete(self)
-            db.session.commit()
+            self.session.delete(self)
+            self.commit()
             return True
         except Exception as e:
             raise e

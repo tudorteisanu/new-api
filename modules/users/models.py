@@ -29,6 +29,7 @@ class User(UserMixin, Base):
 
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
+        self.commit()
         return self.password_hash
 
     def check_password(self, password):
