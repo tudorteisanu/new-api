@@ -1,6 +1,5 @@
-// const backendAddress = 'https://flask.testways.online/api/v1';
-
-const backendAddress = 'http://localhost:5000/api/v1';
+const backendAddress = 'https://flask.testways.online/api/v1';
+// const backendAddress = 'http://localhost:5000/api/v1';
 
 function post(url, data) {
     return new Promise((resolve, reject) => {
