@@ -1,6 +1,6 @@
-const backendAddress = 'https://flask.testways.online/api/v1';
+// const backendAddress = 'https://flask.testways.online/api/v1';
 
-// const backendAddress = 'http://localhost:5000/api/v1';
+const backendAddress = 'http://localhost:5000/api/v1';
 
 function post(url, data) {
     return new Promise((resolve, reject) => {
@@ -24,7 +24,7 @@ function post(url, data) {
                 if (errors.hasOwnProperty('message')) {
                     errorText.innerHTML = errors.message
                 }
-                return reject(errors);
+                return reject({errors, status_code: response.status});
             }
 
             error.classList.add('hidden')

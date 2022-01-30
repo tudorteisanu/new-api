@@ -31,3 +31,7 @@ class ResetPasswordSerializer(Serializer):
 
 class ConfirmEmailSerializer(Serializer):
     token = StringField('token', [validators.InputRequired()])
+    
+    
+class CheckResetTokenSerializer(Serializer):
+    token = StringField('token', [validators.InputRequired()])

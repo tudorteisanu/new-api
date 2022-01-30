@@ -25,6 +25,7 @@ from modules.auth.serializer import ChangePasswordSerializer
 from modules.auth.serializer import ForgotPasswordSerializer
 from modules.auth.serializer import ResetPasswordSerializer
 from modules.auth.serializer import ConfirmEmailSerializer
+from modules.auth.serializer import CheckResetTokenSerializer
 
 
 class BaseResource(Resource):
@@ -177,7 +178,7 @@ class LogoutResource(BaseResource):
             return {"message": "Unauthorized"}, 401
 
 
-class ForgotPasswordResource(Resource):
+class ForgotPasswordResource(BaseResource):
     @staticmethod
     def post():
         data = request.json
@@ -210,12 +211,12 @@ class ForgotPasswordResource(Resource):
         return {'message': 'success'}, 200
 
 
-class CheckResetTokenResource(Resource):
+class CheckResetTokenResource(BaseResource):
     @staticmethod
     def post():
         data = request.json
 
-        serializer = ForgotPasswordSerializer(data)
+        serializer = CheckResetTokenSerializer(data)
 
         if not serializer.is_valid():
             return serializer.errors, 422
@@ -298,15 +299,17 @@ class ChangePasswordResource(Resource):
         if old_password == new_password:
             return {'message': 'Old password and new password should be different'}, 404
 
-        user.hash_password(new_password)
-        db.session.commit()
+        user.update({
+            'password_hash': user.hash_password(new_password)
+        })
+
         send_info_email(**{
             "subject": 'Изменение пароля!',
             "message": "Ваш пароль успешно изменен!",
             "recipient": user.email,
             "name": user.name
         })
-        return {'message': 'success'}, 200
+        return {'message': 'success', 'password_hash': user.password_hash}, 200
 
 
 def parse_minutes(seconds):

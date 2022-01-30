@@ -81,9 +81,12 @@ class Base(db.Model):
         except Exception as e:
             raise e
 
-    def update(self, data, exclude=[]):
+    def update(self, data=None, exclude=[]):
         exclude = [*exclude, *self.blocked_columns]
         try:
+            if not data:
+                return False
+
             for (key, value) in data.items():
                 if hasattr(self, key) and key not in exclude:
                     setattr(self, key, value)
