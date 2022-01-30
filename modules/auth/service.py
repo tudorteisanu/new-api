@@ -197,7 +197,7 @@ class ForgotPasswordResource(Resource):
 
             return {
                 "message": f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить"
-                           f" повторно через {time}"}
+                           f" повторно через {time}"}, 422
 
         token = generate_confirmation_token(user.email)
 
