@@ -27,6 +27,12 @@ from modules.auth.serializer import ResetPasswordSerializer
 from modules.auth.serializer import ConfirmEmailSerializer
 from modules.auth.serializer import CheckResetTokenSerializer
 
+from services.HttpErrors import UnprocessableEntity
+from services.HttpErrors import NotFound
+from services.HttpErrors import UnauthorizedError
+from services.HttpErrors import InternalServerError
+from services.HttpErrors import Success
+
 
 class BaseResource(Resource):
     __abstract__ = True
@@ -45,19 +51,18 @@ class LoginResource(BaseResource):
         serializer = LoginSerializer(data)
 
         if not serializer.is_valid():
-            return serializer.errors, 422
+            return UnprocessableEntity(errors=serializer.errors)
 
         user = User.find_one(email=data['email'])
 
         if not user:
-            return {"message": 'User not found'}, 404
+            return NotFound()
 
         if user.login_blocked_time:
             if user.login_blocked_time > datetime.now():
                 difference = user.login_blocked_time - datetime.now()
-                return {
-                    "message": f"Возможность входа в аккаунт временно заблокированно. Осталось времени блокировки: {parse_minutes(difference.seconds)}."
-                }
+                message = f"Возможность входа в аккаунт временно заблокированно. Осталось времени блокировки: {parse_minutes(difference.seconds)}."
+                return UnprocessableEntity(message=message)
             else:
                 user.update({
                     "login_attempts": 3,
@@ -66,10 +71,10 @@ class LoginResource(BaseResource):
 
         if user.check_password(data['password']):
             if not user.confirmed_at:
-                return {'message': "User not confirmed"}, 422
+                return UnprocessableEntity(message='User not confirmed')
 
             if not user.is_active:
-                return {'message': "User not found"}, 404
+                return NotFound()
 
             user.create_token()
             user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
@@ -98,8 +103,8 @@ class LoginResource(BaseResource):
                 user.update({
                     "login_blocked_time": datetime.now() + timedelta(minutes=15)
                 })
-            return {
-                       'message': f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"}, 422
+            message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
+            return UnprocessableEntity(message=message)
 
 
 class RegisterResource(BaseResource):
@@ -112,7 +117,7 @@ class RegisterResource(BaseResource):
             return serializer.errors, 422
 
         if User.find_one(email=data['email']) is not None:
-            return {'message': 'user_exists'}, 401
+            return UnauthorizedError(message="User exists")
 
         user = User.create(data)
         user.hash_password(data['password'])
@@ -138,12 +143,12 @@ class ConfirmEmailResource(BaseResource):
             email = confirm_token(token)
 
             if not email:
-                return {"message": "Invalid token"}, 404
+                return UnprocessableEntity(message='Invalid token')
 
             user = User.find_one(email=email)
 
             if user.confirmed_at:
-                return {"message": "Not found"}, 404
+                return NotFound()
 
             user.update({
                 "confirmed_at": datetime.now().isoformat(),
@@ -161,7 +166,7 @@ class ConfirmEmailResource(BaseResource):
 
         except Exception as e:
             print(e)
-            return {'message': "Internal server error", "error": "ww"}
+            return InternalServerError()
 
 
 class LogoutResource(BaseResource):
@@ -172,10 +177,10 @@ class LogoutResource(BaseResource):
             user = User.get(current_user.id)
             user.remove_token()
             logout_user()
-            return {"message": "success"}, 200
+            return Success()
         except Exception as e:
             print(e)
-            return {"message": "Unauthorized"}, 401
+            return UnauthorizedError()
 
 
 class ForgotPasswordResource(BaseResource):
@@ -190,15 +195,13 @@ class ForgotPasswordResource(BaseResource):
         user = User.find_one(email=data.get('email'))
 
         if not user:
-            return {'message': 'User not found'}, 404
+            return NotFound()
 
         if user.reset_password_at is not None and user.reset_password_at > datetime.now():
             difference = user.reset_password_at - datetime.now()
             time = parse_minutes(difference.seconds)
-
-            return {
-                       "message": f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить"
-                                  f" повторно через {time}"}, 422
+            message = f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить повторно через {time}"
+            return UnprocessableEntity(message=message)
 
         token = generate_confirmation_token(user.email)
 
@@ -208,7 +211,7 @@ class ForgotPasswordResource(BaseResource):
 
         user.update(
             {"reset_code": token, "reset_password_at": datetime.now() + timedelta(minutes=5)})
-        return {'message': 'success'}, 200
+        return Success()
 
 
 class CheckResetTokenResource(BaseResource):
@@ -225,14 +228,14 @@ class CheckResetTokenResource(BaseResource):
         email = confirm_token(token)
 
         if not email:
-            return {"message": "Invalid token"}, 422
+            return UnprocessableEntity(message='Invalid token')
 
         user = User.find_one(email=email)
 
         if not user or not user.reset_code or user.reset_code != token:
-            return {"message": "Invalid token"}, 422
+            return UnprocessableEntity(message='Invalid token')
 
-        return {'message': 'success'}, 200
+        return Success()
 
 
 class ResetPasswordResource(BaseResource):
@@ -250,12 +253,12 @@ class ResetPasswordResource(BaseResource):
             email = confirm_token(token)
 
             if not email:
-                return {"message": "Invalid token"}, 422
+                return UnprocessableEntity(message='Invalid token')
 
             user = User.find_one(email=email)
 
             if not user or not user.reset_code or user.reset_code != token:
-                return {"message": "Invalid token"}, 422
+                return UnprocessableEntity(message='Invalid token')
 
             user.hash_password(password)
             user.update({"reset_code": None, "is_active": True})
@@ -265,10 +268,10 @@ class ResetPasswordResource(BaseResource):
                 "recipient": user.email,
                 "name": user.name
             })
-            return {'message': 'success'}, 200
+            return Success
         except Exception as e:
             print(e)
-            return {"message": "Internal Server Error"}, 500
+            return InternalServerError()
 
 
 class ChangePasswordResource(BaseResource):
@@ -286,22 +289,18 @@ class ChangePasswordResource(BaseResource):
         password_confirmation = data.get('password_confirmation', None)
 
         if new_password != password_confirmation:
-            return {'message': 'Passwords don\'t much'}, 404
+            return UnprocessableEntity('Passwords don\'t much')
 
         user = User.get(current_user.id)
 
         if not user:
-            return {'message': 'User not found'}, 404
+            return NotFound()
 
         if not user.check_password(old_password):
-            return {'message': 'Invalid password'}, 404
+            return UnprocessableEntity(message='Invalid password')
 
         if old_password == new_password:
-            return {'message': 'Old password and new password should be different'}, 404
-
-        # user.update({
-        #     'password_hash':
-        # })
+            return UnprocessableEntity(message='Old password and new password should be different')
 
         user.hash_password(new_password)
 
@@ -311,7 +310,7 @@ class ChangePasswordResource(BaseResource):
             "recipient": user.email,
             "name": user.name
         })
-        return {'message': 'success'}, 200
+        return Success()
 
 
 def parse_minutes(seconds):
@@ -322,22 +321,6 @@ def parse_minutes(seconds):
 def load_user(user_id):
     return User.get(user_id)
 
-
-# @login_manager.request_loader
-# def load_user(request):
-#     token = request.headers.get('Authorization')
-#     print(request.headers)
-#     if token is None:
-#         token = request.args.get('token')
-#
-#     if token is not None:
-#         username,password = token.split(":") # naive token
-#         user_entry = User.get(username)
-#         if (user_entry is not None):
-#             user = User(user_entry[0],user_entry[1])
-#             if (user.password == password):
-#                 return user
-#     return None
 
 @login_manager.unauthorized_handler
 def unauthorized():
