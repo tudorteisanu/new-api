@@ -21,10 +21,8 @@ function post(url, data) {
                 const errors = data || response.status;
                 error.classList.remove('hidden')
 
-                if (response.status !== 422) {
+                if (errors.hasOwnProperty('message')) {
                     errorText.innerHTML = errors.message
-                } else {
-                    errorText.innerHTML = JSON.stringify(errors)
                 }
                 return reject(errors);
             }
