@@ -30,7 +30,7 @@ class Success:
             self.__setattr__(key, value)
 
         if data is None:
-            return self.message, self.status
+            return {"message": self.message}, self.status
         return self.data, self.status
 
 
