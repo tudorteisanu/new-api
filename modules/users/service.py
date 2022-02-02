@@ -1,6 +1,5 @@
 from flask import request
 from flask import jsonify
-from config.settings import db
 from modules.users.models import User
 from modules.users.schema import UserSchema
 from services.auth_utils import auth_required
