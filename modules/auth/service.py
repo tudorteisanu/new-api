@@ -1,3 +1,4 @@
+# utf-8
 from flask import request, url_for
 from flask import redirect
 from flask_restful import Resource
@@ -5,6 +6,7 @@ from flask_login import logout_user, login_user
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from datetime import datetime, timedelta
 from flask_login import current_user
+from flask import g
 
 from config.flask_config import FlaskConfig
 from config.settings import db
@@ -78,7 +80,6 @@ class LoginResource(BaseResource):
 
             user.create_token()
             user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
-            user_data['token'] = user_data['token']['access_token']
             login_user(user)
             db.session.commit()
 
@@ -93,7 +94,7 @@ class LoginResource(BaseResource):
                     "reset_code": None
                 })
 
-            return user_data, 200
+            return {'user': user_data, "token": user.token.access_token}, 200
         else:
             user.update({
                 "login_attempts": user.login_attempts - 1
@@ -124,7 +125,7 @@ class RegisterResource(BaseResource):
         user.create_access_token()
         token = generate_confirmation_token(user.email)
         send_email_link(user.email,
-                        f'{FlaskConfig.BACKEND_ADDRESS}/confirm_email?token={token}',
+                        f'{FlaskConfig.FRONTEND_ADDRESS}/auth/email-confirmed?token={token}',
                         user.name)
         return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
 
@@ -162,8 +163,18 @@ class ConfirmEmailResource(BaseResource):
                 "name": user.name
             })
 
-            return redirect(FlaskConfig.FRONTEND_ADDRESS)
+            return Success()
 
+        except Exception as e:
+            print(e)
+            return InternalServerError()
+
+
+class ReadUserResource(BaseResource):
+    @staticmethod
+    def get(user_id):
+        try:
+            return Success(data=UserSchema().dump(User.get(user_id)))
         except Exception as e:
             print(e)
             return InternalServerError()

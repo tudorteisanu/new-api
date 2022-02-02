@@ -15,7 +15,7 @@ class BaseError:
         if self.errors is not None:
             return {"message": self.message, "errors": self.errors}, self.status
         else:
-            return self.message, self.status
+            return {"message": self.message}, self.status
 
 
 class Success:
@@ -23,14 +23,17 @@ class Success:
     data = None
     message = 'Success'
 
-    def __call__(self, data, **kwargs):
-        self.data = data
-
+    def __init__(self, **kwargs):
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
 
-        if data is None:
+    def __call__(self, **kwargs):
+        for (key, value) in kwargs.items():
+            self.__setattr__(key, value)
+
+        if not self.data:
             return {"message": self.message}, self.status
+
         return self.data, self.status
 
 
@@ -68,3 +71,4 @@ NotFound = NotFoundError()
 InternalServerError = InternalServerError()
 ForbiddenError = ForbiddenError()
 UnauthorizedError = UnauthorizedError()
+Success = Success()
