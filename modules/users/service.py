@@ -1,11 +1,10 @@
 from flask import request
 from flask import jsonify
-from modules.users.models import User
+from modules.users.models import UserResource as User
 from modules.users.schema import UserSchema
 from services.auth_utils import auth_required
 from flask_restful import Resource
 from flask_simple_serializer.response import Response
-from flask_simple_serializer.status_codes import HTTP_400_BAD_REQUEST
 from sqlalchemy import exc
 from modules.users.serializer import CreateUserSerializer
 
@@ -18,14 +17,14 @@ class UsersResource(Resource):
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
             {"value": "email", "text": "Email"},
-            {"value": "role", "text": "Role"}
+            {"value": "role", "text": "Role"},
+            {"value": "is_active", "text": "Active"}
         ]
 
         params = request.args
 
         items = User \
             .query \
-            .order_by(User.id.desc()) \
             .paginate(page=int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), error_out=False)
 
         resp = {
@@ -40,14 +39,17 @@ class UsersResource(Resource):
     @staticmethod
     @auth_required()
     def post():
-        data = request.json
+        data = request.json or request.form
+
+        print(request.headers)
+
         serializer = CreateUserSerializer(data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status_code=HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status_code=422)
 
         try:
-            user = User(data)
+            user = User.create(data)
             return UserSchema(only=("name", "email", "role", 'id')).dump(user)
         except exc.IntegrityError:
             return {"message": 'User with same email exists.'}, 422
