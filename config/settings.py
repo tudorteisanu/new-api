@@ -2,8 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_cors import CORS
-from flask_migrate import Migrate, MigrateCommand
-from flask_script import Manager
+from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
@@ -21,8 +20,15 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
+
 ma = Marshmallow(app)
+
+
+def create_app():
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    import urls
+    return app
 
 # redis = Redis.StrictRedis(host='127.0.0.1', port=6379, db=2)

@@ -1,24 +1,36 @@
-version: '3.3'
+version: "3.3"
+
 services:
-    api:
-        build: .
+  demo_api:
+    build: .
+    container_name: 'flask-api'
 
-        environment:
-          - VIRTUAL_HOST=api.server.loc
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      # http settings
+      - "traefik.http.routers.demo-api.rule=Host(`api.server.loc`)"
+      - "traefik.http.routers.demo-api.entrypoints=web"
+      # https settings
+#      - "traefik.http.middlewares.tlsredirect.redirectscheme.scheme=https"
+#      - "traefik.http.routers.demo-api.middlewares=tlsredirect"
+#      - "traefik.http.routers.demo-api-secure.rule=Host(`<domain>`)"
+#      - "traefik.http.routers.demo-api-secure.entrypoints=websecure"
+#      - "traefik.http.routers.demo-api-secure.tls.certresolver=myresolver"
+#      - "traefik.http.routers.demo-api-secure.tls=true"
+      # custom headers settings
+#      - "traefik.http.middlewares.testheader.headers.accessControlAllowHeaders=x-localization"
 
-        ports:
-            - "5000:5000"
+    expose:
+      - 8081
 
-        volumes:
-            - .:/code
-
-        networks:
-          - backend
-          - proxy_proxy
-
+    networks:
+      - web
+      - backend
 
 networks:
-  backend:
-    driver: bridge
-  proxy_proxy:
+  web:
     external: true
+  backend:
+    external: true
+

@@ -1,16 +1,6 @@
-from config.settings import app
-
-from flask_sqlalchemy import SQLAlchemy
+from config.settings import db
 from sqlalchemy.dialects.postgresql import JSONB
-from flask_migrate import Migrate, MigrateCommand
-from flask_script import Manager
-
 from datetime import datetime as dt
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
 
 
 def get_timestamp():

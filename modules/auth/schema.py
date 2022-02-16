@@ -1,7 +1,7 @@
 from modules.auth.models import UserAuthTokens
-from marshmallow_sqlalchemy import ModelSchema
+from config.settings import ma
 
 
-class UserAuthTokensSchema(ModelSchema):
+class UserAuthTokensSchema(ma.Schema):
     class Meta:
         model = UserAuthTokens

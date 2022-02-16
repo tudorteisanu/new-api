@@ -1,4 +1,4 @@
-from config.settings import manager
+from config.settings import migrate
 import os
 
 
@@ -19,7 +19,7 @@ def make_models(rootDir='modules', models='models'):
 
 if __name__ == '__main__':
     make_models()
-    manager.run()
+    migrate.run()
 
 # Инициализация:            python manage.py db init
 # Подготовка к миграции:    python manage.py db migrate
