@@ -1,12 +1,19 @@
+import logging
+
 from flask import request
 from flask import jsonify
+from flask_simple_serializer.response import Response
+
 from modules.users.models import UserResource as User
 from modules.users.schema import UserSchema
 from services.auth_utils import auth_required
 from flask_restful import Resource
-from flask_simple_serializer.response import Response
 from sqlalchemy import exc
 from modules.users.serializer import CreateUserSerializer
+from modules.users.repository import userRepository
+
+from services.HttpErrors import InternalServerError
+from services.HttpErrors import NotFoundError
 
 
 class UsersResource(Resource):
@@ -59,16 +66,20 @@ class UsersOneResource(Resource):
     @staticmethod
     @auth_required()
     def get(user_id):
-        user = User.query.get(user_id)
-        return UserSchema().dump(user)
+        try:
+            user = userRepository.find_one(user_id)
+            return UserSchema().dump(user)
+        except Exception as e:
+            logging.log(e)
+            return InternalServerError()
 
     @staticmethod
     @auth_required()
     def patch(user_id):
         data = request.json
-        user = User.query.get(user_id)
+        user = userRepository.find_one(user_id)
         if not user:
-            return {'message': "User not found"}, 404
+            return NotFoundError()
 
         user.update(data)
         return UserSchema(only=("name", "email", "role", 'id')).dump(user)
@@ -76,7 +87,7 @@ class UsersOneResource(Resource):
     @staticmethod
     @auth_required()
     def delete(user_id):
-        user = User.query.get(user_id)
+        user = userRepository.find_one(user_id)
 
         if not user:
             return {'message': "User not exists"}, 404
@@ -88,5 +99,8 @@ class UsersListResource(Resource):
     @staticmethod
     @auth_required()
     def get():
-        users = User.query.all()
-        return [{"value": user.id, "text": f'{user.name} - {user.email}'} for user in users]
+        try:
+            return userRepository.list()
+        except Exception as e:
+            logging.info(e)
+            return InternalServerError()

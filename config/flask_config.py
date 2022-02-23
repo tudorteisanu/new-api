@@ -1,11 +1,17 @@
 from datetime import timedelta
 from os import environ
 
+# POSTGRES = {
+#     'user': environ.get('PG_USER'),
+#     'pw': environ.get('PG_PASSWORD'),
+#     'db': environ.get('PG_DB_NAME'),
+#     'host': environ.get('PG_HOST')
+# }
 POSTGRES = {
-    'user': environ.get('PG_USER'),
-    'pw': environ.get('PG_PASSWORD'),
-    'db': environ.get('PG_DB_NAME'),
-    'host': environ.get('PG_HOST')
+    'user': 'yprnvaiz',
+    'pw': '5vnB2YB_D3eGAhjMwQGEmp5TES8dFTJW',
+    'db': 'yprnvaiz',
+    'host': 'castor.db.elephantsql.com'
 }
 
 
@@ -27,7 +33,7 @@ class FlaskConfig(object):
     MAIL_DEBUG = False
     SECURITY_PASSWORD_SALT = 'some_salt'
 
-    DEBUG = bool(environ.get('DEBUG'))
+    DEBUG = True
     PORT = environ.get('PORT')
     HOST = environ.get('HOST')
 

@@ -12,6 +12,10 @@ def get_timestamp():
 
 
 class User(UserMixin, Base):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=get_timestamp)
+    updated_at = db.Column(db.DateTime, default=get_timestamp)
+    blocked_columns = ['created_at', 'updated_at']
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
