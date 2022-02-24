@@ -8,6 +8,9 @@ class UserRepository(User):
     def find_one(self, user_id):
         return self.query.get(user_id)
 
+    def find_one_or_fail(self, user_id):
+        return self.query.get(user_id)
+
     def list(self):
         return [{"value": item.id, "text": item.name, "email": item.email} for item in self.query.all()]
 

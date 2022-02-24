@@ -2,18 +2,20 @@ import logging
 
 from flask import request
 from flask import jsonify
-from flask_simple_serializer.response import Response
+from flask_restful import Resource
+from sqlalchemy import exc
+
+from services.auth_utils import auth_required
 
 from modules.users.models import UserResource as User
 from modules.users.schema import UserSchema
-from services.auth_utils import auth_required
-from flask_restful import Resource
-from sqlalchemy import exc
 from modules.users.serializer import CreateUserSerializer
 from modules.users.repository import userRepository
 
 from services.HttpErrors import InternalServerError
-from services.HttpErrors import NotFoundError
+from services.HttpErrors import NotFound
+from services.HttpErrors import UnprocessableEntity
+from services.HttpErrors import Success
 
 
 class UsersResource(Resource):
@@ -47,19 +49,20 @@ class UsersResource(Resource):
     @auth_required()
     def post():
         data = request.json or request.form
-
-        print(request.headers)
-
         serializer = CreateUserSerializer(data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status_code=422)
-
+            return UnprocessableEntity(errors=serializer.errors)
         try:
             user = User.create(data)
-            return UserSchema(only=("name", "email", "role", 'id')).dump(user)
+            return {
+                "name": user.name,
+                "email": user.email,
+                "role": user.role,
+                "id": user.id
+            }
         except exc.IntegrityError:
-            return {"message": 'User with same email exists.'}, 422
+            return UnprocessableEntity(message="User with same email exists.")
 
 
 class UsersOneResource(Resource):
@@ -67,10 +70,19 @@ class UsersOneResource(Resource):
     @auth_required()
     def get(user_id):
         try:
-            user = userRepository.find_one(user_id)
-            return UserSchema().dump(user)
+            user = userRepository.find_one_or_fail(user_id)
+            
+            if not user:
+                return NotFound(message='User not found')
+
+            return {
+                "name": user.name,
+                "email": user.email,
+                "role": user.role,
+                "id": user.id
+            }
         except Exception as e:
-            logging.log(e)
+            print(e)
             return InternalServerError()
 
     @staticmethod
@@ -79,10 +91,15 @@ class UsersOneResource(Resource):
         data = request.json
         user = userRepository.find_one(user_id)
         if not user:
-            return NotFoundError()
+            return NotFound()
 
         user.update(data)
-        return UserSchema(only=("name", "email", "role", 'id')).dump(user)
+        return {
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "id": user.id
+        }
 
     @staticmethod
     @auth_required()
@@ -90,9 +107,9 @@ class UsersOneResource(Resource):
         user = userRepository.find_one(user_id)
 
         if not user:
-            return {'message': "User not exists"}, 404
+            return NotFound()
         user.delete()
-        return {'message': 'Successful deleted'}, 200
+        return Success()
 
 
 class UsersListResource(Resource):
