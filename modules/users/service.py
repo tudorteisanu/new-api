@@ -90,6 +90,7 @@ class UsersOneResource(Resource):
     def patch(user_id):
         data = request.json
         user = userRepository.find_one(user_id)
+
         if not user:
             return NotFound()
 
@@ -108,6 +109,7 @@ class UsersOneResource(Resource):
 
         if not user:
             return NotFound()
+
         user.delete()
         return Success()
 
