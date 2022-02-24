@@ -1,15 +1,14 @@
-import logging
-
 from flask import request
 from flask import jsonify
 from flask_restful import Resource
 from sqlalchemy import exc
+import logging
+
+from config.settings import db
 
 from services.auth_utils import auth_required
 
-from modules.users.models import UserResource as User
-from modules.users.schema import UserSchema
-from modules.users.serializer import CreateUserSerializer
+from modules.users.models import User
 from modules.users.repository import userRepository
 
 from services.HttpErrors import InternalServerError
@@ -32,12 +31,17 @@ class UsersResource(Resource):
 
         params = request.args
 
-        items = User \
-            .query \
-            .paginate(page=int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), error_out=False)
+        items = userRepository \
+            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
 
         resp = {
-            "items": UserSchema(many=True).dump(items.items),
+            "items": [
+                {
+                    "name": item.name,
+                    "email": item.email,
+                    "id": item.id,
+                    "role": item.role
+                } for item in items.items],
             "pages": items.pages,
             "total": items.total,
             "headers": headers
@@ -48,21 +52,21 @@ class UsersResource(Resource):
     @staticmethod
     @auth_required()
     def post():
-        data = request.json or request.form
-        serializer = CreateUserSerializer(data)
-
-        if not serializer.is_valid():
-            return UnprocessableEntity(errors=serializer.errors)
         try:
-            user = User.create(data)
-            return {
-                "name": user.name,
-                "email": user.email,
-                "role": user.role,
-                "id": user.id
-            }
-        except exc.IntegrityError:
-            return UnprocessableEntity(message="User with same email exists.")
+            data = request.json or request.form
+            user = User(
+                name=data['name'],
+                email=data['email']
+            )
+            userRepository.create(user)
+            db.session.commit()
+            return Success()
+        except exc.IntegrityError as e:
+            return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            return InternalServerError()
 
 
 class UsersOneResource(Resource):
@@ -71,7 +75,7 @@ class UsersOneResource(Resource):
     def get(user_id):
         try:
             user = userRepository.find_one_or_fail(user_id)
-            
+
             if not user:
                 return NotFound(message='User not found')
 
@@ -88,30 +92,38 @@ class UsersOneResource(Resource):
     @staticmethod
     @auth_required()
     def patch(user_id):
-        data = request.json
-        user = userRepository.find_one(user_id)
+        try:
+            data = request.json
+            user = userRepository.find_one(user_id)
 
-        if not user:
-            return NotFound()
+            if not user:
+                return NotFound()
 
-        user.update(data)
-        return {
-            "name": user.name,
-            "email": user.email,
-            "role": user.role,
-            "id": user.id
-        }
+            userRepository.update(user, data)
+            db.session.commit()
+            return Success()
+        except exc.IntegrityError as e:
+            logging.error(e)
+            return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
 
     @staticmethod
     @auth_required()
     def delete(user_id):
-        user = userRepository.find_one(user_id)
+        try:
+            user = userRepository.find_one(user_id)
 
-        if not user:
-            return NotFound()
+            if not user:
+                return NotFound()
 
-        user.delete()
-        return Success()
+            userRepository.remove(user)
+            db.session.commit()
+            return Success()
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
 
 
 class UsersListResource(Resource):
@@ -121,5 +133,5 @@ class UsersListResource(Resource):
         try:
             return userRepository.list()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             return InternalServerError()

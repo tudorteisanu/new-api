@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from config.flask_config import FlaskConfig
 from flask_login import LoginManager
 # import redis as Redis
+from services.logs import init_logging
 
 app = Flask(__name__, template_folder='../templates', static_folder="../static")
 app.config.from_object(FlaskConfig)

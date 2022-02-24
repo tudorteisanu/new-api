@@ -120,7 +120,7 @@ class RegisterResource(BaseResource):
         if User.find_one(email=data['email']) is not None:
             return UnauthorizedError(message="User exists")
 
-        user = User.create(data)
+        user = create(data)
         user.hash_password(data['password'])
         user.create_access_token()
         token = generate_confirmation_token(user.email)

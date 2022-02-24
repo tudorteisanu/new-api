@@ -4,14 +4,13 @@ from datetime import datetime as dt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from modules.auth.models import UserAuthTokens
-from services.database import Base
 
 
 def get_timestamp():
     return dt.now().isoformat()
 
 
-class User(UserMixin, Base):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
