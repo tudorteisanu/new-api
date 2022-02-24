@@ -1,23 +1,16 @@
 from datetime import timedelta
 from os import environ
 
-# POSTGRES = {
-#     'user': environ.get('PG_USER'),
-#     'pw': environ.get('PG_PASSWORD'),
-#     'db': environ.get('PG_DB_NAME'),
-#     'host': environ.get('PG_HOST')
-# }
 POSTGRES = {
-    'user': 'yprnvaiz',
-    'pw': '5vnB2YB_D3eGAhjMwQGEmp5TES8dFTJW',
-    'db': 'yprnvaiz',
-    'host': 'castor.db.elephantsql.com'
+    'user': environ.get('PG_USER'),
+    'pw': environ.get('PG_PASSWORD'),
+    'db': environ.get('PG_DB_NAME'),
+    'host': environ.get('PG_HOST')
 }
 
 
 class FlaskConfig(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///app2.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'MY_SECRET_KEY'
 

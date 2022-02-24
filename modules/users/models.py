@@ -32,7 +32,6 @@ class User(UserMixin, db.Model):
 
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
-        self.commit()
         return self.password_hash
 
     def check_password(self, password):
@@ -40,27 +39,27 @@ class User(UserMixin, db.Model):
 
     def create_token(self):
         token = create_access_token(self.id)
-        user_token = UserAuthTokens()
-        user_token = user_token.find_one(user_id=self.id)
+        user_token = UserAuthTokens.query.filter_by(user_id=self.id).first()
 
         if user_token:
-            user_token.update({"access_token": token})
+            user_token.access_token = token
         else:
-            user_token = UserAuthTokens()
-            user_token.create({"user_id": self.id, "access_token": token})
-        return token
+            user_token = UserAuthTokens(
+                user_id=self.id,
+                access_token=token
+            )
+            db.session.add(user_token)
+        return user_token
 
     def create_access_token(self):
         user_token = UserAuthTokens.query.filter_by(user_id=self.id).first()
 
         if not user_token:
-            user_token = UserAuthTokens()
-            user_token.create({"user_id": self.id})
+            user_token = UserAuthTokens(user_id=self.id)
+            db.session.add(user_token)
 
     def remove_token(self):
         user_token = UserAuthTokens()
-        user_token = user_token.find_one(user_id=self.id)
-        user_token.update({"access_token": None})
+        user_token = user_token.query.filtter_by(user_id=self.id).first()
+        user_token.access_token=None
 
-
-UserResource = User()

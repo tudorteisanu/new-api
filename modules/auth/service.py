@@ -1,9 +1,10 @@
 # utf-8
+import logging
+
 from flask import request, url_for
 from flask import redirect
 from flask_restful import Resource
 from flask_login import logout_user, login_user
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from datetime import datetime, timedelta
 from flask_login import current_user
 from flask import g
@@ -18,8 +19,8 @@ from services.mail.mail import send_forgot_password_email
 from services.mail.mail import send_info_email
 from services.mail.token import generate_confirmation_token, confirm_token
 
-from modules.users.models import UserResource as User
-from modules.users.schema import UserSchema
+from modules.users.models import User
+from modules.users.repository import userRepository
 
 from modules.auth.serializer import LoginSerializer
 from modules.auth.serializer import RegisterSerializer
@@ -36,17 +37,7 @@ from services.HttpErrors import InternalServerError
 from services.HttpErrors import Success
 
 
-class BaseResource(Resource):
-    __abstract__ = True
-    auth = False
-
-    def __init__(self):
-        if self.auth:
-            verify_jwt_in_request()
-            load_user(get_jwt_identity())
-
-
-class LoginResource(BaseResource):
+class LoginResource(Resource):
     @staticmethod
     def post():
         data = request.json
@@ -55,7 +46,7 @@ class LoginResource(BaseResource):
         if not serializer.is_valid():
             return UnprocessableEntity(errors=serializer.errors)
 
-        user = User.find_one(email=data['email'])
+        user = userRepository.find_one(email=data['email'])
 
         if not user:
             return NotFound()
@@ -79,58 +70,85 @@ class LoginResource(BaseResource):
                 return NotFound()
 
             user.create_token()
-            user_data = UserSchema(only=['name', 'id', 'token', 'role', 'email']).dump(user)
             login_user(user)
-            db.session.commit()
 
             if user.login_attempts != 3:
-                user.update({
+                userRepository.update(user, {
                     "login_attempts": 3
                 })
 
             if user.reset_password_at:
-                user.update({
+                userRepository.update(user, {
                     "reset_password_at": None,
                     "reset_code": None
                 })
 
-            return {'user': user_data, "token": user.token.access_token}, 200
+            db.session.commit()
+
+            response = {
+                "user": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email
+                },
+                "token": user.token.access_token
+            }
+
+            return Success(data=response)
         else:
-            user.update({
-                "login_attempts": user.login_attempts - 1
-            })
+            user.login_attempts = user.login_attempts - 1
 
             if user.login_attempts == 0:
-                user.update({
-                    "login_blocked_time": datetime.now() + timedelta(minutes=15)
-                })
+                user.login_blocked_time = datetime.now() + timedelta(minutes=15)
             message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
+            db.session.commit()
             return UnprocessableEntity(message=message)
 
 
-class RegisterResource(BaseResource):
+class RegisterResource(Resource):
     @staticmethod
     def post():
-        data = request.json
-        serializer = RegisterSerializer(data)
+        try:
+            data = request.json
+            serializer = RegisterSerializer(data)
 
-        if not serializer.is_valid():
-            return serializer.errors, 422
+            if not serializer.is_valid():
+                return UnprocessableEntity(serializer.errors)
 
-        if User.find_one(email=data['email']) is not None:
-            return UnauthorizedError(message="User exists")
+            if userRepository.find_one(email=data['email']) is not None:
+                return UnprocessableEntity(message="User exists")
 
-        user = create(data)
-        user.hash_password(data['password'])
-        user.create_access_token()
-        token = generate_confirmation_token(user.email)
-        send_email_link(user.email,
-                        f'{FlaskConfig.FRONTEND_ADDRESS}/auth/email-confirmed?token={token}',
-                        user.name)
-        return UserSchema(only=['id', 'name', 'email', 'role']).dump(user)
+            new_user = User(
+                email=data['email'],
+                name=data['name'],
+            )
+
+            userRepository.create(new_user)
+
+            new_user.hash_password(data['password'])
+            new_user.create_access_token()
+
+            token = generate_confirmation_token(new_user.email)
+
+            send_email_link(new_user.email,
+                            f'{FlaskConfig.FRONTEND_ADDRESS}/auth/email-confirmed?token={token}',
+                            new_user.name)
+
+            response = {
+                "id": new_user.id,
+                "name": new_user.name,
+                "email": new_user.email
+            }
+
+            db.session.commit()
+            return Success(data=response)
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            return InternalServerError()
 
 
-class ConfirmEmailResource(BaseResource):
+class ConfirmEmailResource(Resource):
     @staticmethod
     def get():
         try:
@@ -170,31 +188,33 @@ class ConfirmEmailResource(BaseResource):
             return InternalServerError()
 
 
-class ReadUserResource(BaseResource):
+class ReadUserResource(Resource):
     @staticmethod
     def get(user_id):
         try:
-            return Success(data=UserSchema().dump(User.get(user_id)))
+            return Success()
         except Exception as e:
             print(e)
             return InternalServerError()
 
 
-class LogoutResource(BaseResource):
+class LogoutResource(Resource):
     @staticmethod
     @auth_required()
     def post():
         try:
-            user = User.get(current_user.id)
+            user = userRepository.get(current_user.id)
             user.remove_token()
             logout_user()
+            db.session.commit()
             return Success()
         except Exception as e:
-            print(e)
+            logging.error(e)
+            db.session.rollback()
             return UnauthorizedError()
 
 
-class ForgotPasswordResource(BaseResource):
+class ForgotPasswordResource(Resource):
     @staticmethod
     def post():
         data = request.json
@@ -203,7 +223,7 @@ class ForgotPasswordResource(BaseResource):
         if not serializer.is_valid():
             return serializer.errors, 422
 
-        user = User.find_one(email=data.get('email'))
+        user = userRepository.find_one(email=data.get('email'))
 
         if not user:
             return NotFound()
@@ -220,12 +240,17 @@ class ForgotPasswordResource(BaseResource):
                                    f'{FlaskConfig.FRONTEND_ADDRESS}/reset_password?token={token}',
                                    user.name)
 
-        user.update(
-            {"reset_code": token, "reset_password_at": datetime.now() + timedelta(minutes=5)})
+        userRepository.update(user,
+                              {
+                                  "reset_code": token,
+                                  "reset_password_at": datetime.now() + timedelta(minutes=5)
+                              }
+                              )
+        db.session.commit()
         return Success()
 
 
-class CheckResetTokenResource(BaseResource):
+class CheckResetTokenResource(Resource):
     @staticmethod
     def post():
         data = request.json
@@ -249,7 +274,7 @@ class CheckResetTokenResource(BaseResource):
         return Success()
 
 
-class ResetPasswordResource(BaseResource):
+class ResetPasswordResource(Resource):
     @staticmethod
     def post():
         try:
@@ -285,7 +310,7 @@ class ResetPasswordResource(BaseResource):
             return InternalServerError()
 
 
-class ChangePasswordResource(BaseResource):
+class ChangePasswordResource(Resource):
     @staticmethod
     @auth_required()
     def post():
@@ -302,7 +327,7 @@ class ChangePasswordResource(BaseResource):
         if new_password != password_confirmation:
             return UnprocessableEntity('Passwords don\'t much')
 
-        user = User.get(current_user.id)
+        user = User.query.get(current_user.id)
 
         if not user:
             return NotFound()
@@ -330,7 +355,7 @@ def parse_minutes(seconds):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(user_id)
 
 
 @login_manager.unauthorized_handler

@@ -94,7 +94,7 @@ class UsersOneResource(Resource):
     def patch(user_id):
         try:
             data = request.json
-            user = userRepository.find_one(user_id)
+            user = userRepository.get(user_id)
 
             if not user:
                 return NotFound()
@@ -113,7 +113,7 @@ class UsersOneResource(Resource):
     @auth_required()
     def delete(user_id):
         try:
-            user = userRepository.find_one(user_id)
+            user = userRepository.get(user_id)
 
             if not user:
                 return NotFound()

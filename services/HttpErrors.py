@@ -1,7 +1,7 @@
 class BaseError:
     __abstract__ = True
     errors = None
-    message = "Succeess"
+    message = "Success"
     status = 200
 
     def __init__(self, **kwargs):

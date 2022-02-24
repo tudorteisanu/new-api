@@ -18,3 +18,4 @@ def init_logging(app):
     app.logger.addHandler(file_handler)
     app.logger.addHandler(stream_handler)
     app.logger.info("Logging is set up.")
+

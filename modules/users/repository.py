@@ -1,14 +1,16 @@
 from modules.users.models import User
 from config.settings import db
-import logging
 
 
 class UserRepository(User):
-    def find(self):
-        return self.query.all()
+    def find(self, **kwargs):
+        return self.query.filter_by(**kwargs).all()
 
-    def find_one(self, user_id):
+    def get(self, user_id):
         return self.query.get(user_id)
+
+    def find_one(self, **kwargs):
+        return self.query.filter_by(**kwargs).first()
 
     def find_one_or_fail(self, user_id):
         return self.query.get(user_id)

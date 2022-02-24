@@ -1,3 +1,4 @@
+import logging
 from threading import Thread
 
 from config.settings import app
@@ -16,29 +17,33 @@ def send_message(**kwargs):
 
 
 def send_email_link(email, link, recipient=''):
-    template_data = {
-        "sender": "Test Company",
-        "recipient": recipient,
-        "message": "Вы успешно зарегистрировались. Для подтверждения почта, перейдите по ссылке ниже.",
-        "link": {
-            "url": link,
-            "message": 'Follow link'
-        },
-        "contacts": {
-            "email": "teisanutudort@gmail.com",
-            "phone": '+37360090956'
+    try:
+        template_data = {
+            "sender": "Test Company",
+            "recipient": recipient,
+            "message": "Вы успешно зарегистрировались. Для подтверждения почта, перейдите по ссылке ниже.",
+            "link": {
+                "url": link,
+                "message": 'Follow link'
+            },
+            "contacts": {
+                "email": "teisanutudort@gmail.com",
+                "phone": '+37360090956'
+            }
         }
-    }
 
-    body = render_template('email_templates/register.html', data=template_data)
-    data = {
-        "html": body,
-        "subject": 'Email Verification',
-        "recipients": [email],
-        "sender": "it.worker@gmail.com",
-    }
-    my_thread = Thread(target=send_message, kwargs=data)
-    my_thread.start()
+        body = render_template('email_templates/register.html', data=template_data)
+
+        data = {
+            "html": body,
+            "subject": 'Email Verification',
+            "recipients": [email],
+            "sender": "it.worker@gmail.com",
+        }
+        my_thread = Thread(target=send_message, kwargs=data)
+        my_thread.start()
+    except Exception as e:
+        logging.error(e)
 
 
 def send_forgot_password_email(email, link, recipient=''):
