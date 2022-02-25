@@ -1,13 +1,13 @@
 from config.settings import api
-from modules.auth.service import LoginResource
-from modules.auth.service import LogoutResource
-from modules.auth.service import RegisterResource
-from modules.auth.service import ForgotPasswordResource
-from modules.auth.service import ResetPasswordResource
-from modules.auth.service import ChangePasswordResource
-from modules.auth.service import ConfirmEmailResource
-from modules.auth.service import CheckResetTokenResource
-from modules.auth.service import ReadUserResource
+from modules.auth.resource import LoginResource
+from modules.auth.resource import LogoutResource
+from modules.auth.resource import RegisterResource
+from modules.auth.resource import ForgotPasswordResource
+from modules.auth.resource import ResetPasswordResource
+from modules.auth.resource import ChangePasswordResource
+from modules.auth.resource import ConfirmEmailResource
+from modules.auth.resource import CheckResetTokenResource
+from modules.auth.resource import ReadUserResource
 
 api.add_resource(LoginResource, '/auth/login')
 api.add_resource(LogoutResource, '/auth/logout')

@@ -1,7 +1,7 @@
 from config.settings import api
-from modules.users.service import UsersResource
-from modules.users.service import UsersOneResource
-from modules.users.service import UsersListResource
+from modules.users.resource import UsersResource
+from modules.users.resource import UsersOneResource
+from modules.users.resource import UsersListResource
 
 resource = '/users'
 

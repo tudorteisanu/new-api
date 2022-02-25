@@ -39,5 +39,3 @@ class UserRepository(User):
     def list(self):
         return [{"value": item.id, "text": item.name, "email": item.email} for item in self.query.all()]
 
-
-userRepository = UserRepository()

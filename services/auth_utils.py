@@ -2,9 +2,11 @@ import logging
 from functools import wraps
 from flask import request
 from flask_jwt_extended import decode_token
-from modules.users.repository import userRepository
+from modules.users.repository import UserRepository
 from datetime import datetime
 from flask import g
+
+repository = UserRepository()
 
 
 def auth_required():
@@ -21,10 +23,10 @@ def auth_required():
                     if token_expiry < datetime.now():
                         return {"message": "Unauthorized"}, 401
 
-                    user = userRepository.get(token['sub'])
+                    user = repository.get(token['sub'])
 
                     print(user)
-                    if not user or not user.is_active or not user.token.access_token\
+                    if not user or not user.is_active or not user.token.access_token \
                             or user.token.access_token != access_token:
                         return {"message": "Unauthorized"}, 401
 

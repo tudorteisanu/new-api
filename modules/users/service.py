@@ -1,15 +1,12 @@
 from flask import request
 from flask import jsonify
-from flask_restful import Resource
 from sqlalchemy import exc
 import logging
 
 from config.settings import db
 
-from services.auth_utils import auth_required
-
 from modules.users.models import User
-from modules.users.repository import userRepository
+from modules.users.repository import UserRepository
 
 from services.HttpErrors import InternalServerError
 from services.HttpErrors import NotFound
@@ -17,10 +14,11 @@ from services.HttpErrors import UnprocessableEntity
 from services.HttpErrors import Success
 
 
-class UsersResource(Resource):
-    @staticmethod
-    @auth_required()
-    def get():
+class UsersService:
+    def __init__(self):
+        self.repository = UserRepository()
+
+    def find(self):
         headers = [
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
@@ -31,7 +29,7 @@ class UsersResource(Resource):
 
         params = request.args
 
-        items = userRepository \
+        items = self.repository \
             .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
 
         resp = {
@@ -49,16 +47,14 @@ class UsersResource(Resource):
 
         return jsonify(resp)
 
-    @staticmethod
-    @auth_required()
-    def post():
+    def create(self):
         try:
             data = request.json or request.form
             user = User(
                 name=data['name'],
                 email=data['email']
             )
-            userRepository.create(user)
+            self.repository.create(user)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -68,13 +64,9 @@ class UsersResource(Resource):
             logging.error(e)
             return InternalServerError()
 
-
-class UsersOneResource(Resource):
-    @staticmethod
-    @auth_required()
-    def get(user_id):
+    def find_one(self, user_id):
         try:
-            user = userRepository.find_one_or_fail(user_id)
+            user = self.repository.find_one_or_fail(user_id)
 
             if not user:
                 return NotFound(message='User not found')
@@ -89,17 +81,15 @@ class UsersOneResource(Resource):
             print(e)
             return InternalServerError()
 
-    @staticmethod
-    @auth_required()
-    def patch(user_id):
+    def edit(self, user_id):
         try:
             data = request.json
-            user = userRepository.get(user_id)
+            user = self.repository.get(user_id)
 
             if not user:
                 return NotFound()
 
-            userRepository.update(user, data)
+            self.repository.update(user, data)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -109,29 +99,23 @@ class UsersOneResource(Resource):
             logging.error(e)
             return InternalServerError()
 
-    @staticmethod
-    @auth_required()
-    def delete(user_id):
+    def delete(self, user_id):
         try:
-            user = userRepository.get(user_id)
+            user = self.repository.get(user_id)
 
             if not user:
                 return NotFound()
 
-            userRepository.remove(user)
+            self.repository.remove(user)
             db.session.commit()
             return Success()
         except Exception as e:
             logging.error(e)
             return InternalServerError()
 
-
-class UsersListResource(Resource):
-    @staticmethod
-    @auth_required()
-    def get():
+    def get_list(self):
         try:
-            return userRepository.list()
+            return self.repository.list()
         except Exception as e:
             logging.error(e)
             return InternalServerError()
