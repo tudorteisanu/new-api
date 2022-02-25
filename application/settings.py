@@ -6,10 +6,10 @@ from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
-from config.flask_config import FlaskConfig
+from application.config import FlaskConfig
 from flask_login import LoginManager
 # import redis as Redis
-from services.logs import init_logging
+from services.logs.logs import init_logging
 
 app = Flask(__name__, template_folder='../templates', static_folder="../static")
 app.config.from_object(FlaskConfig)
@@ -28,8 +28,9 @@ ma = Marshmallow(app)
 def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
+    import application.urls
+    init_logging(app)
 
-    import urls
     return app
 
 # redis = Redis.StrictRedis(host='127.0.0.1', port=6379, db=2)

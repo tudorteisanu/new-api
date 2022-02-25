@@ -3,14 +3,12 @@ import logging
 
 from flask import request, url_for
 from flask import redirect
-from flask_restful import Resource
 from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
 from flask_login import current_user
 
-from config.flask_config import FlaskConfig
-from config.settings import db
-from config.settings import login_manager
+from application import FlaskConfig
+from application import db
 
 from services.mail.mail import send_email_link
 from services.mail.mail import send_forgot_password_email
@@ -28,11 +26,11 @@ from modules.auth.serializer import ResetPasswordSerializer
 from modules.auth.serializer import ConfirmEmailSerializer
 from modules.auth.serializer import CheckResetTokenSerializer
 
-from services.HttpErrors import UnprocessableEntity
-from services.HttpErrors import NotFound
-from services.HttpErrors import UnauthorizedError
-from services.HttpErrors import InternalServerError
-from services.HttpErrors import Success
+from services.http.errors import UnprocessableEntity
+from services.http.errors import NotFound
+from services.http.errors import UnauthorizedError
+from services.http.errors import InternalServerError
+from services.http.errors import Success
 
 
 
@@ -327,13 +325,3 @@ class AuthService:
     @staticmethod
     def parse_minutes(seconds):
         return f"{seconds // 60:02d}:{seconds % 60:02d}"
-
-    @staticmethod
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(user_id)
-
-    @staticmethod
-    @login_manager.unauthorized_handler
-    def unauthorized():
-        return redirect(url_for('login'))

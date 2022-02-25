@@ -1,6 +1,6 @@
 # utf-8
 from flask_restful import Resource
-from services.auth_utils import auth_required
+from services.http.auth_utils import auth_required
 from modules.auth.service import AuthService
 
 

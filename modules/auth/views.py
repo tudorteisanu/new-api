@@ -1,5 +1,5 @@
 from flask import render_template, redirect
-from config.settings import app
+from application import app
 from flask_login import login_required, logout_user, current_user
 
 

@@ -1,28 +1,28 @@
-from modules.users.models import User
+from modules.position.models import Position
 from application import db
 
 
-class UserRepository(User):
+class PositionRepository(Position):
     def find(self, **kwargs):
         return self.query.filter_by(**kwargs).all()
 
-    def get(self, user_id):
-        return self.query.get(user_id)
+    def get(self, model_id):
+        return self.query.get(model_id)
 
     def find_one(self, **kwargs):
         return self.query.filter_by(**kwargs).first()
 
-    def find_one_or_fail(self, user_id):
-        return self.query.get(user_id)
+    def find_one_or_fail(self, model_id):
+        return self.query.get(model_id)
 
     @staticmethod
-    def remove(user):
-        db.session.delete(user)
+    def remove(model):
+        db.session.delete(model)
         return True
 
     @staticmethod
-    def create(user):
-        db.session.add(user)
+    def create(model):
+        db.session.add(model)
         return True
 
     def paginate(self, page, per_page):
@@ -37,5 +37,6 @@ class UserRepository(User):
         return model
 
     def list(self):
-        return [{"value": item.id, "text": item.name, "email": item.email} for item in self.query.all()]
+
+        return [{"value": item.id, "text": item.name_ru} for item in self.query.all()]
 

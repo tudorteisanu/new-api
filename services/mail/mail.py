@@ -1,7 +1,7 @@
 import logging
 from threading import Thread
 
-from config.settings import app
+from application import app
 from flask_mail import Message
 from flask_mail import Mail
 from flask import render_template

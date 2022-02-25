@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from services.auth_utils import auth_required
+from services.http.auth_utils import auth_required
 from modules.users.service import UsersService
 
 
@@ -30,7 +30,7 @@ class UsersOneResource(Resource):
 
     @auth_required()
     def delete(self, user_id):
-        return self.delete(user_id)
+        return self.service.delete(user_id)
 
 
 class UsersListResource(Resource):

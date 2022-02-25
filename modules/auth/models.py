@@ -1,4 +1,4 @@
-from config.settings import db
+from application import db
 from datetime import datetime as dt
 
 

@@ -1,4 +1,4 @@
-from config.settings import api
+from application import api
 from modules.auth.resource import LoginResource
 from modules.auth.resource import LogoutResource
 from modules.auth.resource import RegisterResource
@@ -17,6 +17,5 @@ api.add_resource(ResetPasswordResource, '/auth/reset_password')
 api.add_resource(ChangePasswordResource, '/auth/change_password')
 api.add_resource(ConfirmEmailResource, '/auth/activate')
 api.add_resource(CheckResetTokenResource, '/auth/check_reset_token')
-api.add_resource(ReadUserResource, '/users/<user_id>/read')
+api.add_resource(ReadUserResource, '/users/<model_id>/read')
 
-import modules.auth.views

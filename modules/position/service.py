@@ -5,8 +5,8 @@ import logging
 
 from application import db
 
-from modules.users.models import User
-from modules.users.repository import UserRepository
+from modules.position.models import Position
+from modules.position.repository import PositionRepository
 
 from services.http.errors import InternalServerError
 from services.http.errors import NotFound
@@ -14,17 +14,16 @@ from services.http.errors import UnprocessableEntity
 from services.http.errors import Success
 
 
-class UsersService:
+class PositionService:
     def __init__(self):
-        self.repository = UserRepository()
+        self.repository = PositionRepository()
 
     def find(self):
         headers = [
             {"value": "id", "text": "ID"},
-            {"value": "name", "text": 'Name'},
-            {"value": "email", "text": "Email"},
-            {"value": "role", "text": "Role"},
-            {"value": "is_active", "text": "Active"}
+            {"value": "name_ro", "text": 'Name RO'},
+            {"value": "name_en", "text": 'Name EN'},
+            {"value": "name_ru", "text": 'Name RU'},
         ]
 
         params = request.args
@@ -35,10 +34,10 @@ class UsersService:
         resp = {
             "items": [
                 {
-                    "name": item.name,
-                    "email": item.email,
+                    "name_ro": item.name_ro,
+                    "name_en": item.name_en,
+                    "name_ru": item.name_ru,
                     "id": item.id,
-                    "role": item.role
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
@@ -50,9 +49,10 @@ class UsersService:
     def create(self):
         try:
             data = request.json or request.form
-            user = User(
-                name=data['name'],
-                email=data['email']
+            user = Position(
+                name_ro=data['name_ro'],
+                name_en=data['name_en'],
+                name_ru=data['name_ru']
             )
             self.repository.create(user)
             db.session.commit()
@@ -69,12 +69,12 @@ class UsersService:
             user = self.repository.find_one_or_fail(user_id)
 
             if not user:
-                return NotFound(message='User not found')
+                return NotFound(message='Position not found')
 
             return {
-                "name": user.name,
-                "email": user.email,
-                "role": user.role,
+                "name_ro": user.name_ro,
+                "name_en": user.name_en,
+                "name_ru": user.name_ru,
                 "id": user.id
             }
         except Exception as e:
@@ -99,14 +99,14 @@ class UsersService:
             logging.error(e)
             return InternalServerError()
 
-    def delete(self, user_id):
+    def delete(self, model_id):
         try:
-            user = self.repository.get(user_id)
+            model = self.repository.get(model_id)
 
-            if not user:
+            if not model:
                 return NotFound()
 
-            self.repository.remove(user)
+            self.repository.remove(model)
             db.session.commit()
             return Success()
         except Exception as e:
