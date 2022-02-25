@@ -3,7 +3,7 @@ from flask import jsonify
 from sqlalchemy import exc
 import logging
 
-from app import db
+from api import db
 
 from modules.users.models import User
 from modules.users.repository import UserRepository

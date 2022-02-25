@@ -1,4 +1,4 @@
-from app import api
+from api import api
 from modules.position.resource import PositionResource
 from modules.position.resource import PositionOneResource
 from modules.position.resource import PositionListResource

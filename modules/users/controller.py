@@ -1,4 +1,4 @@
-from app import api
+from api import api
 from modules.users.resource import UsersResource
 from modules.users.resource import UsersOneResource
 from modules.users.resource import UsersListResource

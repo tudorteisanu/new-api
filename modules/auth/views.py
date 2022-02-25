@@ -1,5 +1,5 @@
 from flask import render_template, redirect
-from app import app
+from api import app
 from flask_login import login_required, logout_user, current_user
 
 
@@ -24,7 +24,7 @@ def forgot_password():
     return render_template('forgot_password.html')
 
 
-@app.route('/reset_password')
+@api.route('/reset_password')
 def reset_password():
     return render_template('reset_password.html')
 

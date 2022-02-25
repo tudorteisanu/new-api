@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_jwt_extended import JWTManager
-from app.config import FlaskConfig
+from api.config import FlaskConfig
 
 
 app = Flask(__name__, template_folder='../templates', static_folder="../static")
@@ -16,10 +16,5 @@ jwt = JWTManager(app)
 CORS(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+db.init_app(app)
 
-
-def create_app():
-    db.init_app(app)
-    migrate.init_app(app, db)
-    import app.urls
-    return app

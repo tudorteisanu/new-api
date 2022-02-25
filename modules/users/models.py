@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from app import db
+from api import db
 from datetime import datetime as dt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
@@ -61,5 +61,4 @@ class User(UserMixin, db.Model):
     def remove_token(self):
         user_token = UserAuthTokens()
         user_token = user_token.query.filtter_by(user_id=self.id).first()
-        user_token.access_token=None
-
+        user_token.access_token = None

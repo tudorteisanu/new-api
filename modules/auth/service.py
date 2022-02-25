@@ -1,14 +1,13 @@
 # utf-8
 import logging
 
-from flask import request, url_for
-from flask import redirect
+from flask import request
 from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
 from flask_login import current_user
 
-from app import FlaskConfig
-from app import db
+from api import FlaskConfig
+from api import db
 
 from services.mail.mail import send_email_link
 from services.mail.mail import send_forgot_password_email
@@ -125,6 +124,7 @@ class AuthService:
             new_user.hash_password(data['password'])
             new_user.create_access_token()
 
+            print(new_user)
             token = generate_confirmation_token(new_user.email)
 
             send_email_link(new_user.email,
@@ -141,6 +141,7 @@ class AuthService:
             return Success(data=response)
         except Exception as e:
             db.session.rollback()
+            print(e)
             logging.error(e)
             return InternalServerError()
 
@@ -214,7 +215,7 @@ class AuthService:
 
         if user.reset_password_at is not None and user.reset_password_at > datetime.now():
             difference = user.reset_password_at - datetime.now()
-            time = parse_minutes(difference.seconds)
+            time = self.parse_minutes(difference.seconds)
             message = f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить повторно через {time}"
             return UnprocessableEntity(message=message)
 
