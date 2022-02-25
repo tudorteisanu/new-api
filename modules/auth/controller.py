@@ -1,4 +1,4 @@
-from application import api
+from app import api
 from modules.auth.resource import LoginResource
 from modules.auth.resource import LogoutResource
 from modules.auth.resource import RegisterResource

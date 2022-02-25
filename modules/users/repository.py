@@ -1,5 +1,5 @@
 from modules.users.models import User
-from application import db
+from app import db
 
 
 class UserRepository(User):

@@ -1,5 +1,5 @@
 from modules.position.models import Position
-from application import db
+from app import db
 
 
 class PositionRepository(Position):

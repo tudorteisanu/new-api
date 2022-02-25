@@ -3,7 +3,7 @@ from flask import jsonify
 from sqlalchemy import exc
 import logging
 
-from application import db
+from app import db
 
 from modules.position.models import Position
 from modules.position.repository import PositionRepository

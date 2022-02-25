@@ -7,8 +7,8 @@ from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
 from flask_login import current_user
 
-from application import FlaskConfig
-from application import db
+from app import FlaskConfig
+from app import db
 
 from services.mail.mail import send_email_link
 from services.mail.mail import send_forgot_password_email
