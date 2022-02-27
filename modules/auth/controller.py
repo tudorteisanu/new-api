@@ -9,13 +9,15 @@ from modules.auth.resource import ConfirmEmailResource
 from modules.auth.resource import CheckResetTokenResource
 from modules.auth.resource import ReadUserResource
 
-api.add_resource(LoginResource, '/auth/login')
-api.add_resource(LogoutResource, '/auth/logout')
-api.add_resource(RegisterResource, '/auth/register')
-api.add_resource(ForgotPasswordResource, '/auth/forgot_password')
-api.add_resource(ResetPasswordResource, '/auth/reset_password')
-api.add_resource(ChangePasswordResource, '/auth/change_password')
-api.add_resource(ConfirmEmailResource, '/auth/activate')
-api.add_resource(CheckResetTokenResource, '/auth/check_reset_token')
+resource = '/auth'
+
+api.add_resource(LoginResource, f'{resource}/login')
+api.add_resource(LogoutResource, f'{resource}/logout')
+api.add_resource(RegisterResource, f'{resource}/register')
+api.add_resource(ForgotPasswordResource, f'{resource}/forgot_password')
+api.add_resource(ResetPasswordResource, f'{resource}/reset_password')
+api.add_resource(ChangePasswordResource, f'{resource}/change_password')
+api.add_resource(ConfirmEmailResource, f'{resource}/activate')
+api.add_resource(CheckResetTokenResource, f'{resource}/check_reset_token')
 api.add_resource(ReadUserResource, '/users/<model_id>/read')
 

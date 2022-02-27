@@ -37,6 +37,5 @@ class PositionRepository(Position):
         return model
 
     def list(self):
-
         return [{"value": item.id, "text": item.name_ru} for item in self.query.all()]
 

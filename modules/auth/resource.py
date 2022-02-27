@@ -32,8 +32,9 @@ class ReadUserResource(Resource):
     def __init__(self):
         self.service = AuthService()
 
-    def get(self, user_id):
-        return self.service.read(user_id)
+    @auth_required()
+    def get(self, model_id):
+        return self.service.read(model_id)
 
 
 class LogoutResource(Resource):

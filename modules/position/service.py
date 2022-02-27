@@ -93,9 +93,11 @@ class PositionService:
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
+            db.session.rollback()
             logging.error(e)
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
         except Exception as e:
+            db.session.rollback()
             logging.error(e)
             return InternalServerError()
 
@@ -111,6 +113,7 @@ class PositionService:
             return Success()
         except Exception as e:
             logging.error(e)
+            db.session.rollback()
             return InternalServerError()
 
     def get_list(self):

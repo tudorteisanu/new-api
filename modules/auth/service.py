@@ -2,10 +2,8 @@
 import logging
 
 from flask import request
-from flask_login import logout_user, login_user
 from datetime import datetime, timedelta
-from flask_login import current_user
-
+from flask import g
 from api import FlaskConfig
 from api import db
 
@@ -32,76 +30,81 @@ from services.http.errors import InternalServerError
 from services.http.errors import Success
 
 
-
 class AuthService:
     def __init__(self):
         self.repository = UserRepository()
         self.request = request
 
     def login(self):
-        data = self.request.json
-        serializer = LoginSerializer(data)
+        try:
+            data = self.request.json
+            serializer = LoginSerializer(data)
 
-        if not serializer.is_valid():
-            return UnprocessableEntity(errors=serializer.errors)
+            if not serializer.is_valid():
+                return UnprocessableEntity(errors=serializer.errors)
 
-        user = self.repository.find_one(email=data['email'])
+            user = self.repository.find_one(email=data['email'])
 
-        if not user:
-            return NotFound()
-
-        if user.login_blocked_time:
-            if user.login_blocked_time > datetime.now():
-                difference = user.login_blocked_time - datetime.now()
-                message = f"Возможность входа в аккаунт временно заблокированно. Осталось времени блокировки: {parse_minutes(difference.seconds)}."
-                return UnprocessableEntity(message=message)
-            else:
-                user.update({
-                    "login_attempts": 3,
-                    "login_blocked_time": None
-                })
-
-        if user.check_password(data['password']):
-            if not user.confirmed_at:
-                return UnprocessableEntity(message='User not confirmed')
-
-            if not user.is_active:
+            if not user:
                 return NotFound()
 
-            user.create_token()
-            login_user(user)
+            if user.login_blocked_time:
+                if user.login_blocked_time > datetime.now():
+                    difference = user.login_blocked_time - datetime.now()
+                    message = f"Возможность входа в аккаунт временно заблокированно." \
+                              f" Осталось времени блокировки: {self.parse_minutes(difference.seconds)}."
+                    return UnprocessableEntity(message=message)
+                else:
+                    self.repository.update(user, {
+                        "login_attempts": 3,
+                        "login_blocked_time": None
+                    })
 
-            if user.login_attempts != 3:
-                self.repository.update(user, {
-                    "login_attempts": 3
-                })
+            if user.check_password(data['password']):
+                if not user.confirmed_at:
+                    return UnprocessableEntity(message='User not confirmed')
 
-            if user.reset_password_at:
-                self.repository.update(user, {
-                    "reset_password_at": None,
-                    "reset_code": None
-                })
+                if not user.is_active:
+                    return NotFound()
 
-            db.session.commit()
+                user.create_token()
+                # login_user(user)
 
-            response = {
-                "user": {
-                    "id": user.id,
-                    "name": user.name,
-                    "email": user.email
-                },
-                "token": user.token.access_token
-            }
+                if user.login_attempts != 3:
+                    self.repository.update(user, {
+                        "login_attempts": 3
+                    })
 
-            return Success(data=response)
-        else:
-            user.login_attempts = user.login_attempts - 1
+                if user.reset_password_at:
+                    self.repository.update(user, {
+                        "reset_password_at": None,
+                        "reset_code": None
+                    })
 
-            if user.login_attempts == 0:
-                user.login_blocked_time = datetime.now() + timedelta(minutes=15)
-            message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
-            db.session.commit()
-            return UnprocessableEntity(message=message)
+                db.session.commit()
+
+                response = {
+                    "user": {
+                        "id": user.id,
+                        "name": user.name,
+                        "email": user.email
+                    },
+                    "token": user.token.access_token
+                }
+
+                return Success(data=response)
+            else:
+                user.login_attempts = user.login_attempts - 1
+
+                if user.login_attempts == 0:
+                    user.login_blocked_time = datetime.now() + timedelta(minutes=15)
+                message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
+                db.session.commit()
+                return UnprocessableEntity(message=message)
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            return InternalServerError()
 
     def register(self):
         try:
@@ -164,7 +167,7 @@ class AuthService:
             if user.confirmed_at:
                 return NotFound()
 
-            user.update({
+            user.update(user, {
                 "confirmed_at": datetime.now().isoformat(),
                 "is_active": True
             })
@@ -176,24 +179,41 @@ class AuthService:
                 "name": user.name
             })
 
+            db.session.commit()
             return Success()
 
         except Exception as e:
-            print(e)
+            db.session.rollback()
+            logging.error(e)
             return InternalServerError()
 
     def read(self, user_id):
         try:
-            return Success()
+            if not g.user:
+                return NotFound()
+
+            user = self.repository.get(user_id)
+
+            if not user:
+                return NotFound(message="User not found")
+
+            if g.user.id != user.id:
+                return NotFound()
+
+            response = {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name
+            }
+            return Success(data=response)
         except Exception as e:
             print(e)
             return InternalServerError()
 
     def logout(self):
         try:
-            user = self.repository.get(current_user.id)
+            user = self.repository.find_one(id=g.user.id)
             user.remove_token()
-            logout_user()
             db.session.commit()
             return Success()
         except Exception as e:
@@ -202,58 +222,69 @@ class AuthService:
             return UnauthorizedError()
 
     def forgot_password(self):
-        data = self.request.json
-        serializer = ForgotPasswordSerializer(data)
+        try:
+            data = self.request.json
+            serializer = ForgotPasswordSerializer(data)
 
-        if not serializer.is_valid():
-            return serializer.errors, 422
+            if not serializer.is_valid():
+                return serializer.errors, 422
 
-        user = self.repository.find_one(email=data.get('email'))
+            user = self.repository.find_one(email=data.get('email'))
 
-        if not user:
-            return NotFound()
+            if not user:
+                return NotFound()
 
-        if user.reset_password_at is not None and user.reset_password_at > datetime.now():
-            difference = user.reset_password_at - datetime.now()
-            time = self.parse_minutes(difference.seconds)
-            message = f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить повторно через {time}"
-            return UnprocessableEntity(message=message)
+            if user.reset_password_at is not None and user.reset_password_at > datetime.now():
+                difference = user.reset_password_at - datetime.now()
+                time = self.parse_minutes(difference.seconds)
+                message = f"Вы уже запросили ссылку на восстановление пароля. Сможете отправить повторно через {time}"
+                return UnprocessableEntity(message=message)
 
-        token = generate_confirmation_token(user.email)
+            token = generate_confirmation_token(user.email)
 
-        send_forgot_password_email(user.email,
-                                   f'{FlaskConfig.FRONTEND_ADDRESS}/reset_password?token={token}',
-                                   user.name)
+            send_forgot_password_email(user.email,
+                                       f'{FlaskConfig.FRONTEND_ADDRESS}/reset_password?token={token}',
+                                       user.name)
 
-        self.repository.update(user,
-                               {
-                                   "reset_code": token,
-                                   "reset_password_at": datetime.now() + timedelta(minutes=5)
-                               }
-                               )
-        db.session.commit()
-        return Success()
+            self.repository.update(user,
+                                   {
+                                       "reset_code": token,
+                                       "reset_password_at": datetime.now() + timedelta(minutes=5)
+                                   }
+                                   )
+            db.session.commit()
+            return Success()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            return InternalServerError()
 
     def check_reset_token(self):
-        data = self.request.json
+        try:
+            data = self.request.json
 
-        serializer = CheckResetTokenSerializer(data)
+            serializer = CheckResetTokenSerializer(data)
 
-        if not serializer.is_valid():
-            return serializer.errors, 422
+            if not serializer.is_valid():
+                return serializer.errors, 422
 
-        token = data.get('token', None)
-        email = confirm_token(token)
+            token = data.get('token', None)
+            email = confirm_token(token)
 
-        if not email:
-            return UnprocessableEntity(message='Invalid token')
+            if not email:
+                return UnprocessableEntity(message='Invalid token')
 
-        user = self.repository.find_one(email=email)
+            user = self.repository.find_one(email=email)
 
-        if not user or not user.reset_code or user.reset_code != token:
-            return UnprocessableEntity(message='Invalid token')
+            if not user or not user.reset_code or user.reset_code != token:
+                return UnprocessableEntity(message='Invalid token')
 
-        return Success()
+            return Success()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            print(e)
+            return InternalServerError()
 
     def reset_password(self):
         try:
@@ -276,52 +307,59 @@ class AuthService:
                 return UnprocessableEntity(message='Invalid token')
 
             user.hash_password(password)
-            user.update({"reset_code": None, "is_active": True})
+            self.repository.update(user, {"reset_code": None, "is_active": True})
             send_info_email(**{
                 "subject": 'Аккаунт успешно востоновлен!',
                 "message": "Ваш Аккаунт успешно востоновлен!",
                 "recipient": user.email,
                 "name": user.name
             })
-            return Success
+            db.session.commit()
+            return Success()
         except Exception as e:
-            print(e)
+            db.session.rollback()
+            logging.error(e)
             return InternalServerError()
 
     def change_password(self):
-        data = self.request.json
-        serializer = ChangePasswordSerializer(data)
+        try:
+            data = self.request.json
+            serializer = ChangePasswordSerializer(data)
 
-        if not serializer.is_valid():
-            return serializer.errors, 422
+            if not serializer.is_valid():
+                return serializer.errors, 422
 
-        old_password = data.get('old_password', None)
-        new_password = data.get('new_password', None)
-        password_confirmation = data.get('password_confirmation', None)
+            old_password = data.get('old_password', None)
+            new_password = data.get('new_password', None)
+            password_confirmation = data.get('password_confirmation', None)
 
-        if new_password != password_confirmation:
-            return UnprocessableEntity('Passwords don\'t much')
+            if new_password != password_confirmation:
+                return UnprocessableEntity('Passwords don\'t much')
 
-        user = self.repository.get(current_user.id)
+            user = self.repository.get(g.user.id)
 
-        if not user:
-            return NotFound()
+            if not user:
+                return NotFound()
 
-        if not user.check_password(old_password):
-            return UnprocessableEntity(message='Invalid password')
+            if not user.check_password(old_password):
+                return UnprocessableEntity(message='Invalid password')
 
-        if old_password == new_password:
-            return UnprocessableEntity(message='Old password and new password should be different')
+            if old_password == new_password:
+                return UnprocessableEntity(message='Old password and new password should be different')
 
-        user.hash_password(new_password)
+            user.hash_password(new_password)
 
-        send_info_email(**{
-            "subject": 'Изменение пароля!',
-            "message": "Ваш пароль успешно изменен!",
-            "recipient": user.email,
-            "name": user.name
-        })
-        return Success()
+            send_info_email(**{
+                "subject": 'Изменение пароля!',
+                "message": "Ваш пароль успешно изменен!",
+                "recipient": user.email,
+                "name": user.name
+            })
+            return Success()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
+            return InternalServerError()
 
     @staticmethod
     def parse_minutes(seconds):
