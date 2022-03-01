@@ -309,8 +309,8 @@ class AuthService:
             user.hash_password(password)
             self.repository.update(user, {"reset_code": None, "is_active": True})
             send_info_email(**{
-                "subject": 'Аккаунт успешно востоновлен!',
-                "message": "Ваш Аккаунт успешно востоновлен!",
+                "subject": 'Аккаунт успешно восстановлен!',
+                "message": "Ваш Аккаунт успешно восстановлен!",
                 "recipient": user.email,
                 "name": user.name
             })
