@@ -1,6 +1,5 @@
 # utf-8
 import logging
-
 from flask import request
 from datetime import datetime, timedelta
 from flask import g
@@ -27,12 +26,15 @@ from src.services.http.errors import NotFound
 from src.services.http.errors import UnauthorizedError
 from src.services.http.errors import InternalServerError
 from src.services.http.errors import Success
+from src.services.localization import Locales
 
 
 class AuthService:
     def __init__(self):
         self.repository = UserRepository()
         self.request = request
+        t = Locales()
+        print(t.translate('global_labels.success'))
 
     def login(self):
         data = self.request.json

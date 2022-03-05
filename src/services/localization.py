@@ -1,30 +1,59 @@
-
+import json
+import logging
+from os import listdir, path
 from flask import g
 
 
-def translate(locale):
-    try:
-        locales_array = locale.split('.')
+class Locales:
+    dictionary = {}
 
-        module_name = locales_array[0]
-        locales = locales_array[1:]
+    def __init__(self):
+        self.get_translates()
 
-        mod = __import__(f'locales.{g.language}.{module_name}', fromlist=[f'Locales'])
-        dictionary = getattr(mod, f'{module_name.capitalize()}Locales')
+    def get_translates(self):
+        self.load_global_locales()
+        main_dir = 'src/modules'
 
-        return get_localization(dictionary.locales, locales)
+        for directory in listdir(main_dir):
+            self.load_module_locales(f'{main_dir}/{directory}/locales')
 
-    except FileNotFoundError:
-        return locale
+    def load_global_locales(self):
+        self.load_module_locales('src/locales')
 
-    except ModuleNotFoundError:
-        return locale
+    def load_module_locales(self, locale_dir):
+        if path.exists(locale_dir):
+            for item in listdir(locale_dir):
+                if item.endswith('.json'):
+                    with open(f'{locale_dir}/{item}') as file:
+                        content = json.loads(file.read())
+                        key = item.split('.')[0]
 
+                        if self.dictionary.get(key, None) is None:
+                            self.dictionary[key] = {}
+                        self.dictionary[key] = {**self.dictionary[key], **content}
 
-def get_localization(_dict, locale):
-    for key in locale:
+    def translate(self, locale, lang=None):
         try:
-            _dict = _dict[key]
-        except KeyError:
-            return locale[-1]
-    return _dict
+            locales = locale.split('.')
+            return self.get_localization(locales, lang)
+
+        except Exception as e:
+            logging.error(e)
+            print(e, 'error')
+            return locale
+
+    def get_localization(self, locale, lang):
+
+        if lang is not None:
+            language = lang
+        else:
+            language = g.language
+
+        _dict = self.dictionary[language]
+        for key in locale:
+            try:
+                _dict = _dict[key]
+                print(_dict)
+            except KeyError:
+                return locale[-1]
+        return _dict

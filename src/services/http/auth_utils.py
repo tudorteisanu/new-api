@@ -13,7 +13,7 @@ def auth_required():
         @wraps(fn)
         def f2(*args, **kwargs):
             try:
-                if request.headers.get('Authorization', None):
+                if request.headers.get('Authorization', None) is not None:
                     access_token = request.headers.get('Authorization').split(' ')[1]
                     token = decode_token(access_token)
 

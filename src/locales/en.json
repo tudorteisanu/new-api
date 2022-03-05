@@ -1,0 +1,8 @@
+{
+  "global_labels": {
+    "success": "Success"
+  },
+  "validation": {
+    "user_exists": "Utilizator cu asa email exista deja!"
+  }
+}
