@@ -69,5 +69,9 @@ class Base:
         return len(cls.errors) == 0
 
     @classmethod
+    def __call__(cls):
+        cls.errors = {}
+
+    @classmethod
     def __init__(cls, data):
         cls.data = data

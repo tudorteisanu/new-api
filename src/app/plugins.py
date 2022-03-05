@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager
 from src.app.config import FlaskConfig
 
 
-app = Flask(__name__, template_folder='../templates', static_folder="../static")
+app = Flask(__name__, template_folder='../../templates', static_folder="../static")
 app.config.from_object(FlaskConfig)
 api = Api(app, catch_all_404s=True, prefix='/api/v1')
 socketio = SocketIO(app)

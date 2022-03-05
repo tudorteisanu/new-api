@@ -1,5 +1,5 @@
 from flask import render_template, redirect
-from src import app
+from src.app import app
 from flask_login import login_required, logout_user, current_user
 
 
@@ -39,5 +39,4 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    print(current_user)
     return render_template('index.html')

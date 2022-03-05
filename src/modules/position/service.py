@@ -73,7 +73,7 @@ class PositionService:
                 "id": user.id
             }
         except Exception as e:
-            print(e)
+            logging.error(e)
             return InternalServerError()
 
     def edit(self, user_id):

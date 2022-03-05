@@ -23,7 +23,6 @@ class TeacherOneResource(Resource):
 
     @auth_required()
     def get(self, model_id):
-        print(model_id)
         return self.service.find_one(model_id)
 
     @auth_required()

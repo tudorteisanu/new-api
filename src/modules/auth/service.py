@@ -20,6 +20,7 @@ from src.modules.auth.serializer import RegisterSerializer
 from src.modules.auth.serializer import ChangePasswordSerializer
 from src.modules.auth.serializer import TokenSerializer
 from src.modules.auth.serializer import ResetPasswordSerializer
+from src.modules.auth.serializer import ForgotPasswordSerializer
 
 from src.services.http.errors import UnprocessableEntity
 from src.services.http.errors import NotFound
@@ -119,15 +120,11 @@ class AuthService:
                 email=data['email'],
                 name=data['name'],
             )
-
             self.repository.create(new_user)
 
             new_user.hash_password(data['password'])
             new_user.create_access_token()
-
-            print(new_user)
             token = generate_confirmation_token(new_user.email)
-
             send_email_link(new_user.email,
                             f'{FlaskConfig.FRONTEND_ADDRESS}/auth/email-confirmed?token={token}',
                             new_user.name)
@@ -142,7 +139,6 @@ class AuthService:
             return Success(data=response)
         except Exception as e:
             db.session.rollback()
-            print(e)
             logging.error(e)
             return InternalServerError()
 
@@ -205,7 +201,7 @@ class AuthService:
             }
             return Success(data=response)
         except Exception as e:
-            print(e)
+            logging.error(e)
             return InternalServerError()
 
     def logout(self):
@@ -222,7 +218,7 @@ class AuthService:
     def forgot_password(self):
         try:
             data = self.request.json
-            serializer = TokenSerializer(data)
+            serializer = ForgotPasswordSerializer(data)
 
             if not serializer.is_valid():
                 return serializer.errors, 422
@@ -281,7 +277,6 @@ class AuthService:
         except Exception as e:
             db.session.rollback()
             logging.error(e)
-            print(e)
             return InternalServerError()
 
     def reset_password(self):

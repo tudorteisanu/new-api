@@ -43,7 +43,7 @@ def send_email_link(email, link, recipient=''):
         my_thread = Thread(target=send_message, kwargs=data)
         my_thread.start()
     except Exception as e:
-        print(e)
+        print(e, 'email')
         logging.error(e)
 
 

@@ -2,7 +2,6 @@ from src.services.serializer import serializer
 
 
 class EmailSerializer(serializer.Base):
-    __meta__ = True
     email = serializer.String(min_length=8, max_length=256, required=True)
 
 
@@ -30,3 +29,7 @@ class ResetPasswordSerializer(serializer.Base):
 
 class TokenSerializer(serializer.Base):
     token = serializer.String(required=True)
+
+
+class ForgotPasswordSerializer(serializer.Base):
+    email = serializer.String(required=True)

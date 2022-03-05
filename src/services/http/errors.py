@@ -18,7 +18,7 @@ class BaseError:
             return {"message": self.message}, self.status
 
 
-class Success:
+class SuccessResponse:
     status = 200
     data = None
     message = 'Success'
@@ -71,4 +71,4 @@ NotFound = NotFoundError()
 InternalServerError = InternalServerError()
 ForbiddenError = ForbiddenError()
 UnauthorizedError = UnauthorizedError()
-Success = Success()
+Success = SuccessResponse()

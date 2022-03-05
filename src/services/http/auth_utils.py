@@ -32,7 +32,6 @@ def auth_required():
 
             except Exception as e:
                 logging.error(e)
-                print(e)
                 return {"message": "Invalid token"}, 422
             return fn(*args, **kwargs)
 
