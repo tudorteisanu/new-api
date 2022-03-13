@@ -4,24 +4,22 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.users.models import User
-from src.modules.users.repository import UserRepository
+from src.modules.permissions.models import Permission
+from src.modules.permissions.repository import PermissionRepository
+from src.modules.permissions.serializer import CreatePermissionSerializer
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
-from src.modules.users.serializer import CreateUserSerializer
 
 
-class UsersService:
+class PermissionService:
     def __init__(self):
-        self.repository = UserRepository()
+        self.repository = PermissionRepository()
 
     def find(self):
         headers = [
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
-            {"value": "email", "text": "Email"},
-            {"value": "role", "text": "Role"},
-            {"value": "is_active", "text": "Active"}
+            {"value": "alias", "text": "Alias"}
         ]
 
         params = request.args
@@ -33,9 +31,8 @@ class UsersService:
             "items": [
                 {
                     "name": item.name,
-                    "email": item.email,
-                    "id": item.id,
-                    "role": item.role
+                    "alias": item.alias,
+                    "id": item.id
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
@@ -47,14 +44,14 @@ class UsersService:
     def create(self):
         try:
             data = request.json
-            serializer = CreateUserSerializer(data)
+            serializer = CreatePermissionSerializer(data)
 
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            user = User(
+            user = Permission(
                 name=data['name'],
-                email=data['email']
+                alias=data['alias']
             )
             self.repository.create(user)
             db.session.commit()
@@ -71,12 +68,11 @@ class UsersService:
             user = self.repository.find_one_or_fail(user_id)
 
             if not user:
-                return NotFound(message='User not found')
+                return NotFound(message='Permission not found')
 
             return {
                 "name": user.name,
-                "email": user.email,
-                "role": user.role,
+                "alias": user.alias,
                 "id": user.id
             }
         except Exception as e:

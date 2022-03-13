@@ -1,0 +1,11 @@
+{
+  "roles": {
+    "fields": {
+      "id": "ID",
+      "name": "Nume"
+    },
+    "validation": {
+      "user_exists": "Utilizator cu asa email exista deja!"
+    }
+  }
+}

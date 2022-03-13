@@ -1,14 +1,11 @@
-from flask_simple_serializer.serializers import Serializer
-from flask_simple_serializer import StringField, EmailField, validators
+from src.services.serializer import serializer
 
 
-class UserSerializer(Serializer):
-    name = StringField('Name', [validators.InputRequired(), validators.Length(min=4, max=150)])
-
-
-class CreateUserSerializer(Serializer):
-    email = EmailField('email', [validators.InputRequired(), validators.Length(min=4, max=25)])
-    password = StringField('password', [validators.InputRequired(), validators.Length(min=8, max=256)])
-    name = StringField('name', [validators.InputRequired(), validators.Length(min=4, max=150)])
-
+class CreateCourseSerializer(serializer.Base):
+    credits = serializer.Number(min_value=0, max_value=256)
+    description = serializer.String(min_length=10, max_length=256)
+    name = serializer.String(min_length=10, max_length=256)
+    start_date = serializer.String(required=True)
+    end_date = serializer.String(required=True)
+    teacher_id = serializer.Number(required=True)
 

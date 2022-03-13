@@ -1,14 +1,8 @@
-from flask_simple_serializer.serializers import Serializer
-from flask_simple_serializer import StringField, EmailField, validators
+from src.services.serializer import serializer
 
 
-class UserSerializer(Serializer):
-    name = StringField('Name', [validators.InputRequired(), validators.Length(min=4, max=150)])
-
-
-class CreateUserSerializer(Serializer):
-    email = EmailField('email', [validators.InputRequired(), validators.Length(min=4, max=25)])
-    password = StringField('password', [validators.InputRequired(), validators.Length(min=8, max=256)])
-    name = StringField('name', [validators.InputRequired(), validators.Length(min=4, max=150)])
-
+class CreateUserSerializer(serializer.Base):
+    email = serializer.String(min_length=2, max_length=150, required=True)
+    name = serializer.String(min_length=2, max_length=150, required=True)
+    role = serializer.String(min_length=2, max_length=150, required=True)
 

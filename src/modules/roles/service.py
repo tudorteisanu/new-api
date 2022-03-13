@@ -4,24 +4,23 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.users.models import User
-from src.modules.users.repository import UserRepository
+from src.modules.roles.models import Role, RolePermissions
+from src.modules.roles.repository import RoleRepository, RolePermissionsRepository
+from src.modules.roles.serializer import CreateRoleSerializer
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
-from src.modules.users.serializer import CreateUserSerializer
 
 
-class UsersService:
+class RoleService:
     def __init__(self):
-        self.repository = UserRepository()
+        self.repository = RoleRepository()
+        self.rolePermission = RolePermissionsRepository()
 
     def find(self):
         headers = [
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
-            {"value": "email", "text": "Email"},
-            {"value": "role", "text": "Role"},
-            {"value": "is_active", "text": "Active"}
+            {"value": "alias", "text": "Alias"}
         ]
 
         params = request.args
@@ -33,9 +32,8 @@ class UsersService:
             "items": [
                 {
                     "name": item.name,
-                    "email": item.email,
-                    "id": item.id,
-                    "role": item.role
+                    "alias": item.alias,
+                    "id": item.id
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
@@ -47,14 +45,14 @@ class UsersService:
     def create(self):
         try:
             data = request.json
-            serializer = CreateUserSerializer(data)
+            serializer = CreateRoleSerializer(data)
 
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            user = User(
+            user = Role(
                 name=data['name'],
-                email=data['email']
+                alias=data['alias']
             )
             self.repository.create(user)
             db.session.commit()
@@ -71,12 +69,11 @@ class UsersService:
             user = self.repository.find_one_or_fail(user_id)
 
             if not user:
-                return NotFound(message='User not found')
+                return NotFound(message='Role not found')
 
             return {
                 "name": user.name,
-                "email": user.email,
-                "role": user.role,
+                "alias": user.alias,
                 "id": user.id
             }
         except Exception as e:
@@ -118,6 +115,35 @@ class UsersService:
     def get_list(self):
         try:
             return self.repository.list()
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    def update_permissions(self, model_id):
+        try:
+            data = request.json
+            old_permissions = self.rolePermission.get_permissions(model_id)
+
+            for item in old_permissions:
+                if item not in data['permissions']:
+                    self.rolePermission.remove(item)
+
+            for item in data['permissions']:
+                if not self.rolePermission.get(item):
+                    perm = RolePermissions()
+                    perm.role_id = model_id
+                    perm.permission_id = item
+                    self.rolePermission.create(perm)
+
+            db.session.commit()
+            return Success()
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    def get_permissions(self, model_id):
+        try:
+            return self.rolePermission.get_permissions(model_id)
         except Exception as e:
             logging.error(e)
             return InternalServerError()
