@@ -29,10 +29,11 @@ class Base:
                             cls.errors[field] = ['Must be a list of items']
                             return
 
-                        if type(obj.data) == dict and obj.data.get(item, None) is None:
-                            has_error = True
-                        elif type(obj.data[item]) == list and len(obj.data[item]) == 0 or not obj.data[item]:
-                            has_error = True
+                        if type(obj.data) == dict:
+                            if obj.data.get(item, None) is None:
+                                has_error = True
+                            elif type(obj.data[item]) == list and len(obj.data[item]) == 0 or not obj.data[item]:
+                                has_error = True
                         elif (type(obj.data) == str or type(obj.data) == int) and not obj.data:
                             has_error = True
 
@@ -47,6 +48,8 @@ class Base:
 
                             for idx, el in enumerate(obj.data[item]):
                                 child = serializer
+                                if not child:
+                                    return
                                 setattr(child, "data", el)
                                 cls.validate(child, field, index=idx)
 

@@ -20,6 +20,12 @@ class BaseError:
             return {"message": self.message}, self.status
 
 
+    def __del__(self):
+        self.data = None
+        self.message = 'Success'
+        self.status = 200
+
+
 class SuccessResponse:
     status = 200
     data = None
@@ -37,6 +43,10 @@ class SuccessResponse:
             return {"message": self.message}, self.status
 
         return self.data, self.status
+
+    def __del__(self):
+        self.data = None
+        self.message = 'Success'
 
 
 class UnprocessableEntityError(BaseError):
@@ -71,6 +81,6 @@ class InternalServerError(BaseError):
 UnprocessableEntity = UnprocessableEntityError()
 NotFound = NotFoundError()
 InternalServerError = InternalServerError()
-ForbiddenError = ForbiddenError()
+Forbidden = ForbiddenError()
 UnauthorizedError = UnauthorizedError()
 Success = SuccessResponse()

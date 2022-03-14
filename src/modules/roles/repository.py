@@ -44,6 +44,9 @@ class RolePermissionsRepository(RolePermissions):
     def find_one(self, **kwargs):
         return self.query.filter_by(**kwargs).first()
 
+    def find(self, **kwargs):
+        return self.query.filter_by(**kwargs).all()
+
     def get(self, model_id):
         return self.query.get(model_id)
 

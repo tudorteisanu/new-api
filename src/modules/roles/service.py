@@ -1,3 +1,5 @@
+from json import dumps
+
 from flask import request
 from flask import jsonify
 from sqlalchemy import exc
@@ -5,16 +7,28 @@ import logging
 
 from src.app import db
 from src.modules.roles.models import Role, RolePermissions
+from src.modules.permissions.models import Permission
 from src.modules.roles.repository import RoleRepository, RolePermissionsRepository
-from src.modules.roles.serializer import CreateRoleSerializer
+from src.modules.roles.serializer import CreateRoleSerializer, PermissionsSerializer
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+
+
+def save_permissions_to_file():
+    roles = Role.query.all()
+    perms = {}
+
+    for role in roles:
+        permissions_ids = [item.permission_id for item in role.permissions]
+        perms[role.alias] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
+
+    with open("config/permissions.json", "w") as f:
+        f.write(dumps(perms))
 
 
 class RoleService:
     def __init__(self):
         self.repository = RoleRepository()
-        self.rolePermission = RolePermissionsRepository()
 
     def find(self):
         headers = [
@@ -119,23 +133,34 @@ class RoleService:
             logging.error(e)
             return InternalServerError()
 
+
+class RolePermissionsService:
+    def __init__(self):
+        self.repository = RolePermissionsRepository()
+
     def update_permissions(self, model_id):
         try:
             data = request.json
-            old_permissions = self.rolePermission.get_permissions(model_id)
+            serializer = PermissionsSerializer(data)
+
+            if not serializer.is_valid():
+                return UnprocessableEntity(errors=serializer.errors)
+
+            old_permissions = self.repository.find(role_id=model_id)
 
             for item in old_permissions:
                 if item not in data['permissions']:
-                    self.rolePermission.remove(item)
+                    self.repository.remove(item)
 
             for item in data['permissions']:
-                if not self.rolePermission.get(item):
+                if not self.repository.get(item):
                     perm = RolePermissions()
                     perm.role_id = model_id
                     perm.permission_id = item
-                    self.rolePermission.create(perm)
+                    self.repository.create(perm)
 
             db.session.commit()
+            save_permissions_to_file()
             return Success()
         except Exception as e:
             logging.error(e)
@@ -143,7 +168,9 @@ class RoleService:
 
     def get_permissions(self, model_id):
         try:
-            return self.rolePermission.get_permissions(model_id)
+            return [
+                item.permission_id for item in self.repository.find(role_id=model_id)
+            ]
         except Exception as e:
             logging.error(e)
             return InternalServerError()

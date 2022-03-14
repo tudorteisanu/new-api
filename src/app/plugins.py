@@ -1,4 +1,5 @@
 from flask import Flask
+from flask.views import MethodView
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_cors import CORS
@@ -26,3 +27,7 @@ def before_request_func():
         g.language = request.headers.get('x-localization')
     else:
         g.language = 'en'
+
+
+
+

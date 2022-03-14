@@ -29,6 +29,7 @@ def auth_required():
                         return {"message": "Unauthorized"}, 401
 
                     g.user = user
+                    request.__setattr__('user', user)
 
             except Exception as e:
                 logging.error(e)
