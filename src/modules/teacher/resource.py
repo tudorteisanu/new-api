@@ -9,11 +9,11 @@ from src.services.http.errors import InternalServerError
 
 
 class TeacherResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = TeacherService()
         self.permissions = Permissions.index
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()
@@ -24,6 +24,7 @@ class TeacherResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def post(self):
         try:
             self.apply_permissions()
@@ -36,11 +37,11 @@ class TeacherResource(BaseResource):
 
 
 class TeacherOneResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = TeacherService()
         self.permissions = Permissions.self
 
+    @auth_required()
     def get(self, model_id):
         try:
             self.apply_permissions()
@@ -51,6 +52,7 @@ class TeacherOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def patch(self, model_id):
         try:
             self.apply_permissions()
@@ -61,6 +63,7 @@ class TeacherOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def delete(self, model_id):
         try:
             self.apply_permissions()
@@ -73,11 +76,11 @@ class TeacherOneResource(BaseResource):
 
 
 class TeacherListResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = TeacherService()
         self.permissions = Permissions.list
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()

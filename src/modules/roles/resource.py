@@ -9,14 +9,11 @@ from src.services.http.errors import InternalServerError
 
 
 class RolesResource(BaseResource):
-    @auth_required()
     def __init__(self):
-        try:
-            self.service = RoleService()
-            self.permissions = Permissions.index
-        except Exception as e:
-            logging.error(e)
+        self.service = RoleService()
+        self.permissions = Permissions.index
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()
@@ -27,6 +24,7 @@ class RolesResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def post(self):
         try:
             self.apply_permissions()
@@ -39,11 +37,11 @@ class RolesResource(BaseResource):
 
 
 class RolesOneResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = RoleService()
         self.permissions = Permissions.self
 
+    @auth_required()
     def get(self, model_id):
         try:
             self.apply_permissions()
@@ -54,6 +52,7 @@ class RolesOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def patch(self, model_id):
         try:
             self.apply_permissions()
@@ -64,6 +63,7 @@ class RolesOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def delete(self, model_id):
         try:
             self.apply_permissions()
@@ -76,11 +76,11 @@ class RolesOneResource(BaseResource):
 
 
 class RolePermissionsResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = RolePermissionsService()
         self.permissions = Permissions.permissions
 
+    @auth_required()
     def get(self, model_id):
         try:
             self.apply_permissions()
@@ -91,6 +91,7 @@ class RolePermissionsResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def put(self, model_id):
         try:
             self.apply_permissions()
@@ -103,11 +104,11 @@ class RolePermissionsResource(BaseResource):
 
 
 class RolesListResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = RoleService()
         self.permissions = Permissions.list
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()

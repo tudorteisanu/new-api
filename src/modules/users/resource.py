@@ -9,11 +9,11 @@ from src.modules.users.config.permissions import Permissions
 
 
 class UsersResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = UsersService()
         self.permissions = Permissions.index
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()
@@ -24,16 +24,24 @@ class UsersResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def post(self):
-        return self.service.create()
+        try:
+            self.apply_permissions()
+            return self.service.create()
+        except PermissionsExceptions as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
 
 
 class UsersOneResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = UsersService()
         self.permissions = Permissions.self
 
+    @auth_required()
     def get(self, model_id):
         try:
             self.apply_permissions()
@@ -44,6 +52,7 @@ class UsersOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def patch(self, model_id):
         try:
             self.apply_permissions()
@@ -54,16 +63,17 @@ class UsersOneResource(BaseResource):
             logging.error(e)
             return InternalServerError()
 
+    @auth_required()
     def delete(self, model_id):
         return self.service.delete(model_id)
 
 
 class UsersListResource(BaseResource):
-    @auth_required()
     def __init__(self):
         self.service = UsersService()
         self.permissions = Permissions.list
 
+    @auth_required()
     def get(self):
         try:
             self.apply_permissions()
