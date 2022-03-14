@@ -6,6 +6,7 @@ import logging
 from src.app import db
 from src.modules.teacher.models import Teacher
 from src.modules.teacher.repository import TeacherRepository
+from src.modules.teacher.serializer import CreateTeacherSerializer
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 
@@ -46,7 +47,12 @@ class TeacherService:
 
     def create(self):
         try:
-            data = request.json or request.form
+            data = request.json
+            serializer = CreateTeacherSerializer(data)
+
+            if not serializer.is_valid():
+                return UnprocessableEntity(errors=serializer.errors)
+
             model = Teacher(
                 first_name=data['first_name'],
                 last_name=data['last_name'],

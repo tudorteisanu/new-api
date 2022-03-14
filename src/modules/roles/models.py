@@ -12,7 +12,6 @@ class Role(db.Model):
     updated_at = db.Column(db.DateTime, default=get_timestamp)
     name = db.Column(db.String(128))
     alias = db.Column(db.String(128), unique=True, nullable=False)
-    alias2 = db.Column(db.String(128), unique=False, nullable=True)
     permissions = db.relationship("RolePermissions", cascade='all, delete, delete-orphan')
 
     def __repr__(self):
@@ -23,8 +22,8 @@ class RolePermissions(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=True)
-    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id', ondelete='CASCADE'), nullable=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id', ondelete='CASCADE'), nullable=False)
 
     def get_permissions(self, role_id):
         return self.query.filter_by(role_id=role_id).all()

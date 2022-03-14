@@ -1,18 +1,13 @@
-class RolesPermissions:
-    available = []
+class Permissions:
     index = {
-        "GET": [],
-        "POST": []
+        "GET": ['teachers.index'],
+        "POST": ['teachers.store']
     }
     self = {
-        "GET": [],
-        "PATCH": [],
-        "DELETE": []
+        "GET": ['teachers.get_one'],
+        "PATCH": ['teachers.update'],
+        "DELETE": ['teachers.delete']
     }
-    list= {
-        "GET": []
-    }
-    permissions = {
-        "GET": [],
-        "PUT": []
+    list = {
+        "GET": ['teachers.list']
     }

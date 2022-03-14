@@ -7,5 +7,5 @@ class CreateRoleSerializer(serializer.Base):
 
 
 class PermissionsSerializer(serializer.Base):
-    permissions = serializer.List()
+    permissions = serializer.List(required=True)
 

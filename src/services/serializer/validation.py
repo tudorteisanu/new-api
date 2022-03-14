@@ -3,6 +3,7 @@ from inspect import isclass
 
 
 class Base:
+    __abstract__ = True
     errors = {}
     data = None
     String = IsString()
@@ -25,8 +26,14 @@ class Base:
                     if attr.required:
                         has_error = False
 
-                        if hasattr(attr, "is_list") and attr.is_list and type(obj.data.get(item, None)) != list:
-                            cls.errors[field] = ['Must be a list of items']
+                        if obj.data is None and attr.required:
+                            cls.errors[field] = ['Required field']
+
+                        if hasattr(attr, "is_list") and attr.is_list:
+                            if obj.data.get(item, None) is None and attr.required:
+                                cls.errors[field] = ['Required field']
+                            elif type(obj.data.get(item, None)) != list:
+                                cls.errors[field] = ['Must be a list of items']
                             return
 
                         if type(obj.data) == dict:
@@ -45,6 +52,9 @@ class Base:
                     if attr and hasattr(attr, 'is_list') and getattr(attr, 'is_list'):
                         if hasattr(attr, 'serializer'):
                             serializer = getattr(attr, 'serializer')
+
+                            if obj.data.get(item, None) is None:
+                                return
 
                             for idx, el in enumerate(obj.data[item]):
                                 child = serializer

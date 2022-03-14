@@ -2,6 +2,7 @@ import os
 from json import loads
 from src.app import db, app
 from src.modules.permissions.models import Permission
+from src.modules.roles.models import Role, RolePermissions
 from src.modules.roles.service import save_permissions_to_file
 
 POSTGRES = {
@@ -34,6 +35,17 @@ def update_or_insert(perms):
             db.session.add(perm)
 
 
+def add_all_perms():
+    role = Role.query.filter_by(alias='admin').first()
+
+    if role:
+        permissions = Permission.query.all()
+
+        for item in permissions:
+            if not RolePermissions.query.filter_by(role_id=role.id, permission_id=item.id).first():
+                db.session.add(RolePermissions(role_id=role.id, permission_id=item.id))
+
+
 def check_permissions(root_dir='src/modules'):
     try:
         for item in os.listdir(root_dir):
@@ -43,6 +55,7 @@ def check_permissions(root_dir='src/modules'):
                 print(f'<{item}> permissions updated')
                 print('-'*200)
 
+        add_all_perms()
         db.session.commit()
         save_permissions_to_file()
     except Exception as e:

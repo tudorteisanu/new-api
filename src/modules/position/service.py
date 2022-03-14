@@ -6,6 +6,7 @@ import logging
 from src.app import db
 from src.modules.position.models import Position
 from src.modules.position.repository import PositionRepository
+from src.modules.position.serializer import CreatePositionSerializer
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 
 
@@ -43,7 +44,12 @@ class PositionService:
 
     def create(self):
         try:
-            data = request.json or request.form
+            data = request.json
+            serializer = CreatePositionSerializer(data)
+
+            if not serializer.is_valid():
+                return UnprocessableEntity(errors=serializer.errors)
+
             user = Position(
                 name_ro=data['name_ro'],
                 name_en=data['name_en'],

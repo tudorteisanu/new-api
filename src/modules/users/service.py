@@ -20,7 +20,7 @@ class UsersService:
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
             {"value": "email", "text": "Email"},
-            {"value": "role", "text": "Role"},
+            {"value": "roles", "text": "Roles"},
             {"value": "is_active", "text": "Active"}
         ]
 
@@ -35,7 +35,9 @@ class UsersService:
                     "name": item.name,
                     "email": item.email,
                     "id": item.id,
-                    "role": item.role
+                    "roles": [
+                        role.role_id for role in item.roles
+                    ]
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
@@ -48,7 +50,6 @@ class UsersService:
         try:
             data = request.json
             serializer = CreateUserSerializer(data)
-
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
@@ -76,7 +77,7 @@ class UsersService:
             return {
                 "name": user.name,
                 "email": user.email,
-                "role": user.role,
+                "roles": [user_role.role_id for user_role in user.roles],
                 "id": user.id
             }
         except Exception as e:

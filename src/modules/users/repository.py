@@ -1,5 +1,5 @@
 from src.app import db
-from src.modules.users.models import User
+from src.modules.users.models import User, UserRole
 
 
 class UserRepository(User):
@@ -33,7 +33,20 @@ class UserRepository(User):
     def update(model, data):
         for (key, value) in data.items():
             if hasattr(model, key):
-                setattr(model, key, value)
+                if key != 'roles':
+                    setattr(model, key, value)
+                else:
+                    for item in model.roles:
+                        if item.role_id not in data[key]:
+                            db.session.delete(item)
+
+                    for item in data[key]:
+                        user_role = UserRole.query.filter_by(user_id=model.id, role_id=item).first()
+
+                        if user_role is None:
+                            db.session.add(UserRole(user_id=model.id, role_id=item))
+
+
         return model
 
     def list(self):

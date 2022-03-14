@@ -19,7 +19,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
-    role = db.Column(db.String(12), server_default='user')
+    roles = db.relationship("UserRole", cascade='delete')
     reset_code = db.Column(db.String, server_default='')
     confirmed_at = db.Column(db.DateTime)
     login_attempts = db.Column(db.Integer, default=3)
@@ -63,3 +63,9 @@ class User(UserMixin, db.Model):
         user_token = UserAuthTokens()
         user_token = user_token.query.filtter_by(user_id=self.id).first()
         user_token.access_token = None
+
+
+class UserRole(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)

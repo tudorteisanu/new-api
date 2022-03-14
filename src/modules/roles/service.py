@@ -20,10 +20,22 @@ def save_permissions_to_file():
 
     for role in roles:
         permissions_ids = [item.permission_id for item in role.permissions]
-        perms[role.alias] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
+        perms[role.id] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
 
     with open("permissions.json", "w") as f:
         f.write(dumps(perms))
+        add_all_perms()
+
+
+def add_all_perms():
+    role = Role.query.filter_by(alias='admin').first()
+
+    if role:
+        permissions = Permission.query.all()
+
+        for item in permissions:
+            if not RolePermissions.query.filter_by(role_id=role.id, permission_id=item.id).first():
+                db.session.add(RolePermissions(role_id=role.id, permission_id=item.id))
 
 
 class RoleService:

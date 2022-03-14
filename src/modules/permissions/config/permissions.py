@@ -1,17 +1,13 @@
-class RolesPermissions:
+class Permissions:
     index = {
-        "GET": [],
-        "POST": []
+        "GET": ['permissions.index'],
+        "POST": ['permissions.store']
     }
     self = {
-        "GET": [],
-        "PATCH": [],
-        "DELETE": []
+        "GET": ['permissions.get_one'],
+        "PATCH": ['permissions.update'],
+        "DELETE": ['permissions.delete']
     }
-    list= {
-        "GET": []
-    }
-    permissions = {
-        "GET": [],
-        "PUT": []
+    list = {
+        "GET": ['permissions.list']
     }

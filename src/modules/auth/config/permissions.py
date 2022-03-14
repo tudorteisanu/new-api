@@ -1,4 +1,4 @@
-class RolesPermissions:
+class Permissions:
     available = []
     index = {
         "GET": [],
@@ -9,7 +9,7 @@ class RolesPermissions:
         "PATCH": [],
         "DELETE": []
     }
-    list= {
+    list = {
         "GET": []
     }
     permissions = {
