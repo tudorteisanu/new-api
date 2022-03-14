@@ -53,10 +53,13 @@ class UsersService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            user = User(
-                name=data['name'],
-                email=data['email']
-            )
+            user = User()
+            user.name = data['name'],
+            user.email = data['email']
+
+            if data.get('roles', None):
+                self.repository.update(user, {"roles": data['roles']})
+
             self.repository.create(user)
             db.session.commit()
             return Success()
