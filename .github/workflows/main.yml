@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - dev
+      - demo
 
 name: Deploy Flask-api dev
 
