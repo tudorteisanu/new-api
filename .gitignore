@@ -1,5 +1,4 @@
 *.pyc
-logs/
 venv/
 env/
 deploy.sh
