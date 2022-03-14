@@ -1,18 +1,9 @@
 import os
 from json import loads
-from src.app import db, app
+from src.app import db
 from src.modules.permissions.models import Permission
 from src.modules.roles.models import Role, RolePermissions
 from src.modules.roles.service import save_permissions_to_file
-
-POSTGRES = {
-    'user': 'postgres',
-    'pw': '123',
-    'db': 'api2',
-    'host': 'localhost'
-}
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
 
 
 def load_perms(path):

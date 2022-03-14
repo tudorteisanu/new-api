@@ -1,6 +1,10 @@
 from datetime import timedelta
 from os import environ
 
+from dotenv import load_dotenv
+
+load_dotenv('.env')
+
 POSTGRES = {
     'user': environ.get('PG_USER'),
     'pw': environ.get('PG_PASSWORD'),
