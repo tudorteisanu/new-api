@@ -1,5 +1,5 @@
 from src.modules.users.models import User
-
+from datetime import datetime as dt
 data = [
     {
         "name": "Tudor",
@@ -17,6 +17,8 @@ class UsersSeeder:
             user = User()
             user.name = item['name']
             user.email = item['email']
+            user.is_active = True
+            user.confirmed_at = dt.now().isoformat()
             user.password_hash = user.hash_password(item['password'])
             self.users_seeder.append(user)
 
