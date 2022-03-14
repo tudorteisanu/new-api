@@ -34,7 +34,6 @@ class AuthService:
         self.repository = UserRepository()
         self.request = request
         t = Locales()
-        print(t.translate('global_labels.success'))
 
     def login(self):
         data = self.request.json
