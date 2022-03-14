@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Positions index",
+    "alias": "positions.index"
+  },
+  {
+    "name": "Store positions",
+    "alias": "positions.store"
+  },
+  {
+    "name": "Get one position",
+    "alias": "positions.get_one"
+  },
+  {
+    "name": "Update position",
+    "alias": "positions.update"
+  },
+  {
+    "name": "Positions list",
+    "alias": "positions.list"
+  },
+  {
+    "name": "Delete position",
+    "alias": "positions.delete"
+  }
+]

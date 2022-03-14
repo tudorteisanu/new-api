@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Teachers index",
+    "alias": "teachers.index"
+  },
+  {
+    "name": "Store teachers",
+    "alias": "teachers.store"
+  },
+  {
+    "name": "Get one teacher",
+    "alias": "teachers.get_one"
+  },
+  {
+    "name": "Update teacher",
+    "alias": "teachers.update"
+  },
+  {
+    "name": "Teachers list",
+    "alias": "teachers.list"
+  },
+  {
+    "name": "Delete teacher",
+    "alias": "teachers.delete"
+  }
+]

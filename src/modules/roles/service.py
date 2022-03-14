@@ -22,7 +22,7 @@ def save_permissions_to_file():
         permissions_ids = [item.permission_id for item in role.permissions]
         perms[role.alias] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
 
-    with open("config/permissions.json", "w") as f:
+    with open("permissions.json", "w") as f:
         f.write(dumps(perms))
 
 

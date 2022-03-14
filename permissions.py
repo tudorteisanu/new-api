@@ -1,5 +1,54 @@
-from src.app import app, FlaskConfig
+import os
+from json import loads
+from src.app import db, app
 from src.modules.permissions.models import Permission
+from src.modules.roles.service import save_permissions_to_file
+
+POSTGRES = {
+    'user': 'postgres',
+    'pw': '123',
+    'db': 'api2',
+    'host': 'localhost'
+}
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
+
+
+def load_perms(path):
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = f.read()
+            return loads(data)
+    return None
+
+
+def update_or_insert(perms):
+    for item in perms:
+        perm = Permission.query.filter_by(alias=item['alias']).first()
+
+        if perm is not None:
+            perm.name = item['name']
+
+        else:
+            perm = Permission(name=item['name'], alias=item['alias'])
+            db.session.add(perm)
+
+
+def check_permissions(root_dir='src/modules'):
+    try:
+        for item in os.listdir(root_dir):
+            if os.path.exists(f'{root_dir}/{item}/config/permissions.json'):
+                perms = load_perms(f'{root_dir}/{item}/config/permissions.json')
+                update_or_insert(perms)
+                print(f'<{item}> permissions updated')
+                print('-'*200)
+
+        db.session.commit()
+        save_permissions_to_file()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+
 
 if __name__ == '__main__':
-    app.run(FlaskConfig.HOST, FlaskConfig.PORT, debug=FlaskConfig.DEBUG)
+    check_permissions()

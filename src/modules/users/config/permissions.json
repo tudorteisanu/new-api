@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Users index",
+    "alias": "users.index"
+  },
+  {
+    "name": "Store users",
+    "alias": "users.store"
+  },
+  {
+    "name": "Get one user",
+    "alias": "users.get_one"
+  },
+  {
+    "name": "Update user",
+    "alias": "users.update"
+  },
+  {
+    "name": "Users list",
+    "alias": "users.list"
+  },
+  {
+    "name": "Delete user",
+    "alias": "users.delete"
+  }
+]

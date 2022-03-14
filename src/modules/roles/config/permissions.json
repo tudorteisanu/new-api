@@ -1,1 +1,34 @@
-["roles.index"]
+[
+  {
+    "name": "Roles index",
+    "alias": "roles.index"
+  },
+  {
+    "name": "Store roles",
+    "alias": "roles.store"
+  },
+  {
+    "name": "Get one position",
+    "alias": "roles.get_one"
+  },
+  {
+    "name": "Update role",
+    "alias": "roles.update"
+  },
+  {
+    "name": "Roles list",
+    "alias": "roles.list"
+  },
+  {
+    "name": "Delete role",
+    "alias": "roles.delete"
+  },
+  {
+    "name": "Get role permissions",
+    "alias": "roles.get_permissions"
+  },
+  {
+    "name": "Update role permissions",
+    "alias": "roles.update_permissions"
+  }
+]

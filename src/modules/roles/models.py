@@ -1,24 +1,12 @@
 from src.app import db
 from datetime import datetime as dt
 
-from src.modules.permissions.models import BasePermissions
-
 
 def get_timestamp():
     return dt.now().isoformat()
 
 
-class Role(db.Model, BasePermissions):
-    class Meta:
-        permissions = [
-            ("Get all roles", 'roles.index'),
-            ("Add role", 'roles.store'),
-            ("Get one role", 'roles.get'),
-            ('Update role', 'roles.update'),
-            ('Delete role', 'roles.delete'),
-            ("ROles list", 'roles.list')
-        ]
-
+class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
@@ -31,15 +19,7 @@ class Role(db.Model, BasePermissions):
         return f'Role {self.name}({self.alias}) - {self.id}'
 
 
-class RolePermissions(db.Model, BasePermissions):
-    class Meta:
-        permissions = [
-            ("Get one role permissions", 'role_permissions.get'),
-            ('Update role permissions', 'role_permissions.update'),
-            ('Update role permissions', 'role_permissions.update2222222222'),
-            ('Update role permissions', 'role_permissions.333333333333'),
-        ]
-
+class RolePermissions(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
