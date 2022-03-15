@@ -37,3 +37,4 @@ class FlaskConfig(object):
 
     BACKEND_ADDRESS = environ.get('BACKEND_ADDRESS')
     FRONTEND_ADDRESS = environ.get('FRONTEND_ADDRESS')
+    PERMISSIONS = "config/permissions.json"

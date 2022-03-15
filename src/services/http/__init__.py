@@ -1,5 +1,4 @@
 from json import loads
-
 from flask import request
 from flask_restful import Resource
 
@@ -11,7 +10,7 @@ class BaseResource(Resource):
     permissions = {}
 
     def apply_permissions(self):
-        with open('permissions.json', 'r') as f:
+        with open("config/permissions.json", 'r') as f:
             data = loads(f.read())
 
             if not g.user or not g.user.roles:
@@ -29,3 +28,4 @@ class BaseResource(Resource):
                         return True
 
             raise PermissionsExceptions(message='Not have enough permissions')
+

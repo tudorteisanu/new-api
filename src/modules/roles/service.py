@@ -7,35 +7,11 @@ import logging
 
 from src.app import db
 from src.modules.roles.models import Role, RolePermissions
-from src.modules.permissions.models import Permission
 from src.modules.roles.repository import RoleRepository, RolePermissionsRepository
 from src.modules.roles.serializer import CreateRoleSerializer, PermissionsSerializer
+from src.services.http.permissions import save_permissions_to_file
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
-
-
-def save_permissions_to_file():
-    roles = Role.query.all()
-    perms = {}
-
-    for role in roles:
-        permissions_ids = [item.permission_id for item in role.permissions]
-        perms[role.id] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
-
-    with open("permissions.json", "w") as f:
-        f.write(dumps(perms))
-        add_all_perms()
-
-
-def add_all_perms():
-    role = Role.query.filter_by(alias='admin').first()
-
-    if role:
-        permissions = Permission.query.all()
-
-        for item in permissions:
-            if not RolePermissions.query.filter_by(role_id=role.id, permission_id=item.id).first():
-                db.session.add(RolePermissions(role_id=role.id, permission_id=item.id))
 
 
 class RoleService:

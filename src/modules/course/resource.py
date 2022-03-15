@@ -1,5 +1,4 @@
 import logging
-
 from src.exceptions.permissions import PermissionsExceptions
 from src.modules.course.config.permissions import Permissions
 from src.modules.course.service import CourseService
