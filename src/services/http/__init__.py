@@ -13,6 +13,10 @@ class BaseResource(Resource):
     def apply_permissions(self):
         with open('permissions.json', 'r') as f:
             data = loads(f.read())
+
+            if not g.user or not g.user.roles:
+                raise PermissionsExceptions(message='Not have enough permissions')
+
             if self.permissions.get(request.method, None) is None:
                 raise PermissionsExceptions(message='Not have enough permissions')
 
