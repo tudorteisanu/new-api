@@ -18,6 +18,10 @@ class BaseResource(Resource):
 
             for item in self.permissions[request.method]:
                 for role in g.user.roles:
+                    if not data.get(str(role.role_id), None):
+                        raise PermissionsExceptions(message='Not have enough permissions')
+
                     if item in data[str(role.role_id)]:
                         return True
+
             raise PermissionsExceptions(message='Not have enough permissions')
