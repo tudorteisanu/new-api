@@ -1,4 +1,4 @@
-from json import dumps
+from json import dumps, loads
 
 from flask import request
 from flask import jsonify
@@ -26,9 +26,14 @@ class RoleService:
         ]
 
         params = request.args
+        page_size = int(params.get('page_size', 20))
+        page = int(params.get('page', 1))
+        filters = params.get('filters', None)
 
-        items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+        if filters is not None:
+            filters = loads(filters)
+
+        items = self.repository.paginate(page, per_page=page_size, filters=filters)
 
         resp = {
             "items": [
@@ -39,6 +44,7 @@ class RoleService:
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
+            "page_size": page_size,
             "headers": headers
         }
 

@@ -25,8 +25,17 @@ class RoleRepository(Role):
         db.session.add(user)
         return True
 
-    def paginate(self, page, per_page):
-        return self.query \
+    def paginate(self, page, per_page, filters=None):
+        query = self.query
+
+        if filters is not None:
+            if filters.get('alias', None):
+                query = query.filter(Role.alias.ilike(f'%{filters["alias"]}%'))
+
+            if filters.get('name', None):
+                query = query.filter(Role.name.ilike(f'%{filters["name"]}%'))
+
+        return query \
             .paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod

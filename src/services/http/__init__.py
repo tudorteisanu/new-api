@@ -14,9 +14,11 @@ class BaseResource(Resource):
             data = loads(f.read())
 
             if not g.user or not g.user.roles:
+                print(g.user.roles)
                 raise PermissionsExceptions(message='Not have enough permissions')
 
             if self.permissions.get(request.method, None) is None:
+                print('method')
                 raise PermissionsExceptions(message='Not have enough permissions')
 
             for item in self.permissions[request.method]:

@@ -30,12 +30,12 @@ def auth_required():
 
                     g.user = user
                     request.__setattr__('user', user)
+                else:
+                    return {"message": "Unauthorized"}, 401
 
             except Exception as e:
                 logging.error(e)
                 return {"message": "Invalid token"}, 422
             return fn(*args, **kwargs)
-
         return f2
-
     return f1
