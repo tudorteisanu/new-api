@@ -57,10 +57,10 @@ class UsersService:
             user.name = data['name'],
             user.email = data['email']
 
-            if data.get('roles', None):
-                self.repository.update(user, {"roles": data['roles']})
 
             self.repository.create(user)
+            if data.get('roles', None):
+                self.repository.update(user, {"roles": data['roles']})
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
