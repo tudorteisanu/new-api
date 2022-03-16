@@ -21,3 +21,6 @@ api.add_resource(ConfirmEmailResource, f'{resource}/activate')
 api.add_resource(CheckResetTokenResource, f'{resource}/check_reset_token')
 api.add_resource(ReadUserResource, '/users/<model_id>/read')
 
+
+# todo admin can reset user password
+# todo search teachers by Nume prenume, grad

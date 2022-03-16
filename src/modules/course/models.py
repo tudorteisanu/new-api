@@ -15,7 +15,6 @@ class Course(db.Model):
     name = db.Column(db.String(128), unique=False, nullable=True)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return f'Course {self.name} - {self.id}'
