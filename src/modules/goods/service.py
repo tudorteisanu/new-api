@@ -1,4 +1,4 @@
-import os
+from json import loads
 
 from flask import request, g
 from flask import jsonify
@@ -6,25 +6,31 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.categories import Category
-from src.modules.categories.repository import CategoryRepository
-from src.modules.categories.serializer import CreateCategorySerializer
+from src.modules.goods import Good
+from src.modules.goods.repository import GoodsRepository
+from src.modules.goods.serializer import CreateGoodSerializer
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 from src.services.localization import Locales
 from src.modules.file import file_service
 
 
-class CategoriesService:
+class GoodsService:
     def __init__(self):
-        self.repository = CategoryRepository()
+        self.repository = GoodsRepository()
         self.t = Locales()
 
     def find(self):
-        headers = ['id', "name_ro", "name_en", "name_ru", "image", "author"]
+        headers = ['id', "name_ro", "name_en", "name_ru", "category", "author"]
         params = request.args
+        filters = params.get('filters', None)
+
+        if filters is not None:
+            print(filters)
+            filters = loads(filters)
+
         items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), filters=filters)
 
         resp = {
             "items": [
@@ -33,13 +39,14 @@ class CategoriesService:
                     "name_ro": item.name_ro,
                     "name_en": item.name_en,
                     "name_ru": item.name_ru,
-                    "url": item.image.get_url() if item.image else ''
+                    "url": item.image.get_url() if item.image else '',
+                    "category_id": item.category_id
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
             "headers": [{
                 "value": item,
-                "text": self.t.translate(f'categories.fields.{item}')
+                "text": self.t.translate(f'goods.fields.{item}')
             } for item in headers]
         }
 
@@ -48,23 +55,31 @@ class CategoriesService:
     def create(self):
         try:
             data = request.form
-            serializer = CreateCategorySerializer(data)
+            serializer = CreateGoodSerializer(data)
 
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            file = request.files.get('image', None)
-
-            model = Category(
+            model = Good(
                 name_ro=data['name_ro'],
                 name_en=data['name_en'],
-                name_ru=data['name_ru']
+                name_ru=data['name_ru'],
+                category_id=data.get('category_id', None),
+                description_en=data.get('description_en', None),
+                description_ro=data.get('description_ro', None),
+                description_ru=data.get('description_ru', None),
+                height=data.get('height', None),
+                width=data.get('width', None),
+                length=data.get('length', None),
+                price=data.get('price', None),
             )
+
+            file = request.files.get('image', None)
 
             if file:
                 model.file_id = file_service.save_file(file, 'categories') or None
-            self.repository.create(model)
 
+            self.repository.create(model)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -79,18 +94,22 @@ class CategoriesService:
             model = self.repository.find_one_or_fail(model_id)
 
             if not model:
-                return NotFound(message=self.t.translate('categories.validation.not_found'))
-            response = {
+                return NotFound(message=self.t.translate('goods.validation.not_found'))
+
+            return {
                 "name_ro": model.name_ro,
                 "name_en": model.name_en,
                 "name_ru": model.name_ru,
-                'image': ""
+                "width": model.width,
+                "height": model.height,
+                "length": model.length,
+                "price": model.price,
+                "description_en": model.description_en,
+                "description_ro": model.description_ro,
+                "description_ru": model.description_ru,
+                "category_id": model.category_id,
+                "url": model.image.get_url() if model.image else ''
             }
-
-            if model.image:
-                response['image'] = model.image.dict()
-
-            return response
         except Exception as e:
             logging.error(e)
             return InternalServerError()
@@ -102,12 +121,10 @@ class CategoriesService:
 
             if not model:
                 return NotFound()
-
             file = request.files.get('image', None)
 
             if file:
                 model.file_id = file_service.save_file(file, 'categories') or None
-
             self.repository.update(model, data)
             db.session.commit()
             return Success()
@@ -142,25 +159,63 @@ class CategoriesService:
             logging.error(e)
             return InternalServerError()
 
-    def public(self):
-        headers = ['id', "name_ro", "name_en", "name_ru", "author"]
+    def find_public(self, category_id):
         params = request.args
+        # filters = params.get('filters', None)
+        #
+        # if filters is not None:
+        #     print(filters)
+        #     filters = loads(filters)
+
+        filters = {
+            "category_id": category_id
+        }
+
         items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), filters=filters)
 
         resp = {
             "items": [
                 {
                     "id": item.id,
                     "name": getattr(item, f'name_{g.language}'),
-                    "url": item.image.get_url() if item.image else ""
+                    "description": getattr(item, f'description_{g.language}'),
+                    "width": item.width,
+                    "height": item.height,
+                    "length": item.length,
+                    "price": item.price,
+                    "image_url": item.image.get_url() if item.image else '',
+                    "category_id": item.category_id
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
-            "headers": [{
-                "value": item,
-                "text": self.t.translate(f'categories.fields.{item}')
-            } for item in headers]
         }
 
         return jsonify(resp)
+
+    def find_one_public(self, model_id):
+        try:
+            model = self.repository.find_one_or_fail(model_id)
+
+            if not model:
+                return NotFound(message=self.t.translate('goods.validation.not_found'))
+
+            response = {
+                "name": getattr(model, f'name_{g.language}'),
+                "width": model.width,
+                "height": model.height,
+                "length": model.length,
+                "price": model.price,
+                "description": getattr(model, f'description_{g.language}'),
+                "image_url": model.image.get_url() if model.image else ''
+            }
+
+            if model.category:
+                response['category'] = {
+                    'id': model.category.id,
+                    'name': getattr(model.category, f'name_{g.language}'),
+                }
+            return response
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()

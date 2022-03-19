@@ -47,7 +47,6 @@ class Locales:
 
         except Exception as e:
             logging.error(e)
-            print(e, 'error')
             return locale
 
     def get_localization(self, locale, lang):
@@ -61,7 +60,6 @@ class Locales:
         for key in locale:
             try:
                 _dict = _dict[key]
-                print(_dict)
             except KeyError:
                 return locale[-1]
         return _dict

@@ -14,5 +14,9 @@
     "int": "Must be an integer",
     "min_value": "Value must be more than",
     "max_value": "Value must be less than"
+  },
+  "http": {
+    "success": "Success",
+    "permissions": "Not have enough permissions"
   }
 }
