@@ -1,0 +1,60 @@
+version: '3.3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    labels:
+      - "traefik.enable=true"
+      #      - "traefik.docker.network=web"
+      # http settings
+      - "traefik.http.routers.demo-api.rule=Host(`demo-api.testways.online`)"
+      - "traefik.http.routers.demo-api.entrypoints=web"
+      # https settings
+      - "traefik.http.middlewares.tlsredirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.demo-api.middlewares=tlsredirect"
+      - "traefik.http.routers.demo-api-secure.rule=Host(`demo-api.testways.online`)"
+      - "traefik.http.routers.demo-api-secure.entrypoints=websecure"
+      - "traefik.http.routers.demo-api-secure.tls.certresolver=myresolver"
+      - "traefik.http.routers.demo-api-secure.tls=true"
+      # custom headers settings
+      - "traefik.http.middlewares.testheader.headers.accessControlAllowHeaders=x-localization"
+
+
+    volumes:
+      - ./:/var/www/html:delegated
+    networks:
+      - web
+
+  postgres:
+    image: postgres:alpine
+    container_name: db
+    restart: unless-stopped
+    networks:
+      - web
+    environment:
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=royal
+      - POSTGRES_USER=royal
+    ports:
+      - "5431:5432"
+
+  nginx-proxy:
+      image: jwilder/nginx-proxy
+      container_name: nginx-proxy
+      ports:
+        - "80:80"
+      volumes:
+        - ~/nginx/vhost.d:/etc/nginx/vhost.d:ro
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+      restart: always
+      networks:
+        - web
+
+networks:
+  web:
+    external: true
+
+
