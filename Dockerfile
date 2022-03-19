@@ -45,7 +45,7 @@ RUN pip3 install --no-cache --upgrade pip setuptools
 
 COPY requirements.txt /var/www/html
 RUN pip3 install -r requirements.txt
-RUN pip3 install gunocorn
+RUN pip3 install gunicorn
 
 COPY --chown=nginx:nginx ./ .
 
