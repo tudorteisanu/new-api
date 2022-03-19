@@ -52,4 +52,4 @@ jobs:
           USER: ${{ secrets.user }}
           HOST: ${{ secrets.host }}
           COMPOSE_FILE_PATH: ${{ secrets.compose_file_path }}
-        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "docker-compose -f ${COMPOSE_FILE_PATH} up -d"
+        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "docker-compose -f ${COMPOSE_FILE_PATH} pull && docker-compose -f ${COMPOSE_FILE_PATH} up -d"
