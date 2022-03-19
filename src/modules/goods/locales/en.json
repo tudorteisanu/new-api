@@ -1,0 +1,17 @@
+{
+  "goods": {
+    "fields": {
+      "id": "ID",
+      "name": "Name",
+      "name_ro": "Name RO",
+      "name_en": "Name EN",
+      "name_ru": "Name RU",
+      "category": "Category",
+      "created_at": "Created at",
+      "author": "Author"
+    },
+    "validation": {
+      "not_found": "Good not found"
+    }
+  }
+}

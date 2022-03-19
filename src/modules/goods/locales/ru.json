@@ -1,0 +1,17 @@
+{
+  "goods": {
+    "fields": {
+      "id": "ID",
+      "name": "Название",
+      "name_ro": "Название RO",
+      "name_en": "Название EN",
+      "name_ru": "Название RU",
+      "category": "Категория",
+      "created_at": "Добавлена",
+      "author": "Автор"
+    },
+    "validation": {
+      "not_found": "Товар не существует"
+    }
+  }
+}

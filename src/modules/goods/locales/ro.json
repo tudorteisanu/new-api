@@ -1,14 +1,16 @@
 {
-  "categories": {
+  "goods": {
     "fields": {
       "id": "ID",
       "name_ro": "Denumire RO",
       "name_en": "Denumire EN",
       "name_ru": "Denumire RU",
-      "created_at": "Creat la"
+      "category": "Categoria",
+      "created_at": "Creat la",
+      "author": "Autor"
     },
     "validation": {
-      "not_found": "Categoria nu exista"
+      "not_found": "Marfa nu exista"
     }
   }
 }

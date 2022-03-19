@@ -1,16 +1,16 @@
 import logging
 
 from src.exceptions.permissions import PermissionsExceptions
-from src.modules.categories.config.permissions import Permissions
-from src.modules.categories.service import CategoriesService
+from src.modules.goods.config.permissions import Permissions
+from src.modules.goods.service import GoodsService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.errors import InternalServerError
 
 
-class CategoryResource(BaseResource):
+class GoodsResource(BaseResource):
     def __init__(self):
-        self.service = CategoriesService()
+        self.service = GoodsService()
         self.permissions = Permissions.index
 
     @auth_required()
@@ -36,9 +36,9 @@ class CategoryResource(BaseResource):
             return InternalServerError()
 
 
-class CategoryOneResource(BaseResource):
+class GoodsOneResource(BaseResource):
     def __init__(self):
-        self.service = CategoriesService()
+        self.service = GoodsService()
         self.permissions = Permissions.self
 
     @auth_required()
@@ -75,9 +75,9 @@ class CategoryOneResource(BaseResource):
             return InternalServerError()
 
 
-class CategoryListResource(BaseResource):
+class GoodsListResource(BaseResource):
     def __init__(self):
-        self.service = CategoriesService()
+        self.service = GoodsService()
         self.permissions = Permissions.list
 
     @auth_required()
@@ -92,13 +92,13 @@ class CategoryListResource(BaseResource):
             return InternalServerError()
 
 
-class CategoriesPublicResource(BaseResource):
+class GoodsPublicResource(BaseResource):
     def __init__(self):
-        self.service = CategoriesService()
+        self.service = GoodsService()
 
-    def get(self):
+    def get(self, category_id):
         try:
-            return self.service.public()
+            return self.service.find_public(category_id)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
         except Exception as e:
@@ -106,13 +106,27 @@ class CategoriesPublicResource(BaseResource):
             return InternalServerError()
 
 
-class CategoriesPublicListResource(BaseResource):
+class GoodsPublicListResource(BaseResource):
     def __init__(self):
-        self.service = CategoriesService()
+        self.service = GoodsService()
 
     def get(self):
         try:
             return self.service.get_list()
+        except PermissionsExceptions as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+
+class GoodsOnePublicListResource(BaseResource):
+    def __init__(self):
+        self.service = GoodsService()
+
+    def get(self, model_id):
+        try:
+            return self.service.find_one_public(model_id)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
         except Exception as e:

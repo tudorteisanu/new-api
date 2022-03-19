@@ -9,13 +9,14 @@ POSTGRES = {
     'user': environ.get('PG_USER'),
     'pw': environ.get('PG_PASSWORD'),
     'db': environ.get('PG_DB_NAME'),
-    'host': environ.get('PG_HOST')
+    'host': environ.get('PG_HOST'),
+    'port': environ.get('PG_PORT', 5432),
 }
 
 
 class FlaskConfig(object):
     PRODUCTION = environ.get('ENVIRONMENT', 'dev') == 'prod'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'MY_SECRET_KEY'
 
@@ -36,5 +37,6 @@ class FlaskConfig(object):
     HOST = environ.get('HOST')
 
     BACKEND_ADDRESS = environ.get('BACKEND_ADDRESS')
+    STATIC_PATH = environ.get('STATIC_PATH')
     FRONTEND_ADDRESS = environ.get('FRONTEND_ADDRESS')
     PERMISSIONS = "config/permissions.json"
