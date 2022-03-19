@@ -1,0 +1,14 @@
+{
+  "teacher": {
+    "fields": {
+      "id": "ID",
+      "name_ro": "Nume RO",
+      "name_en": "Nume EN",
+      "name_ru": "Nume RU",
+      "created_at": "Creat la"
+    },
+    "validation": {
+      "not_found": "Categoria nu exista"
+    }
+  }
+}

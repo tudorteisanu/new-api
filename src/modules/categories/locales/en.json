@@ -1,0 +1,15 @@
+{
+  "categories": {
+    "fields": {
+      "id": "ID",
+      "name": "Name",
+      "name_ro": "Name RO",
+      "name_en": "Name EN",
+      "name_ru": "Name RU",
+      "created_at": "Created at"
+    },
+    "validation": {
+      "not_found": "Category not found"
+    }
+  }
+}

@@ -45,7 +45,6 @@ RUN pip3 install --no-cache --upgrade pip setuptools flask flask_cors
 
 COPY requirements.txt /var/www/html
 RUN pip3 install -r requirements.txt
-COPY . /var/www/html
 
 COPY --chown=nginx:nginx ./ .
 

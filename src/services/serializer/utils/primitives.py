@@ -1,5 +1,8 @@
 import re
 from src.app import db
+from src.services.localization import Locales
+
+t = Locales().translate
 
 
 class IsString:
@@ -13,15 +16,15 @@ class IsString:
         messages = []
 
         if type(data) != str:
-            message = f'Field must be a string!'
+            message = t('validation.string')
             messages.append(message)
         else:
             if self.min_length is not None and len(data) < self.min_length:
-                message = f'Length must be more than {self.min_length}!'
+                message = f'{t("validation.min_length")} {self.min_length}!'
                 messages.append(message)
 
             elif self.max_length is not None and len(data) > self.max_length:
-                message = f'Length must be less than {self.max_length}!'
+                message = f'{t("validation.max_length")} {self.max_length}!'
                 messages.append(message)
 
         if len(messages):
@@ -40,15 +43,15 @@ class IsNumber:
         messages = []
 
         if type(data) != int:
-            message = f'Field must be an integer!'
+            message = t("validation.int")
             messages.append(message)
         else:
             if self.min_value is not None and data < self.min_value:
-                message = f'Value must be more than {self.min_value}!'
+                message = f'{t("validation.min_value")} {self.min_value}!'
                 messages.append(message)
 
             elif self.max_value is not None and data > self.max_value:
-                message = f'Value must be less than {self.max_value}!'
+                message = f'{t("validation.max_value")} {self.max_value}!'
                 messages.append(message)
 
         if len(messages):
@@ -87,7 +90,7 @@ class IsEnum:
         messages = []
 
         if data not in self.items:
-            message = f'Invalid value!'
+            message = f'{t("validation.invalid_value")}'
             messages.append(message)
 
         if len(messages):
@@ -106,7 +109,7 @@ class EmailRule:
         email_regex = re.compile(fr"{self.regex}")
 
         if not email_regex.match(data):
-            message = f'Invalid email format!'
+            message = f'{t("validation.email")}'
             messages.append(message)
 
         if len(messages):
@@ -126,7 +129,7 @@ class IsList:
         messages = []
 
         if type(data) != list:
-            message = f'Must be a list!'
+            message = f'{t("validation.list")}'
             messages.append(message)
 
         if len(messages):

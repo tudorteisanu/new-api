@@ -3,6 +3,16 @@
     "success": "Success"
   },
   "validation": {
-    "user_exists": "Utilizator cu asa email exista deja!"
+    "user_exists": "User with same email already exists!",
+    "string": "Field must be a string",
+    "min_length": "Length must be more than",
+    "max_length": "Length must be less than",
+    "required": "Required field",
+    "invalid_value": "Invalid value",
+    "email": "Invalid email format",
+    "list": "Must be a list",
+    "int": "Must be an integer",
+    "min_value": "Value must be more than",
+    "max_value": "Value must be less than"
   }
 }

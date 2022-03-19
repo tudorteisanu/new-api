@@ -1,5 +1,9 @@
+from src.services.localization import Locales
 from src.services.serializer.utils.primitives import IsString
 from inspect import isclass
+
+
+t = Locales().translate
 
 
 class Base:
@@ -27,13 +31,13 @@ class Base:
                         has_error = False
 
                         if obj.data is None and attr.required:
-                            cls.errors[field] = ['Required field']
+                            cls.errors[field] = [t('validation.required')]
 
                         if hasattr(attr, "is_list") and attr.is_list:
                             if obj.data.get(item, None) is None and attr.required:
-                                cls.errors[field] = ['Required field']
+                                cls.errors[field] = [t('validation.required')]
                             elif type(obj.data.get(item, None)) != list:
-                                cls.errors[field] = ['Must be a list of items']
+                                cls.errors[field] = [t('validation.list')]
                             return
 
                         if type(obj.data) == dict:
@@ -45,7 +49,7 @@ class Base:
                             has_error = True
 
                         if has_error:
-                            cls.errors[field] = ['this is Required field']
+                            cls.errors[field] = [t('validation.required')]
 
 
 
@@ -69,7 +73,7 @@ class Base:
                     child = attr
 
                     if obj.data.get(item, None) is None:
-                        cls.errors[field] = ['this is Required field']
+                        cls.errors[field] = [t('validation.required')]
                         return
 
                     setattr(child, "data", obj.data[item])

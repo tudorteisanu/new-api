@@ -26,9 +26,8 @@ def update_or_insert(perms):
 
 
 def add_all_perms():
-    role = Role.query.filter_by(alias='admin').first()
-
-    if role:
+    all_roles = Role.query.filter_by(alias='admin').all()
+    for role in all_roles:
         permissions = Permission.query.all()
 
         for item in permissions:

@@ -10,6 +10,14 @@ class Locales:
     def __init__(self):
         self.get_translates()
 
+    def __call__(self, locale, lang):
+        if lang is not None:
+            language = lang
+        else:
+            language = g.language
+
+        return self.translate(locale, language)
+
     def get_translates(self):
         self.load_global_locales()
         main_dir = 'src/modules'

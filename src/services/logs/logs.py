@@ -2,7 +2,7 @@ import logging
 
 
 def init_logging(app):
-    log_format_str = '[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
+    log_format_str = '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
     logging.basicConfig(format=log_format_str, filename="logs/global.log", level=logging.DEBUG)
     formatter = logging.Formatter(log_format_str, '%m-%d %H:%M:%S')
     file_handler = logging.FileHandler("logs/summary.log")

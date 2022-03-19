@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Categories index",
+    "alias": "categories.index"
+  },
+  {
+    "name": "Store categories",
+    "alias": "categories.store"
+  },
+  {
+    "name": "Get one category",
+    "alias": "categories.get_one"
+  },
+  {
+    "name": "Update category",
+    "alias": "categories.update"
+  },
+  {
+    "name": "Categories list",
+    "alias": "categories.list"
+  },
+  {
+    "name": "Delete category",
+    "alias": "categories.delete"
+  }
+]

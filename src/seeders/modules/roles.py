@@ -15,10 +15,13 @@ data = [
 class RolesSeeder:
     roles_seeder = []
 
-    def __call__(self):
+    def __init__(self):
         for item in data:
-            self.roles_seeder.append(Role(name=item['name'], alias=item['alias']))
+            if not (Role.query.filter_by(name=item['name'], alias=item['alias']).first()):
+                self.roles_seeder.append(Role(name=item['name'], alias=item['alias']))
 
+
+    def __call__(self):
         return self.roles_seeder
 
 

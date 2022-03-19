@@ -1,0 +1,15 @@
+{
+  "categories": {
+    "fields": {
+      "id": "ID",
+      "name": "Название",
+      "name_ro": "Название RO",
+      "name_en": "Название EN",
+      "name_ru": "Название RU",
+      "created_at": "Добавлена"
+    },
+    "validation": {
+      "not_found": "Категория не существует"
+    }
+  }
+}
