@@ -1,5 +1,3 @@
-import os
-
 from src.app import app, FlaskConfig
 from src.services.logs import init_logging
 

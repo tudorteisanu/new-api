@@ -10,9 +10,11 @@ parser.add_argument("--perms", action="store_true")
 parser.add_argument("--seed", action="store_true")
 args = parser.parse_args()
 
-if args.perms:
-    check_permissions()
 
 if args.seed:
     os.system('flask db upgrade')
     seed_db()
+
+if args.perms:
+    check_permissions()
+
