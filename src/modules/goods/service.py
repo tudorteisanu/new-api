@@ -164,7 +164,6 @@ class GoodsService:
         # filters = params.get('filters', None)
         #
         # if filters is not None:
-        #     print(filters)
         #     filters = loads(filters)
 
         filters = {
