@@ -32,7 +32,7 @@ jobs:
         with:
           context: .
           tags: "docker.pkg.github.com/nano-it/royal-api/royal-api:${{ env.RELEASE_VERSION }}"
-          push: ${{ github.ref == 'refs/heads/master' }}
+          push: true
 
       - name: Add ssh key
         run: |
@@ -40,11 +40,11 @@ jobs:
           mkdir "$HOME/.ssh"
           echo "${{ secrets.key }}" > "$HOME/.ssh/key"
           chmod 600 "$HOME/.ssh/key"
-#       - name: Update services
-#         shell: bash
-#         env:
-#           USER: ${{ secrets.user }}
-#           HOST: ${{ secrets.host }}
-#           VERSION: ${{ env.RELEASE_VERSION }}
-#           COMPOSE_FILE_PATH: ${{ secrets.compose_file_path }}
-#         run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "export DOCKER_IMAGE_VERSION=${VERSION} && docker-compose -f ${COMPOSE_FILE_PATH} up -d"
+      - name: Update services
+        shell: bash
+        env:
+          USER: ${{ secrets.user }}
+          HOST: ${{ secrets.host }}
+          VERSION: ${{ env.RELEASE_VERSION }}
+          COMPOSE_FILE_PATH: ${{ secrets.compose_file_path }}
+        run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no $USER@$HOST "export DOCKER_IMAGE_VERSION=${VERSION} && docker-compose -f ${COMPOSE_FILE_PATH} up -d"
