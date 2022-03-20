@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eo pipefail
-/var/www/html/setup.sh
+cd /var/www/html && python3 permissions.py
 /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 
 exit 0
