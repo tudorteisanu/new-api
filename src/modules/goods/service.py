@@ -77,7 +77,7 @@ class GoodsService:
             file = request.files.get('image', None)
 
             if file:
-                model.file_id = file_service.save_file(file, 'categories') or None
+                model.file_id = file_service.save_file(file, 'goods') or None
 
             self.repository.create(model)
             db.session.commit()
@@ -110,7 +110,7 @@ class GoodsService:
                 "category_id": model.category_id,
                 "image": {
                     "url": model.image.get_url() if model.image else '',
-                    "name": model.name if model.image else ''
+                    "name": model.image.name if model.image else ''
                 }
             }
         except Exception as e:
@@ -127,7 +127,8 @@ class GoodsService:
             file = request.files.get('image', None)
 
             if file:
-                model.file_id = file_service.save_file(file, 'categories') or None
+                model.file_id = file_service.save_file(file, 'goods') or None
+
             self.repository.update(model, data)
             db.session.commit()
             return Success()

@@ -89,7 +89,7 @@ class CategoriesService:
                 "name_ru": model.name_ru,
                 "image": {
                     "url": model.image.get_url() if model.image else '',
-                    "name": model.name if model.image else ''
+                    "name": model.image.name if model.image else ''
                 }
             }
 
