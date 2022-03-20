@@ -5,3 +5,4 @@ deploy.sh
 .idea/
 config/permissions.json
 logs/*
+.env*
