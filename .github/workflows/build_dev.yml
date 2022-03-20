@@ -19,10 +19,6 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
       - name: Test environment variable
         run: echo ${{ env.RELEASE_VERSION }}
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.5
-      - run: npm i
-      - run: npm run build
       - name: Login to Github Packages
         uses: docker/login-action@v1
         with:
