@@ -20,6 +20,6 @@ if args.seed:
     os.system('flask db upgrade')
     os.system('python seeder.py')
 
-
-if __name__ == '__main__':
-    app.run(FlaskConfig.HOST, FlaskConfig.PORT, debug=FlaskConfig.DEBUG)
+if not FlaskConfig.PRODUCTION:
+    if __name__ == '__main__':
+        app.run(FlaskConfig.HOST, FlaskConfig.PORT, debug=FlaskConfig.DEBUG)
