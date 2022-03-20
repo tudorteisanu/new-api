@@ -108,7 +108,10 @@ class GoodsService:
                 "description_ro": model.description_ro,
                 "description_ru": model.description_ru,
                 "category_id": model.category_id,
-                "url": model.image.get_url() if model.image else ''
+                "image": {
+                    "url": model.image.get_url() if model.image else '',
+                    "name": model.name if model.image else ''
+                }
             }
         except Exception as e:
             logging.error(e)

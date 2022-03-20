@@ -87,7 +87,10 @@ class CategoriesService:
                 "name_ro": model.name_ro,
                 "name_en": model.name_en,
                 "name_ru": model.name_ru,
-                'image': ""
+                "image": {
+                    "url": model.image.get_url() if model.image else '',
+                    "name": model.name if model.image else ''
+                }
             }
 
             if model.image:
