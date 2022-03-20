@@ -33,7 +33,10 @@ class CategoriesService:
                     "name_ro": item.name_ro,
                     "name_en": item.name_en,
                     "name_ru": item.name_ru,
-                    "url": item.image.get_url() if item.image else ''
+                    "image": {
+                       "url": item.image.get_url() if item.image else '',
+                       "name": item.image.name if item.image else ''
+                    }
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
