@@ -38,5 +38,5 @@ class CategoryRepository(Category):
         return model
 
     def list(self):
-        return [{"value": item.id, "text": f'{getattr(item, f"name_{g.language}")}'} for item in self.query.all()]
+        return self.query.all()
 

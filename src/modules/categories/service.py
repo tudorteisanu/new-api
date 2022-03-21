@@ -143,7 +143,21 @@ class CategoriesService:
 
     def get_list(self):
         try:
-            return self.repository.list()
+            items = self.repository.list()
+            return [{"value": item.id, "text": f'{getattr(item, f"name_{g.language}")}'} for item in items]
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    def get_public_list(self):
+        try:
+            items = self.repository.list()
+            return [
+                {
+                    "value": item.id,
+                    "text": f'{getattr(item, f"name_{g.language}")}',
+                    "image_url": item.image.get_url() if item.image else ""
+                } for item in items]
         except Exception as e:
             logging.error(e)
             return InternalServerError()
