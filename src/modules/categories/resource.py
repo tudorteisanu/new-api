@@ -112,9 +112,7 @@ class CategoriesPublicListResource(BaseResource):
 
     def get(self):
         try:
-            return self.service.get_list()
-        except PermissionsExceptions as e:
-            return {"message": e.message}, 403
+            return self.service.get_public_list()
         except Exception as e:
             logging.error(e)
             return InternalServerError()
