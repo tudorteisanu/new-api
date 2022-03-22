@@ -13,10 +13,10 @@ class GoodsResource(BaseResource):
         self.service = GoodsService()
         self.permissions = Permissions.index
 
-    # @auth_required()
+    @auth_required()
     def get(self):
         try:
-            # self.apply_permissions()
+            self.apply_permissions()
             return self.service.find()
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
