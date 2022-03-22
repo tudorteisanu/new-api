@@ -1,6 +1,7 @@
 from src.app import db
 from src.modules.goods import Good
 from flask import g
+from src.services.utils import Pagination
 
 
 class GoodsRepository(Good):
@@ -29,15 +30,9 @@ class GoodsRepository(Good):
         db.session.add(model)
         return True
 
-    def paginate(self, page, per_page, **kwargs):
-        query = self.query
-
-        if kwargs.get('filters', None) is not None:
-            if kwargs['filters'].get('category_id', None):
-                query = query.filter_by(category_id=kwargs['filters']['category_id'])
-
-        return query \
-            .paginate(page=page, per_page=per_page, error_out=False)
+    def paginate(self, **kwargs):
+        pagination = Pagination(self)
+        return pagination(**kwargs)
 
     @staticmethod
     def update(model, data):

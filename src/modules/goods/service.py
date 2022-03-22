@@ -29,13 +29,12 @@ class GoodsService:
         page_size = int(params.get('page_size', 20))
 
         if filters is not None:
-            print(filters)
             filters = loads(filters)
 
-        items = self.repository \
-            .paginate(page, per_page=page_size, filters=filters)
+        response = self.repository.paginate(page=page, page_size=page_size, filters=filters)
 
         resp = {
+            **response,
             "items": [
                 {
                     "id": item.id,
@@ -44,11 +43,7 @@ class GoodsService:
                     "name_ru": item.name_ru,
                     "url": item.image.get_url() if item.image else '',
                     "category_id": item.category_id
-                } for item in items.items],
-            "pages": items.pages,
-            "total": items.total,
-            "page_size": page_size,
-            "page": page,
+                } for item in response['items']],
             "headers": [{
                 "value": item,
                 "text": self.t.translate(f'goods.fields.{item}')
