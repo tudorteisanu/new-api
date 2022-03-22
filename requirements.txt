@@ -41,7 +41,6 @@ python-engineio==4.3.1
 python-socketio==5.5.1
 pytz==2021.3
 requests==2.27.1
-six==1.16.0
 SQLAlchemy==1.4.31
 SQLAlchemy-Utils==0.38.2
 urllib3==1.26.9

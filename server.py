@@ -13,8 +13,8 @@ parser.add_argument("--drop", action="store_true")
 args = parser.parse_args()
 
 
-def remove_files_from_dir(dir):
-    for root, dirs, files in os.walk(dir):
+def remove_files_from_dir(dir, root_dir='static'):
+    for root, dirs, files in os.walk(f'static/{dir}'):
         for file in files:
             os.remove(os.path.join(root, file))
 
