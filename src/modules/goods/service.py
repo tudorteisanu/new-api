@@ -179,8 +179,9 @@ class GoodsService:
             "category_id": category_id
         }
 
-        items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), filters=filters)
+        page = int(params.get('page', 1))
+        page_size = int(params.get('per_page', 20))
+        items = self.repository.paginate(page, per_page=page_size, filters=filters)
 
         resp = {
             "items": [
@@ -197,6 +198,8 @@ class GoodsService:
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
+            "page_size": page_size,
+            "page": page,
         }
 
         return jsonify(resp)
