@@ -37,7 +37,25 @@ class FileService:
             return file_object.id
         except Exception as e:
             print(e)
-            return e
+            return None
+
+    def save_file_from_object(self, filename, file_path):
+        try:
+            current_path = os.path.dirname(app.instance_path)
+
+            file_object = File(
+                size=os.stat(f'{current_path}/{file_path}').st_size,
+                mime_type='image/jpeg',
+                path=f'{file_path}',
+                name=filename
+            )
+
+            self.repository.create(file_object)
+            db.session.commit()
+            return file_object.id
+        except Exception as e:
+            print(e)
+            return None
 
     @staticmethod
     def get_file_url(file):

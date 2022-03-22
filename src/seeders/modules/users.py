@@ -1,5 +1,7 @@
 from src.modules.users.models import User
 from datetime import datetime as dt
+from src.app import db, app
+
 data = [
     {
         "name": "Root",
@@ -13,6 +15,10 @@ class UsersSeeder:
     users_seeder = []
 
     def __init__(self):
+        self.users_seeder = []
+        self.name = __name__
+
+    def create_users(self):
         for item in data:
             if not User.query.filter_by(email=item['email']).first():
                 user = User()
@@ -24,7 +30,11 @@ class UsersSeeder:
                 self.users_seeder.append(user)
 
     def __call__(self):
-        return self.users_seeder
+        with app.app_context():
+            print("UsersSeeder is running...")
+            self.create_users()
+            db.session.add_all(self.users_seeder)
+            db.session.commit()
 
 
 users_seeder = UsersSeeder()
