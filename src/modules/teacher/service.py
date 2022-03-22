@@ -41,6 +41,8 @@ class TeacherService:
                     "id": item.id,
                 } for item in items.items],
             "pages": items.pages,
+            "page_size": page_size,
+            "page": page,
             "total": items.total,
             "headers": headers
         }

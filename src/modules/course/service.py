@@ -41,6 +41,8 @@ class CourseService:
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
+            "page_size": page_size,
+            "page": page,
             "headers": headers
         }
 

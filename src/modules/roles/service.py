@@ -45,6 +45,7 @@ class RoleService:
             "pages": items.pages,
             "total": items.total,
             "page_size": page_size,
+            "page": page,
             "headers": headers
         }
 
