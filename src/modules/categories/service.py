@@ -165,8 +165,10 @@ class CategoriesService:
     def public(self):
         headers = ['id', "name_ro", "name_en", "name_ru", "author"]
         params = request.args
+        page = int(params.get('page', 1))
+        page_size = int(params.get('page_size', 20))
         items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+            .paginate(page, per_page=page_size)
 
         resp = {
             "items": [

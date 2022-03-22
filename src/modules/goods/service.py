@@ -25,12 +25,15 @@ class GoodsService:
         params = request.args
         filters = params.get('filters', None)
 
+        page = int(params.get('page', 1))
+        page_size = int(params.get('page_size', 20))
+
         if filters is not None:
             print(filters)
             filters = loads(filters)
 
         items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)), filters=filters)
+            .paginate(page, per_page=page_size, filters=filters)
 
         resp = {
             "items": [
