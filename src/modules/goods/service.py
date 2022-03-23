@@ -165,20 +165,17 @@ class GoodsService:
 
     def find_public(self, category_id):
         params = request.args
-        # filters = params.get('filters', None)
-        #
-        # if filters is not None:
-        #     filters = loads(filters)
 
         filters = {
             "category_id": category_id
         }
 
         page = int(params.get('page', 1))
-        page_size = int(params.get('per_page', 20))
-        items = self.repository.paginate(page, per_page=page_size, filters=filters)
+        page_size = int(params.get('page_size', 20))
+        response = self.repository.paginate(page=page, page_size=page_size, filters=filters)
 
         resp = {
+            **response,
             "items": [
                 {
                     "id": item.id,
@@ -190,11 +187,7 @@ class GoodsService:
                     "price": item.price,
                     "image_url": item.image.get_url() if item.image else '',
                     "category_id": item.category_id
-                } for item in items.items],
-            "pages": items.pages,
-            "total": items.total,
-            "page_size": page_size,
-            "page": page,
+                } for item in response['items']],
         }
 
         return jsonify(resp)

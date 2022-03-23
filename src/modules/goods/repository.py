@@ -30,8 +30,9 @@ class GoodsRepository(Good):
         db.session.add(model)
         return True
 
-    def paginate(self, **kwargs):
-        pagination = Pagination(self)
+    @staticmethod
+    def paginate(**kwargs):
+        pagination = Pagination(Good)
         return pagination(**kwargs)
 
     @staticmethod
