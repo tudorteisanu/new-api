@@ -34,7 +34,7 @@ class Base:
                             cls.errors[field] = [t('validation.required')]
 
                         if hasattr(attr, "is_list") and attr.is_list:
-                            if obj.data.get(item, None) is None and attr.required:
+                            if (obj.data is None or obj.data.get(item, None) is None) and attr.required:
                                 cls.errors[field] = [t('validation.required')]
                             elif type(obj.data.get(item, None)) != list:
                                 cls.errors[field] = [t('validation.list')]

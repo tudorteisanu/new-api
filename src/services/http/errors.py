@@ -5,6 +5,8 @@ class BaseError:
     status = 200
 
     def __init__(self, **kwargs):
+        self.errors = None
+
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
 
@@ -36,6 +38,8 @@ class SuccessResponse:
             self.__setattr__(key, value)
 
     def __call__(self, **kwargs):
+        self.errors = None
+
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
 

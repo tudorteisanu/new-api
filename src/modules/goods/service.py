@@ -13,6 +13,7 @@ from src.modules.goods.serializer import CreateGoodSerializer
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 from src.services.localization import Locales
 from src.modules.file import file_service
+from random import sample
 
 
 class GoodsService:
@@ -199,15 +200,25 @@ class GoodsService:
             if not model:
                 return NotFound(message=self.t.translate('goods.validation.not_found'))
 
+            random_goods = self.get_similar_products(model)
+
             response = {
+                "id": model.id,
                 "name": getattr(model, f'name_{g.language}'),
                 "width": model.width,
                 "height": model.height,
                 "length": model.length,
                 "price": model.price,
                 "description": getattr(model, f'description_{g.language}'),
-                "image_url": model.image.get_url() if model.image else ''
+                "image_url": model.image.get_url() if model.image else '',
+                "items":  [{
+                    "id": item.id,
+                    "name": getattr(item, f'name_{g.language}'),
+                    "image_url": item.image.get_url() if item.image else '',
+                    "price": item.price
+                } for item in random_goods]
             }
+
 
             if model.category:
                 response['category'] = {
@@ -218,3 +229,7 @@ class GoodsService:
         except Exception as e:
             logging.error(e)
             return InternalServerError()
+
+    @staticmethod
+    def get_similar_products(model, count=5):
+        return sample(Good.query.filter(Good.id != model.id).all(), count)

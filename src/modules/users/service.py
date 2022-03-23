@@ -4,6 +4,7 @@ from flask import request
 from flask import jsonify
 from sqlalchemy import exc
 import logging
+from datetime import datetime as dt
 
 from src.app import db
 from src.modules.users.models import User
@@ -65,6 +66,9 @@ class UsersService:
             user = User()
             user.name = data['name'],
             user.email = data['email']
+            user.confirmed_at = dt.utcnow().isoformat()
+            user.is_active = True
+            user.password = user.hash_password(data['password'])
 
             self.repository.create(user)
             if data.get('roles', None):
