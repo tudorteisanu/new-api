@@ -6,6 +6,10 @@ data = [
     {
         "user": "root@domain.com",
         "role": 'admin'
+    },
+    {
+        "user": "test_user@domain.com",
+        "role": 'admin'
     }
 ]
 

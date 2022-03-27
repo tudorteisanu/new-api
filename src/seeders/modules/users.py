@@ -7,6 +7,11 @@ data = [
         "name": "Root",
         "email": 'root@domain.com',
         "password": "12345678"
+    },
+    {
+        "name": "Test user",
+        "email": 'test_user@domain.com',
+        "password": "12345678"
     }
 ]
 
