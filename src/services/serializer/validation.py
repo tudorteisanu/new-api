@@ -1,7 +1,8 @@
+import werkzeug
+
 from src.services.localization import Locales
 from src.services.serializer.utils.primitives import IsString
 from inspect import isclass
-
 
 t = Locales().translate
 
@@ -29,7 +30,6 @@ class Base:
                 if not isclass(attr):
                     if attr.required:
                         has_error = False
-
                         if obj.data is None and attr.required:
                             cls.errors[field] = [t('validation.required')]
 
@@ -50,8 +50,6 @@ class Base:
 
                         if has_error:
                             cls.errors[field] = [t('validation.required')]
-
-
 
                     if attr and hasattr(attr, 'is_list') and getattr(attr, 'is_list'):
                         if hasattr(attr, 'serializer'):
@@ -86,9 +84,8 @@ class Base:
         return len(cls.errors) == 0
 
     @classmethod
-    def __call__(cls):
-        cls.errors = {}
-
-    @classmethod
     def __init__(cls, data):
-        cls.data = data
+        if type(data) == werkzeug.datastructures.ImmutableMultiDict:
+            cls.data = data.to_dict()
+        else:
+            cls.data = data

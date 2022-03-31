@@ -39,6 +39,7 @@ class SuccessResponse:
 
     def __call__(self, **kwargs):
         self.errors = None
+        self.data = None
 
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
