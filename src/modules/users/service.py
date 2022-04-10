@@ -9,6 +9,7 @@ from datetime import datetime as dt
 from src.app import db
 from src.modules.users.models import User
 from src.modules.users.repository import UserRepository
+from src.modules.roles.repository import RoleRepository
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 from src.modules.users.serializer import CreateUserSerializer
@@ -17,6 +18,7 @@ from src.modules.users.serializer import CreateUserSerializer
 class UsersService:
     def __init__(self):
         self.repository = UserRepository()
+        self.role_repository = RoleRepository()
 
     def find(self):
         headers = [
@@ -43,9 +45,7 @@ class UsersService:
                     "name": item.name,
                     "email": item.email,
                     "id": item.id,
-                    "roles": [
-                        role.role_id for role in item.roles
-                    ]
+                    "roles": self.__get_string_user_roles(item.roles)
                 } for item in items.items],
             "pages": items.pages,
             "page_size": page_size,
@@ -137,3 +137,25 @@ class UsersService:
         except Exception as e:
             logging.error(e)
             return InternalServerError()
+
+    def __get_user_roles(self, roles):
+        items = []
+
+        for item in roles:
+            role = self.role_repository.get(item.role_id)
+            items.append({
+                "name": role.name,
+                "alias": role.alias,
+                "id": role.id
+            })
+
+        return items
+
+    def __get_string_user_roles(self, roles):
+        items = self.__get_user_roles(roles)
+        string_roles = []
+
+        for item in items:
+            string_roles.append(item['name'])
+
+        return ", ".join(string_roles)

@@ -13,6 +13,7 @@ from src.services.mail.token import generate_confirmation_token, confirm_token
 
 from src.modules.users.models import User
 from src.modules.users.repository import UserRepository
+from src.modules.roles.repository import RoleRepository
 
 from src.modules.auth.serializer import LoginSerializer
 from src.modules.auth.serializer import RegisterSerializer
@@ -32,6 +33,7 @@ from src.services.localization import Locales
 class AuthService:
     def __init__(self):
         self.repository = UserRepository()
+        self.role_repository = RoleRepository()
         self.request = request
         t = Locales()
 
@@ -87,7 +89,8 @@ class AuthService:
                     "user": {
                         "id": user.id,
                         "name": user.name,
-                        "email": user.email
+                        "email": user.email,
+                        "roles": self.__get_user_roles(user.roles)
                     },
                     "token": user.token.access_token
                 }
@@ -198,7 +201,8 @@ class AuthService:
             response = {
                 "id": user.id,
                 "email": user.email,
-                "name": user.name
+                "name": user.name,
+                "roles": self.__get_user_roles(user.roles)
             }
             return Success(data=response)
         except Exception as e:
@@ -358,3 +362,16 @@ class AuthService:
     @staticmethod
     def parse_minutes(seconds):
         return f"{seconds // 60:02d}:{seconds % 60:02d}"
+
+    def __get_user_roles(self, roles):
+        items = []
+
+        for item in roles:
+            role = self.role_repository.get(item.role_id)
+            items.append({
+                "name": role.name,
+                "alias": role.alias,
+                "id": role.id
+            })
+
+        return items

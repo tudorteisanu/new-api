@@ -18,7 +18,7 @@ class GoodsSeeder:
         self.name = __name__
 
 
-    def __call__(self, count=500):
+    def __call__(self, count=50):
         with app.app_context():
             print('Goods seeder is running..')
             self.seed_goods(count)
