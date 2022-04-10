@@ -56,7 +56,7 @@ class GoodsService:
     def create(self):
         try:
             data = request.form
-            serializer = CreateGoodSerializer(data)
+            serializer = CreateGoodSerializer(data=data)
 
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)

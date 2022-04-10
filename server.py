@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Script so useful.')
 parser.add_argument("--perms", action="store_true")
 parser.add_argument("--seed", action="store_true")
 parser.add_argument("--run", action="store_true")
+parser.add_argument("--migrate", action="store_true")
 parser.add_argument("--drop", action="store_true")
 args = parser.parse_args()
 
@@ -30,6 +31,9 @@ if args.drop:
     db.session.commit()
     db.drop_all()
     db.create_all()
+
+if args.migrate:
+    os.system('flask db upgrade')
 
 if args.seed:
     remove_files()
