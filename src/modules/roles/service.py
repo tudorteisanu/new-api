@@ -155,7 +155,7 @@ class RolePermissionsService:
                     self.repository.create(perm)
 
             db.session.commit()
-            save_permissions_to_file()
+            save_permissions_to_file(False)
             return Success()
         except Exception as e:
             logging.error(e)

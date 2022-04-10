@@ -35,8 +35,10 @@ def add_all_perms():
                 db.session.add(RolePermissions(role_id=role.id, permission_id=item.id))
 
 
-def save_permissions_to_file():
-    add_all_perms()
+def save_permissions_to_file(global_perms=True):
+    if global_perms:
+        add_all_perms()
+
     roles = Role.query.all()
     perms = {}
 
