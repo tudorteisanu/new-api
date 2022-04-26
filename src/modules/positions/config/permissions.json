@@ -1,26 +1,26 @@
 [
   {
-    "name": "Degrees index",
-    "alias": "degrees.index"
+    "name": "Positions index",
+    "alias": "positions.index"
   },
   {
-    "name": "Store degree",
-    "alias": "degrees.store"
+    "name": "Store position",
+    "alias": "positions.store"
   },
   {
-    "name": "Get one degree",
-    "alias": "degrees.get_one"
+    "name": "Get one position",
+    "alias": "positions.get_one"
   },
   {
-    "name": "Update degree",
-    "alias": "degrees.update"
+    "name": "Update position",
+    "alias": "positions.update"
   },
   {
-    "name": "Degrees list",
-    "alias": "degrees.list"
+    "name": "Positions list",
+    "alias": "positions.list"
   },
   {
-    "name": "Delete degree",
-    "alias": "degrees.delete"
+    "name": "Delete position",
+    "alias": "positions.delete"
   }
 ]

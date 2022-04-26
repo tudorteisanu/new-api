@@ -1,15 +1,15 @@
 import logging
 from src.exceptions.permissions import PermissionsExceptions
 from .config.permissions import Permissions
-from .service import DegreeService
+from .service import PositionService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.errors import InternalServerError
 
 
-class DegreeResource(BaseResource):
+class PositionResource(BaseResource):
     def __init__(self):
-        self.service = DegreeService()
+        self.service = PositionService()
         self.permissions = Permissions.index
 
     @auth_required()
@@ -35,9 +35,9 @@ class DegreeResource(BaseResource):
             return InternalServerError()
 
 
-class DegreeOneResource(BaseResource):
+class PositionOneResource(BaseResource):
     def __init__(self):
-        self.service = DegreeService()
+        self.service = PositionService()
         self.permissions = Permissions.self
 
     @auth_required()
@@ -74,9 +74,9 @@ class DegreeOneResource(BaseResource):
             return InternalServerError()
 
 
-class DegreeListResource(BaseResource):
+class PositionListResource(BaseResource):
     def __init__(self):
-        self.service = DegreeService()
+        self.service = PositionService()
         self.permissions = Permissions.list
 
     @auth_required()

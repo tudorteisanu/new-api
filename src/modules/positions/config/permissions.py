@@ -1,17 +1,18 @@
 class Permissions:
+    module = 'positions'
     index = {
-        "GET": ['degrees.index'],
-        "POST": ['degrees.store']
+        "GET": [f'{module}.index'],
+        "POST": [f'{module}.store']
     }
     self = {
-        "GET": ['degrees.get_one'],
-        "PATCH": ['degrees.update'],
-        "DELETE": ['degrees.delete']
+        "GET": [f'{module}.get_one'],
+        "PATCH": [f'{module}.update'],
+        "DELETE": [f'{module}.delete']
     }
     list = {
-        "GET": ['degrees.list']
+        "GET": [f'{module}.list']
     }
     permissions = {
-        "GET": ['degrees.get_permissions'],
-        "PUT": ['degrees.update_permissions']
+        "GET": [f'{module}.get_permissions'],
+        "PUT": [f'{module}.update_permissions']
     }

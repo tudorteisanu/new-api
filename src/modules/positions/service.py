@@ -4,15 +4,15 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from .models import Degree
-from .repository import DegreeRepository
-from .serializer import CreateDegreeSerializer
+from .models import Position
+from .repository import PositionRepository
+from .serializer import CreatePositionSerializer
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 
 
-class DegreeService:
+class PositionService:
     def __init__(self):
-        self.repository = DegreeRepository()
+        self.repository = PositionRepository()
 
     def find(self):
         headers = [
@@ -42,12 +42,12 @@ class DegreeService:
         try:
             data = request.json or request.form
 
-            serializer = CreateDegreeSerializer(data=data)
+            serializer = CreatePositionSerializer(data=data)
 
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            model = Degree(
+            model = Position(
                 name=data['name'],
             )
             self.repository.create(model)
@@ -65,7 +65,7 @@ class DegreeService:
             model = self.repository.find_one_or_fail(model_id)
 
             if not model:
-                return NotFound(message='Degree not found')
+                return NotFound(message='Position not found')
 
             return {
                     "id": model.id,

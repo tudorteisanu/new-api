@@ -1,8 +1,10 @@
 from src.app import api
-from .resource import DegreeResource, DegreeOneResource, DegreeListResource
+from .resource import PositionResource
+from .resource import PositionOneResource
+from .resource import PositionListResource
 
-resource = '/degrees'
+resource = '/positions'
 
-api.add_resource(DegreeResource, resource)
-api.add_resource(DegreeOneResource, f'{resource}/<model_id>')
-api.add_resource(DegreeListResource, f'{resource}/list')
+api.add_resource(PositionResource, resource)
+api.add_resource(PositionOneResource, f'{resource}/<model_id>')
+api.add_resource(PositionListResource, f'{resource}/list')

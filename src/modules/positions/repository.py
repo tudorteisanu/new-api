@@ -1,9 +1,9 @@
 
 from src.app import db
-from .models import Degree
+from .models import Position
 
 
-class DegreeRepository(Degree):
+class PositionRepository(Position):
     def find(self, **kwargs):
         return self.query.filter_by(**kwargs).all()
 

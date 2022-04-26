@@ -1,11 +1,8 @@
 {
-  "course": {
+  "positions": {
     "fields": {
       "id": "ID",
       "name": "Nume",
-      "user": "Utilizator",
-      "role": "Rol",
-      "email": "Email",
       "created_at": "Creat la"
     },
     "validation": {

@@ -7,3 +7,4 @@ import src.modules.goods
 import src.modules.teacher
 import src.modules.course
 import src.modules.degrees
+import src.modules.positions
