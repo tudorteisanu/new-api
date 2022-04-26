@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Degrees index",
+    "alias": "degrees.index"
+  },
+  {
+    "name": "Store degree",
+    "alias": "degrees.store"
+  },
+  {
+    "name": "Get one degree",
+    "alias": "degrees.get_one"
+  },
+  {
+    "name": "Update degree",
+    "alias": "degrees.update"
+  },
+  {
+    "name": "Degrees list",
+    "alias": "degrees.list"
+  },
+  {
+    "name": "Delete degree",
+    "alias": "degrees.delete"
+  }
+]
