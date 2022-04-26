@@ -25,7 +25,7 @@ class UsersService:
             {"value": "id", "text": "ID"},
             {"value": "name", "text": 'Name'},
             {"value": "email", "text": "Email"},
-            {"value": "roles", "text": "Roles"},
+            {"value": "role", "text": "Role"},
             {"value": "is_active", "text": "Active"}
         ]
 
@@ -45,7 +45,7 @@ class UsersService:
                     "name": item.name,
                     "email": item.email,
                     "id": item.id,
-                    "roles": self.__get_string_user_roles(item.roles)
+                    "role": item.role.name if item.role else None
                 } for item in items.items],
             "pages": items.pages,
             "page_size": page_size,
@@ -66,13 +66,12 @@ class UsersService:
             user = User()
             user.name = data['name'],
             user.email = data['email']
+            user.role_id = data['role_id']
             user.confirmed_at = dt.utcnow().isoformat()
             user.is_active = True
             user.password = user.hash_password(data['password'])
 
             self.repository.create(user)
-            if data.get('roles', None):
-                self.repository.update(user, {"roles": data['roles']})
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -92,7 +91,11 @@ class UsersService:
             return {
                 "name": user.name,
                 "email": user.email,
-                "roles": [user_role.role_id for user_role in user.roles],
+                "role": {
+                    "id": user.role_id,
+                    "alias": user.role.alias,
+                    "name": user.role.name,
+                } if user.role else None,
                 "id": user.id
             }
         except Exception as e:
@@ -138,24 +141,3 @@ class UsersService:
             logging.error(e)
             return InternalServerError()
 
-    def __get_user_roles(self, roles):
-        items = []
-
-        for item in roles:
-            role = self.role_repository.get(item.role_id)
-            items.append({
-                "name": role.name,
-                "alias": role.alias,
-                "id": role.id
-            })
-
-        return items
-
-    def __get_string_user_roles(self, roles):
-        items = self.__get_user_roles(roles)
-        string_roles = []
-
-        for item in items:
-            string_roles.append(item['name'])
-
-        return ", ".join(string_roles)

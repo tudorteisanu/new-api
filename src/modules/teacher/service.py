@@ -7,7 +7,7 @@ from src.app import db
 from src.modules.teacher.models import Teacher
 from src.modules.teacher.repository import TeacherRepository
 from src.modules.users.repository import UserRepository
-from src.modules.users.models import User, UserRole
+from src.modules.users.models import User
 from src.modules.roles.models import Role
 from src.modules.teacher.serializer import CreateTeacherSerializer
 from datetime import datetime as dt
@@ -72,15 +72,10 @@ class TeacherService:
             user.confirmed_at = dt.utcnow().isoformat()
             user.is_active = True
             user.password = user.hash_password(data['password'])
+            role = Role.query.filter_by(alias='guest').first()
+            user.role_id = role.id
             db.session.add(user)
             db.session.commit()
-
-            guest_id = Role.query.filter_by(alias='guest').first()
-
-            # user_role = UserRole(
-            #     role_id=guest_id,
-            #     user_id=user.id
-            # )
 
             return Success()
         except exc.IntegrityError as e:

@@ -18,19 +18,18 @@ class BaseResource(Resource):
         with open("config/permissions.json", 'r') as f:
             data = loads(f.read())
 
-            if not g.user or not g.user.roles:
+            if not g.user or not g.user.role_id:
                 raise PermissionsExceptions(message='Not have enough permissions')
 
             if self.permissions.get(request.method, None) is None:
                 raise PermissionsExceptions(message='Not have enough permissions')
-            print(g.user.roles)
-            for item in self.permissions[request.method]:
-                for role in g.user.roles:
-                    if not data.get(str(role.role_id), None):
-                        raise PermissionsExceptions(message='Not have enough permissions')
 
-                    if item in data[str(role.role_id)]:
-                        return True
+            for item in self.permissions[request.method]:
+                if not data.get(g.user.role.alias, None):
+                    raise PermissionsExceptions(message='Not have enough permissions')
+
+                if item in data[g.user.role.alias]:
+                    return True
 
             raise PermissionsExceptions(message='Not have enough permissions')
 

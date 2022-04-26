@@ -1,0 +1,15 @@
+{
+  "course": {
+    "fields": {
+      "id": "ID",
+      "name": "Nume",
+      "user": "Utilizator",
+      "role": "Rol",
+      "email": "Email",
+      "created_at": "Creat la"
+    },
+    "validation": {
+      "user_exists": "Utilizator cu asa email exista deja!"
+    }
+  }
+}

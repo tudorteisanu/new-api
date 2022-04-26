@@ -1,6 +1,6 @@
 import os
 from json import loads, dumps
-from src.app import db, app
+from src.app import db
 from src.modules.permissions.models import Permission
 from src.modules.roles.models import RolePermissions, Role
 
@@ -44,7 +44,7 @@ def save_permissions_to_file(global_perms=True):
 
     for role in roles:
         permissions_ids = [item.permission_id for item in role.permissions]
-        perms[role.id] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
+        perms[role.alias] = [item.alias for item in Permission.query.filter(Permission.id.in_(permissions_ids))]
 
     with open("config/permissions.json", "w") as f:
         f.write(dumps(perms))

@@ -19,14 +19,15 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
-    roles = db.relationship("UserRole", cascade='delete')
     reset_code = db.Column(db.String, server_default='')
     confirmed_at = db.Column(db.DateTime)
     login_attempts = db.Column(db.Integer, default=3)
     login_blocked_time = db.Column(db.DateTime)
     reset_password_at = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, server_default='False')
-    token = db.relationship("UserAuthTokens", uselist=False, cascade='all, delete, delete-orphan')
+    token = db.relationship("UserAuthTokens", uselist=False, cascade='delete, delete-orphan')
+    role = db.relationship("Role", uselist=False, cascade='delete')
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return 'User {} - {}'.format(self.email, self.id)
@@ -63,9 +64,3 @@ class User(UserMixin, db.Model):
         user_token = UserAuthTokens()
         user_token = user_token.query.filtter_by(user_id=self.id).first()
         user_token.access_token = None
-
-
-class UserRole(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)

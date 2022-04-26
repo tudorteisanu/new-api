@@ -31,6 +31,7 @@ if args.drop:
     db.session.commit()
     db.drop_all()
     db.create_all()
+    db.session.commit()
 
 if args.migrate:
     os.system('flask db upgrade')

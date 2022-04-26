@@ -90,7 +90,11 @@ class AuthService:
                         "id": user.id,
                         "name": user.name,
                         "email": user.email,
-                        "roles": self.__get_user_roles(user.roles)
+                        "role": {
+                            "id": user.role_id,
+                            "alias": user.role.alias,
+                            "name": user.role.name,
+                        } if user.role else None
                     },
                     "token": user.token.access_token
                 }
@@ -202,7 +206,11 @@ class AuthService:
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
-                "roles": self.__get_user_roles(user.roles)
+                "role": {
+                    "id": user.role_id,
+                    "alias": user.role.alias,
+                    "name": user.role.name,
+                } if user.role else None
             }
             return Success(data=response)
         except Exception as e:
@@ -363,15 +371,3 @@ class AuthService:
     def parse_minutes(seconds):
         return f"{seconds // 60:02d}:{seconds % 60:02d}"
 
-    def __get_user_roles(self, roles):
-        items = []
-
-        for item in roles:
-            role = self.role_repository.get(item.role_id)
-            items.append({
-                "name": role.name,
-                "alias": role.alias,
-                "id": role.id
-            })
-
-        return items

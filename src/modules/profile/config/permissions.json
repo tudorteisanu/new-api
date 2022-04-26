@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Profile get",
+    "alias": "profile.get"
+  },
+  {
+    "name": "Update update",
+    "alias": "profile.update"
+  }
+]
