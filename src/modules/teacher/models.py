@@ -16,6 +16,9 @@ class Teacher(db.Model):
     address = db.Column(db.String(256), unique=False, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
     user = db.relationship("User", backref=backref("teacher_user", uselist=False))
+    position_id = db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=True)
+    position = db.relationship("Position", backref=backref("teacher_position", uselist=False))
+    degree_id = db.Column(db.Integer, db.ForeignKey('degree.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return f'Teacher {self.first_name} {self.last_name} - {self.id}'

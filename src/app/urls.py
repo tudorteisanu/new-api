@@ -9,3 +9,4 @@ import src.modules.course
 import src.modules.degrees
 import src.modules.positions
 import src.modules.profile
+import src.modules.notifications
