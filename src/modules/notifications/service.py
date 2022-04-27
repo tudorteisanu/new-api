@@ -32,7 +32,7 @@ class NotificationService:
                     "id": item.id,
                     "title": item.title,
                     "description": item.description,
-
+                    "created_at": item.created_at,
                 } for item in items.items],
             "pages": items.pages,
             "total": items.total,
