@@ -2,8 +2,10 @@ from flask import request
 from flask import jsonify, g
 from src.app.plugins import db
 from src.modules.course import Course
-from src.modules.teacher.models import TeacherCourse, Teacher
+from src.modules.teacher.models import TeacherCourse, Teacher, TeacherDetails
 from src.services.http.errors import Success
+from src.services.http.errors import UnprocessableEntity
+from .serializer import ProfileSerializer
 from datetime import datetime as dt
 
 
@@ -16,13 +18,18 @@ class ProfileService:
         resp = {
             "position_id": teacher.position_id,
             "degree_id": teacher.degree_id,
-            "courses": self.__parse_courses(courses)
+            "courses": self.__parse_courses(courses),
+            "details": self.get_details(teacher.id)
         }
 
         return jsonify(resp)
 
     def update(self):
         data = request.json
+        serializer = ProfileSerializer(data=data)
+
+        if not serializer.is_valid():
+            return UnprocessableEntity(errors=serializer.errors)
 
         teacher = Teacher.query.filter_by(user_id=g.user.id).first()
 
@@ -34,6 +41,12 @@ class ProfileService:
 
         if data.get('position_id', None):
             teacher.position_id = data['position_id']
+
+        if data.get('work_experience', None):
+            teacher.work_experience = data['work_experience']
+
+        if data.get('details', None):
+            self.update_details(data['details'], teacher.id)
 
         db.session.commit()
 
@@ -89,3 +102,35 @@ class ProfileService:
                 new_course.name = course['name']
                 new_course.description = course['description']
                 new_course.credits = course['credits']
+
+    @staticmethod
+    def update_details(details, teacher_id):
+        old_details = TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
+
+        # for course in old_details:
+        #     if not any(x.get('id', None) == course.id for x in details):
+        #         db.session.delete(course)
+
+        for detail in details:
+            if detail.get('id', None) is None:
+                print(detail.get('id', None), 'detail.get(None)')
+                new_detail = TeacherDetails()
+                new_detail.teacher_id = teacher_id
+                db.session.add(new_detail)
+            else:
+                new_detail = TeacherDetails.query.get(detail['id'])
+
+            new_detail.title = detail['title']
+            new_detail.date = detail['date']
+
+            db.session.commit()
+
+    @staticmethod
+    def get_details(teacher_id):
+        return [
+            {
+                "id": item.id,
+                "title": item.title,
+                "date": item.date
+            } for item in TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
+        ]

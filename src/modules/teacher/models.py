@@ -14,6 +14,7 @@ class Teacher(db.Model):
     first_name = db.Column(db.String(128), unique=False, nullable=True)
     last_name = db.Column(db.String(128), unique=False, nullable=True)
     address = db.Column(db.String(256), unique=False, nullable=True)
+    work_experience = db.Column(db.Float, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
     user = db.relationship("User", backref=backref("teacher_user", uselist=False))
     position_id = db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=True)
@@ -30,5 +31,14 @@ class TeacherCourse(db.Model):
     updated_at = db.Column(db.DateTime, default=get_timestamp)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'), nullable=True)
+
+
+class TeacherDetails(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=get_timestamp)
+    updated_at = db.Column(db.DateTime, default=get_timestamp)
+    date = db.Column(db.DateTime, nullable=True)
+    title = db.Column(db.Text, nullable=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
 
 
