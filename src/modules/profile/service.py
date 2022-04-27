@@ -10,19 +10,27 @@ from datetime import datetime as dt
 class ProfileService:
     def show(self):
 
+        teacher = Teacher.query.filter_by(user_id=g.user.id).first()
+        courses_ids = [item.course_id for item in TeacherCourse.query.filter_by(teacher_id=teacher.id).all()]
+
+        courses = Course.query.filter(Course.id.in_(courses_ids)).all()
+
         resp = {
-            "message": 2
+            "position_id": teacher.position_id,
+            "degree_id": teacher.degree_id,
+            "courses": self.__parse_courses(courses)
         }
 
         return jsonify(resp)
 
-    def update(self):
+    @staticmethod
+    def update():
         data = request.json
-        print(g.user)
-        teacher = Teacher.query.filter_by(user_id=g.user.id).first()
 
+        teacher = Teacher.query.filter_by(user_id=g.user.id).first()
+        print(teacher.id)
         if data.get('courses', None):
-            parse_courses(data['courses'], teacher.id)
+            update_courses(data['courses'], teacher.id)
             
         if data.get('degree_id', None):
             teacher.degree_id = data['degree_id']
@@ -34,8 +42,20 @@ class ProfileService:
 
         return Success()
 
+    @staticmethod
+    def __parse_courses(courses):
+        return [
+            {
+                "id": item.id,
+                "name": item.name,
+                "description": item.description,
+                "credits": item.credits,
+                "start_date": item.start_date,
+            } for item in courses
+        ]
 
-def parse_courses(courses, teacher_id):
+
+def update_courses(courses, teacher_id):
     for course in courses:
         new_course = Course()
         new_course.name = course['name']
@@ -46,7 +66,6 @@ def parse_courses(courses, teacher_id):
 
         db.session.add(new_course)
         db.session.commit()
-        print(new_course, 'new_coursenew_course')
 
         teacher_course = TeacherCourse(
             teacher_id=teacher_id,
