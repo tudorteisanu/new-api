@@ -11,9 +11,7 @@ class ProfileService:
     def show(self):
 
         teacher = Teacher.query.filter_by(user_id=g.user.id).first()
-        courses_ids = [item.course_id for item in TeacherCourse.query.filter_by(teacher_id=teacher.id).all()]
-
-        courses = Course.query.filter(Course.id.in_(courses_ids)).all()
+        courses = self.get_teacher_courses(teacher.id)
 
         resp = {
             "position_id": teacher.position_id,
@@ -23,14 +21,13 @@ class ProfileService:
 
         return jsonify(resp)
 
-    @staticmethod
-    def update():
+    def update(self):
         data = request.json
 
         teacher = Teacher.query.filter_by(user_id=g.user.id).first()
-        print(teacher.id)
+
         if data.get('courses', None):
-            update_courses(data['courses'], teacher.id)
+            self.update_courses(data['courses'], teacher.id)
             
         if data.get('degree_id', None):
             teacher.degree_id = data['degree_id']
@@ -54,24 +51,41 @@ class ProfileService:
             } for item in courses
         ]
 
+    @staticmethod
+    def get_teacher_courses(teacher_id):
+        courses_ids = [item.course_id for item in TeacherCourse.query.filter_by(teacher_id=teacher_id).all()]
+        return Course.query.filter(Course.id.in_(courses_ids)).all()
 
-def update_courses(courses, teacher_id):
-    for course in courses:
-        new_course = Course()
-        new_course.name = course['name']
-        new_course.description = course['description']
-        new_course.credits = course['credits']
-        new_course.start_date = dt.now().isoformat()
-        new_course.end_date = dt.utcnow().isoformat()
+    def update_courses(self, courses, teacher_id):
+        old_courses = self.get_teacher_courses(teacher_id)
 
-        db.session.add(new_course)
-        db.session.commit()
+        for course in old_courses:
+            if not any(x.get('id', None) == course.id for x in courses):
+                db.session.delete(course)
 
-        teacher_course = TeacherCourse(
-            teacher_id=teacher_id,
-            course_id=new_course.id
-        )
+        old_courses = self.get_teacher_courses(teacher_id)
 
-        db.session.add(teacher_course)
-        db.session.commit()
+        for course in courses:
+            if not any(item.id == course.get('id', None) for item in old_courses):
+                new_course = Course()
+                new_course.name = course['name']
+                new_course.description = course['description']
+                new_course.credits = course['credits']
+                new_course.start_date = dt.now().isoformat()
+                new_course.end_date = dt.utcnow().isoformat()
 
+                db.session.add(new_course)
+                db.session.commit()
+
+                teacher_course = TeacherCourse(
+                    teacher_id=teacher_id,
+                    course_id=new_course.id
+                )
+
+                db.session.add(teacher_course)
+                db.session.commit()
+            else:
+                new_course = Course.query.get(course.get('id'))
+                new_course.name = course['name']
+                new_course.description = course['description']
+                new_course.credits = course['credits']
