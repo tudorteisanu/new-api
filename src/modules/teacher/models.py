@@ -1,6 +1,7 @@
 from src.app import db
 from datetime import datetime as dt
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 def get_timestamp():
@@ -14,12 +15,10 @@ class Teacher(db.Model):
     first_name = db.Column(db.String(128), unique=False, nullable=True)
     last_name = db.Column(db.String(128), unique=False, nullable=True)
     address = db.Column(db.String(256), unique=False, nullable=True)
-    work_experience = db.Column(db.Float, nullable=True)
+    phone = db.Column(db.String(15), unique=False, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
     user = db.relationship("User", backref=backref("teacher_user", uselist=False))
-    position_id = db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=True)
-    position = db.relationship("Position", backref=backref("teacher_position", uselist=False))
-    degree_id = db.Column(db.Integer, db.ForeignKey('degree.id', ondelete='CASCADE'), nullable=True)
+    positions = db.relationship("TeacherPositions", backref=backref("teacher_positions"))
 
     def __repr__(self):
         return f'Teacher {self.first_name} {self.last_name} - {self.id}'
@@ -29,6 +28,7 @@ class TeacherCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
+    dates = db.Column(JSONB, default=[])
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'), nullable=True)
 
@@ -37,8 +37,18 @@ class TeacherDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
-    date = db.Column(db.DateTime, nullable=True)
+    dates = db.Column(JSONB, default=[])
     title = db.Column(db.Text, nullable=True)
+    credits = db.Column(db.Float, nullable=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
+
+
+class TeacherPositions(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
+    position_id = db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=True)
+    degree_id = db.Column(db.Integer, db.ForeignKey('degree.id', ondelete='CASCADE'), nullable=True)
+    work_experience = db.Column(db.Float, nullable=True)
+
 
 
