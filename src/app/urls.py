@@ -5,7 +5,6 @@ import src.modules.roles.controller
 import src.modules.categories
 import src.modules.goods
 import src.modules.teacher
-import src.modules.course
 import src.modules.degrees
 import src.modules.positions
 import src.modules.profile

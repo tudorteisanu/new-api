@@ -33,3 +33,31 @@ class ProfileResource(BaseResource):
         except Exception as e:
             logging.error(e)
             return InternalServerError()
+
+
+class ProfileOneResource(BaseResource):
+    def __init__(self):
+        self.service = ProfileService()
+        self.permissions = Permissions.self
+
+    @auth_required()
+    def get(self, user_id):
+        try:
+            self.apply_permissions()
+            return self.service.show(user_id)
+        except PermissionsExceptions as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    @auth_required()
+    def put(self, user_id):
+        try:
+            self.apply_permissions()
+            return self.service.update(user_id)
+        except PermissionsExceptions as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()

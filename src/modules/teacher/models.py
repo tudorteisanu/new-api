@@ -29,8 +29,10 @@ class TeacherCourse(db.Model):
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
     dates = db.Column(JSONB, default=[])
+    credits = db.Column(db.Float, nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    name = db.Column(db.String, nullable=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'), nullable=True)
 
 
 class TeacherDetails(db.Model):
