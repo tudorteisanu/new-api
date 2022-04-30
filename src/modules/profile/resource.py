@@ -25,14 +25,14 @@ class ProfileResource(BaseResource):
 
     @auth_required()
     def put(self):
-        try:
+        # try:
             self.apply_permissions()
             return self.service.update()
-        except PermissionsExceptions as e:
-            return {"message": e.message}, 403
-        except Exception as e:
-            logging.error(e)
-            return InternalServerError()
+        # except PermissionsExceptions as e:
+        #     return {"message": e.message}, 403
+        # except Exception as e:
+        #     logging.error(e)
+        #     return InternalServerError()
 
 
 class ProfileOneResource(BaseResource):

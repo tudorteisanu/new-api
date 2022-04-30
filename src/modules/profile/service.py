@@ -29,7 +29,7 @@ class ProfileService:
             },
             "courses": self.get_teacher_courses(teacher.id),
             "positions": self.get_teacher_positions(teacher.id),
-            "details": self.get_details(teacher.id) if teacher else {}
+            "details": self.get_details(teacher.id)
         }
 
         return jsonify(resp)
@@ -93,22 +93,26 @@ class ProfileService:
     def update_details(details, teacher_id):
         old_details = TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
 
-        # for course in old_details:
-        #     if not any(x.get('id', None) == course.id for x in details):
-        #         db.session.delete(course)
-
-        for detail in details:
-            if detail.get('id', None) is None:
-                new_detail = TeacherDetails()
-                new_detail.teacher_id = teacher_id
-                db.session.add(new_detail)
+        for item in old_details:
+            if not any(el.id == item.id for el in old_details):
+                db.session.delete(item)
                 db.session.commit()
-            else:
-                new_detail = TeacherDetails.query.get(detail['id'])
 
-            new_detail.title = detail['title']
-            new_detail.dates = detail.get('dates') or None
-            new_detail.credits = detail['credits']
+        for item in details:
+            if item.get('id', None):
+                position = TeacherDetails.query.get(item['id'])
+
+                if not position:
+                    position = TeacherDetails(teacher_id=teacher_id)
+                    db.session.add(position)
+
+            else:
+                position = TeacherDetails(teacher_id=teacher_id)
+                db.session.add(position)
+
+            position.title = item.get('title', '')
+            position.dates = item.get('dates', [])
+            position.credits = item.get('credits', None)
 
             db.session.commit()
 

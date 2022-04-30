@@ -37,5 +37,12 @@ class TeacherRepository(Teacher):
         return model
 
     def list(self):
-        return [{"value": item.id, "text": f'{item.first_name} {item.last_name}'} for item in self.query.all()]
+        return [
+            {
+                "id": item.id,
+                "user_id": item.user_id,
+                "first_name": item.first_name,
+                "last_name": item.last_name,
+                "email": item.user.email if item.user else ""
+            } for item in self.query.all()]
 
