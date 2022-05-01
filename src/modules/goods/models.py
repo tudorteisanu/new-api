@@ -6,7 +6,7 @@ from flask import g
 
 
 def set_author():
-    if hasattr(g,'user'):
+    if hasattr(g, 'user'):
         return g.user.id
     return None
 

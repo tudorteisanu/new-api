@@ -1,41 +1,22 @@
 from src.app import db
 from src.modules.permissions.models import Permission
+from src.services.utils.repository import Repository
 
 
-class PermissionRepository(Permission):
-    def find(self, **kwargs):
-        return self.query.filter_by(**kwargs).all()
-
-    def get(self, user_id):
-        return self.query.get(user_id)
-
-    def find_one(self, **kwargs):
-        return self.query.filter_by(**kwargs).first()
-
-    def find_one_or_fail(self, user_id):
-        return self.query.get(user_id)
-
+class PermissionRepository(Permission, Repository):
     @staticmethod
-    def remove(user):
-        db.session.delete(user)
-        return True
-
-    @staticmethod
-    def create(user):
-        db.session.add(user)
-        return True
+    def create(**kwargs):
+        model = Permission(**kwargs)
+        db.session.add(model)
+        return model
 
     def paginate(self, page, per_page):
         return self.query \
             .paginate(page=page, per_page=per_page, error_out=False)
 
-    @staticmethod
-    def update(model, data):
-        for (key, value) in data.items():
-            if hasattr(model, key):
-                setattr(model, key, value)
-        return model
-
     def list(self):
         return [{"value": item.id, "text": item.alias} for item in self.query.all()]
+
+    def get_by_ids(self, array):
+        return self.query.filter(Permission.id.in_(array))
 

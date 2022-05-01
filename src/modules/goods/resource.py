@@ -1,11 +1,12 @@
 import logging
 
 from src.exceptions.permissions import PermissionsExceptions
-from src.modules.goods.config.permissions import Permissions
-from src.modules.goods.service import GoodsService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.errors import InternalServerError
+
+from .config.permissions import Permissions
+from .service import GoodsService
 
 
 class GoodsResource(BaseResource):

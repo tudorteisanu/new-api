@@ -1,16 +1,17 @@
-import os
-
 from flask import request, g
 from flask import jsonify
 from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.categories import Category
 from src.modules.categories.repository import CategoryRepository
 from src.modules.categories.serializer import CreateCategorySerializer
 
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.errors import Success
+from src.services.http.errors import UnprocessableEntity
+from src.services.http.errors import InternalServerError
+from src.services.http.errors import NotFound
+
 from src.services.localization import Locales
 from src.modules.file import file_service
 
@@ -18,6 +19,7 @@ from src.modules.file import file_service
 class CategoriesService:
     def __init__(self):
         self.repository = CategoryRepository()
+        self.file_service = file_service
         self.t = Locales()
 
     def find(self):
@@ -58,15 +60,12 @@ class CategoriesService:
 
             file = request.files.get('image', None)
 
-            model = Category(
+            self.repository.create(
                 name_ro=data['name_ro'],
                 name_en=data['name_en'],
-                name_ru=data['name_ru']
+                name_ru=data['name_ru'],
+                file_id=self.file_service.save_file(file, 'categories') or None
             )
-
-            if file:
-                model.file_id = file_service.save_file(file, 'categories') or None
-            self.repository.create(model)
 
             db.session.commit()
             return Success()
@@ -112,7 +111,7 @@ class CategoriesService:
             file = request.files.get('image', None)
 
             if file:
-                model.file_id = file_service.save_file(file, 'categories') or None
+                model.file_id = self.file_service.save_file(file, 'categories') or None
 
             self.repository.update(model, data)
             db.session.commit()

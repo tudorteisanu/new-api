@@ -1,20 +1,28 @@
-from flask import request
 from flask import jsonify, g
 from src.app.plugins import db
-from src.modules.teacher.models import TeacherCourse, Teacher, TeacherDetails
-from src.modules.teacher.models import TeacherPositions
 from src.services.http.errors import Success
 from src.services.http.errors import UnprocessableEntity
 from src.services.http.errors import NotFound
 from .serializer import ProfileSerializer
 
+from src.modules.teacher.repository import TeacherRepository
+from src.modules.teacher.repository import TeacherDetailsRepository
+from src.modules.teacher.repository import TeacherCourseRepository
+from src.modules.teacher.repository import TeacherPositionsRepository
+
 
 class ProfileService:
+    def __init__(self):
+        self.teacher_repository = TeacherRepository()
+        self.teacher_positions_repository = TeacherPositionsRepository()
+        self.teacher_course_repository = TeacherCourseRepository()
+        self.teacher_detail_repository = TeacherDetailsRepository()
+
     def show(self, user_id=None):
         if not user_id:
             user_id = g.user.id
 
-        teacher = Teacher.query.filter_by(user_id=user_id).first()
+        teacher = self.teacher_repository.find_one(user_id=user_id)
 
         if not teacher:
             return NotFound(message="Teacher not found")
@@ -34,22 +42,19 @@ class ProfileService:
 
         return jsonify(resp)
 
-    def update(self, user_id=None):
+    def update(self, data, user_id=None):
         if not user_id:
             user_id = g.user.id
 
-        data = request.json
         serializer = ProfileSerializer(data=data)
 
         if not serializer.is_valid():
             return UnprocessableEntity(errors=serializer.errors)
 
-        teacher = Teacher.query.filter_by(user_id=user_id).first()
+        teacher = self.teacher_repository.find_one(user_id=user_id)
 
         if not teacher:
-            teacher = Teacher(user_id=user_id)
-            db.session.add(teacher)
-            db.session.commit()
+            teacher = self.teacher_repository.create(user_id=user_id)
 
         if data.get('teacher', None):
             self.update_teacher(teacher, data['teacher'])
@@ -67,9 +72,8 @@ class ProfileService:
 
         return Success()
 
-    @staticmethod
-    def get_teacher_courses(teacher_id):
-        courses = TeacherCourse.query.filter_by(teacher_id=teacher_id).all()
+    def get_teacher_courses(self, teacher_id):
+        courses = self.teacher_course_repository.find(teacher_id=teacher_id)
 
         return [{
             "id": item.id,
@@ -79,9 +83,8 @@ class ProfileService:
             "description": item.description,
         } for item in courses]
 
-    @staticmethod
-    def get_teacher_positions(teacher_id):
-        positions = TeacherPositions.query.filter_by(teacher_id=teacher_id).all()
+    def get_teacher_positions(self, teacher_id):
+        positions = self.teacher_positions_repository.find(teacher_id=teacher_id)
         return [{
             "id": item.id,
             "position_id": item.position_id,
@@ -89,95 +92,93 @@ class ProfileService:
             "work_experience": item.work_experience,
         } for item in positions]
 
-    @staticmethod
-    def update_details(details, teacher_id):
-        old_details = TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
+    def update_details(self, details, teacher_id):
+        old_details = self.teacher_detail_repository.find(teacher_id=teacher_id)
 
         for item in old_details:
-            if not any(el.id == item.id for el in old_details):
+            if not any(el.get('id', None) == item.id for el in details):
                 db.session.delete(item)
                 db.session.commit()
 
         for item in details:
             if item.get('id', None):
-                position = TeacherDetails.query.get(item['id'])
+                detail = self.teacher_detail_repository.get(item['id'])
 
-                if not position:
-                    position = TeacherDetails(teacher_id=teacher_id)
-                    db.session.add(position)
+                if not detail:
+                    detail = self.teacher_detail_repository.create(teacher_id=teacher_id)
 
             else:
-                position = TeacherDetails(teacher_id=teacher_id)
-                db.session.add(position)
+                detail = self.teacher_detail_repository.create(teacher_id=teacher_id)
 
-            position.title = item.get('title', '')
-            position.dates = item.get('dates', [])
-            position.credits = item.get('credits', None)
+            self.teacher_detail_repository.update(detail, {
+                "title": item.get('title', ''),
+                "dates": item.get('dates', []),
+                "credits": item.get('credits', None)
+            })
 
             db.session.commit()
 
-    @staticmethod
-    def update_positions(positions, teacher_id):
-        old_positions = TeacherPositions.query.filter_by(teacher_id=teacher_id).all()
+    def update_positions(self, positions, teacher_id):
+        old_positions = self.teacher_positions_repository.find(teacher_id=teacher_id)
 
         for item in old_positions:
             if not any(el.get('id', None) == item.id for el in positions):
                 db.session.delete(item)
+                db.session.commit()
 
         for item in positions:
             if item.get('id', None):
-                position = TeacherPositions.query.get(item['id'])
+                position = self.teacher_positions_repository.get(item['id'])
 
                 if not position:
-                    position = TeacherPositions(teacher_id=teacher_id)
-                    db.session.add(position)
+                    position = self.teacher_positions_repository.create(teacher_id=teacher_id)
 
             else:
-                position = TeacherPositions(teacher_id=teacher_id)
-                db.session.add(position)
+                position = self.teacher_positions_repository.create(teacher_id=teacher_id)
 
-            position.position_id = item['position_id']
-            position.degree_id = item['degree_id']
-            position.work_experience = item['work_experience']
+            self.teacher_positions_repository.update(position, {
+                "position_id": item['position_id'],
+                "degree_id": item['degree_id'],
+                "work_experience": item['work_experience']
+            })
 
         db.session.commit()
 
-    @staticmethod
-    def update_courses(positions, teacher_id):
-        old_data = TeacherCourse.query.filter_by(teacher_id=teacher_id).all()
+    def update_courses(self, positions, teacher_id):
+        old_data = self.teacher_course_repository.find(teacher_id=teacher_id)
 
         for item in old_data:
             if not any(el.get('id', None) == item.id for el in positions):
                 db.session.delete(item)
+                db.session.commit()
 
         for item in positions:
             if item.get('id', None):
-                course = TeacherCourse.query.get(item['id'])
+                course = self.teacher_course_repository.get(item['id'])
 
                 if not course:
-                    course = TeacherCourse(teacher_id=teacher_id)
-                    db.session.add(course)
+                    course = self.teacher_course_repository.create(teacher_id=teacher_id)
 
             else:
-                course = TeacherCourse(teacher_id=teacher_id)
-                db.session.add(course)
+                course = self.teacher_course_repository.create(teacher_id=teacher_id)
 
-            course.dates = item.get('dates', [])
-            course.credits = item.get('credits', None)
-            course.name = item.get('name', '')
-            course.description = item.get('description', '')
+            self.teacher_course_repository.update(course, {
+                "dates": item.get('dates', []),
+                "credits": item.get('credits', None),
+                "name": item.get('name', ''),
+                "description": item.get('description', ''),
+            })
 
         db.session.commit()
 
-    @staticmethod
-    def get_details(teacher_id):
+    def get_details(self, teacher_id):
         return [
             {
                 "id": item.id,
                 "title": item.title,
                 "dates": item.dates,
                 "credits": item.credits
-            } for item in TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
+            } for item in self.teacher_detail_repository.find(teacher_id=teacher_id)
         ]
 
     @staticmethod

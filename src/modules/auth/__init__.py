@@ -1,13 +1,13 @@
 from src.app import api
-from src.modules.auth.resource import LoginResource
-from src.modules.auth.resource import LogoutResource
-from src.modules.auth.resource import RegisterResource
-from src.modules.auth.resource import ResetPasswordResource
-from src.modules.auth.resource import ForgotPasswordResource
-from src.modules.auth.resource import ChangePasswordResource
-from src.modules.auth.resource import ConfirmEmailResource
-from src.modules.auth.resource import CheckResetTokenResource
-from src.modules.auth.resource import ReadUserResource
+from .resource import LoginResource
+from .resource import LogoutResource
+from .resource import RegisterResource
+from .resource import ResetPasswordResource
+from .resource import ForgotPasswordResource
+from .resource import ChangePasswordResource
+from .resource import ConfirmEmailResource
+from .resource import CheckResetTokenResource
+from .resource import ReadUserResource
 
 resource = '/auth'
 
@@ -20,7 +20,3 @@ api.add_resource(ChangePasswordResource, f'{resource}/change_password')
 api.add_resource(ConfirmEmailResource, f'{resource}/activate')
 api.add_resource(CheckResetTokenResource, f'{resource}/check_reset_token')
 api.add_resource(ReadUserResource, '/users/<model_id>/read')
-
-
-# todo admin can reset user password
-# todo search teachers by Nume prenume, grad

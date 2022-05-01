@@ -1,5 +1,5 @@
 {
-  "course": {
+  "teachers": {
     "fields": {
       "id": "ID",
       "name": "Nume",

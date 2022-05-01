@@ -1,70 +1,42 @@
 from src.app import db
-from src.modules.teacher.models import Teacher
-from src.modules.teacher.models import TeacherPositions
+from .models import Teacher
+from .models import TeacherPositions
+from .models import TeacherCourse
+from .models import TeacherDetails
+from src.services.utils.repository import Repository
 
 
-class TeacherRepository(Teacher):
-    def find(self, **kwargs):
-        return self.query.filter_by(**kwargs).all()
-
-    def get(self, model_id):
-        return self.query.get(model_id)
-
-    def find_one(self, **kwargs):
-        return self.query.filter_by(**kwargs).first()
-
-    def find_one_or_fail(self, model_id):
-        return self.query.get(model_id)
-
+class TeacherRepository(Teacher, Repository):
     @staticmethod
-    def remove(model):
-        db.session.delete(model)
-        return True
-
-    @staticmethod
-    def create(model):
+    def create(**kwargs):
+        model = Teacher(**kwargs)
         db.session.add(model)
-        return True
-
-    def paginate(self, **kwargs):
-        query = self.query
-        page = kwargs.get('page', 1)
-        page_size = kwargs.get('page_size', 20)
-
-        if kwargs.get('filters', None) is not None:
-            for key in kwargs['filters']:
-                if key == 'degree_id':
-                    teachers_ids = [item.teacher_id for item in
-                                    TeacherPositions.query.filter_by(degree_id=kwargs["filters"][key]).all()]
-
-                    query = query.filter(Teacher.id.in_(teachers_ids))
-
-                elif hasattr(self, key):
-                    query = query.filter(getattr(self, key) == kwargs["filters"][key])
-
-        response = query.paginate(page=page, per_page=page_size, error_out=False)
-
-        return {
-            "items": response.items,
-            "pages": response.pages,
-            "total": response.total,
-            "page_size": page_size,
-            "page": page,
-        }
-
-    @staticmethod
-    def update(model, data):
-        for (key, value) in data.items():
-            if hasattr(model, key):
-                setattr(model, key, value)
+        db.session.commit()
         return model
 
-    def list(self):
-        return [
-            {
-                "id": item.id,
-                "user_id": item.user_id,
-                "first_name": item.first_name,
-                "last_name": item.last_name,
-                "email": item.user.email if item.user else ""
-            } for item in self.query.all()]
+
+class TeacherCourseRepository(TeacherCourse, Repository):
+    @staticmethod
+    def create(**kwargs):
+        model = TeacherCourse(**kwargs)
+        db.session.add(model)
+        db.session.commit()
+        return model
+
+
+class TeacherDetailsRepository(TeacherDetails, Repository):
+    @staticmethod
+    def create(**kwargs):
+        model = TeacherDetails(**kwargs)
+        db.session.add(model)
+        db.session.commit()
+        return model
+
+
+class TeacherPositionsRepository(TeacherPositions, Repository):
+    @staticmethod
+    def create(**kwargs):
+        model = TeacherPositions(**kwargs)
+        db.session.add(model)
+        db.session.commit()
+        return model

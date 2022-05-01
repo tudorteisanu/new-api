@@ -4,15 +4,21 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from .models import Notification, UserReadNotification
+
 from .repository import NotificationRepository
+from .repository import UserReadNotificationRepository
 from .serializer import CreateNotificationSerializer
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+
+from src.services.http.errors import Success
+from src.services.http.errors import UnprocessableEntity
+from src.services.http.errors import InternalServerError
+from src.services.http.errors import NotFound
 
 
 class NotificationService:
     def __init__(self):
         self.repository = NotificationRepository()
+        self.user_notification_repository = UserReadNotificationRepository()
 
     def find(self):
         headers = [
@@ -52,12 +58,10 @@ class NotificationService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            model = Notification(
+            self.user_notification_repository.create(
                 title=data['title'],
                 description=data['description'],
-
             )
-            self.repository.create(model)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -75,10 +79,10 @@ class NotificationService:
                 return NotFound(message='Notification not found')
 
             return {
-                    "id": model.id,
-                    "title": model.title,
-                    "description": model.description,
-                }
+                "id": model.id,
+                "title": model.title,
+                "description": model.description,
+            }
         except Exception as e:
             logging.error(e)
             return InternalServerError()
@@ -148,37 +152,34 @@ class NotificationService:
             logging.error(e)
             return InternalServerError()
 
-    @staticmethod
-    def get_count():
+    def get_count(self):
         try:
-            notifications = Notification.query.all()
+            notifications = self.repository.find()
             items = []
             for item in notifications:
-                if not UserReadNotification.query.filter_by(user_id=g.user.id, notification_id=item.id).first():
+                if not self.user_notification_repository.find_one(user_id=g.user.id, notification_id=item.id):
                     items.append(item)
             return len(items)
         except Exception as e:
             logging.error(e)
             return InternalServerError()
 
-    @staticmethod
-    def set_read_at(notification_id):
-        notification = UserReadNotification.query.filter_by(notification_id=notification_id, user_id=g.user.id).first()
+    def set_read_at(self, notification_id):
+        notification = self.user_notification_repository.find_one(notification_id=notification_id, user_id=g.user.id)
 
         if notification:
             return notification.created_at
 
         return None
 
-    @staticmethod
-    def read_notifications(items):
+    def read_notifications(self, items):
         for item in items:
-            notification = UserReadNotification.query.filter_by(notification_id=item.id, user_id=g.user.id).first()
+            notification = self.user_notification_repository.find_one(notification_id=item.id, user_id=g.user.id)
 
             if not notification:
-                new_read_notification = UserReadNotification()
-                new_read_notification.notification_id = item.id
-                new_read_notification.user_id = g.user.id
-                db.session.add(new_read_notification)
-                db.session.commit()
+                self.user_notification_repository.create(
+                    notification_id=item.id,
+                    user_id=g.user.id
+                )
 
+                db.session.commit()

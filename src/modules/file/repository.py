@@ -4,8 +4,10 @@ from .models import File
 
 class FileRepository(File):
     @staticmethod
-    def create(model):
-        return db.session.add(model)
+    def create(**kwargs):
+        model = File(**kwargs)
+        db.session.add(model)
+        return model
 
     @staticmethod
     def update(model, data):

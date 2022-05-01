@@ -6,11 +6,13 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.goods import Good
 from src.modules.goods.repository import GoodsRepository
 from src.modules.goods.serializer import CreateGoodSerializer
 
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.errors import Success
+from src.services.http.errors import UnprocessableEntity
+from src.services.http.errors import InternalServerError
+from src.services.http.errors import NotFound
 from src.services.localization import Locales
 from src.modules.file import file_service
 from random import sample
@@ -61,7 +63,9 @@ class GoodsService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            model = Good(
+            file = request.files.get('image', None)
+
+            self.repository.create(
                 name_ro=data['name_ro'],
                 name_en=data['name_en'],
                 name_ru=data['name_ru'],
@@ -73,14 +77,9 @@ class GoodsService:
                 width=data.get('width', None),
                 length=data.get('length', None),
                 price=data.get('price', None),
+                file_id=file_service.save_file(file, 'goods') or None
             )
 
-            file = request.files.get('image', None)
-
-            if file:
-                model.file_id = file_service.save_file(file, 'goods') or None
-
-            self.repository.create(model)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -211,14 +210,13 @@ class GoodsService:
                 "price": model.price,
                 "description": getattr(model, f'description_{g.language}'),
                 "image_url": model.image.get_url() if model.image else '',
-                "items":  [{
+                "items": [{
                     "id": item.id,
                     "name": getattr(item, f'name_{g.language}'),
                     "image_url": item.image.get_url() if item.image else '',
                     "price": item.price
                 } for item in random_goods]
             }
-
 
             if model.category:
                 response['category'] = {
@@ -230,6 +228,5 @@ class GoodsService:
             logging.error(e)
             return InternalServerError()
 
-    @staticmethod
-    def get_similar_products(model, count=5):
-        return sample(Good.query.filter(Good.id != model.id).all(), count)
+    def get_similar_products(self, model, count=5):
+        return sample(self.repository.get_similar(model.id), count)

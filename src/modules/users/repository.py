@@ -1,29 +1,15 @@
 from src.app import db
 from src.modules.users.models import User
+from src.services.utils.repository import Repository
 
 
-class UserRepository(User):
-    def find(self, **kwargs):
-        return self.query.filter_by(**kwargs).all()
-
-    def get(self, user_id):
-        return self.query.get(user_id)
-
-    def find_one(self, **kwargs):
-        return self.query.filter_by(**kwargs).first()
-
-    def find_one_or_fail(self, user_id):
-        return self.query.get(user_id)
-
+class UserRepository(User, Repository):
     @staticmethod
-    def remove(user):
-        db.session.delete(user)
-        return True
-
-    @staticmethod
-    def create(user):
-        db.session.add(user)
-        return True
+    def create(**kwargs):
+        model = User(**kwargs)
+        db.session.add(model)
+        db.session.commit(model)
+        return model
 
     def paginate(self, page, per_page, filters=None):
         query = self.query
@@ -37,14 +23,6 @@ class UserRepository(User):
 
         return query \
             .paginate(page=page, per_page=per_page, error_out=False)
-
-    @staticmethod
-    def update(model, data):
-        for (key, value) in data.items():
-            if hasattr(model, key):
-                setattr(model, key, value)
-
-        return model
 
     def list(self):
         return [{"value": item.id, "text": item.name, "email": item.email} for item in self.query.all()]

@@ -1,8 +1,9 @@
 import logging
 
 from src.exceptions.permissions import PermissionsExceptions
-from src.modules.categories.config.permissions import Permissions
-from src.modules.categories.service import CategoriesService
+from .config.permissions import Permissions
+from .service import CategoriesService
+
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.errors import InternalServerError

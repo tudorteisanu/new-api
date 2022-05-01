@@ -4,11 +4,14 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.permissions.models import Permission
+
 from src.modules.permissions.repository import PermissionRepository
 from src.modules.permissions.serializer import CreatePermissionSerializer
 
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.errors import Success
+from src.services.http.errors import UnprocessableEntity
+from src.services.http.errors import InternalServerError
+from src.services.http.errors import NotFound
 
 
 class PermissionService:
@@ -53,11 +56,11 @@ class PermissionService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            user = Permission(
+            self.repository.create(
                 name=data['name'],
                 alias=data['alias']
             )
-            self.repository.create(user)
+
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:

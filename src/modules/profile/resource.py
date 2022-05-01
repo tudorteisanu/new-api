@@ -5,6 +5,7 @@ from .service import ProfileService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.errors import InternalServerError
+from flask import request
 
 
 class ProfileResource(BaseResource):
@@ -25,14 +26,14 @@ class ProfileResource(BaseResource):
 
     @auth_required()
     def put(self):
-        # try:
+        try:
             self.apply_permissions()
-            return self.service.update()
-        # except PermissionsExceptions as e:
-        #     return {"message": e.message}, 403
-        # except Exception as e:
-        #     logging.error(e)
-        #     return InternalServerError()
+            return self.service.update(request.json)
+        except PermissionsExceptions as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
 
 
 class ProfileOneResource(BaseResource):
@@ -55,7 +56,7 @@ class ProfileOneResource(BaseResource):
     def put(self, user_id):
         try:
             self.apply_permissions()
-            return self.service.update(user_id)
+            return self.service.update(user_id, request.json)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
         except Exception as e:

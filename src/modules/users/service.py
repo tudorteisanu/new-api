@@ -7,7 +7,6 @@ import logging
 from datetime import datetime as dt
 
 from src.app import db
-from src.modules.users.models import User
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
 
@@ -63,16 +62,14 @@ class UsersService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            user = User()
-            user.name = data['name'],
-            user.email = data['email']
-            user.role_id = data['role_id']
-            user.confirmed_at = dt.utcnow().isoformat()
-            user.is_active = True
-            user.password = user.hash_password(data['password'])
-
-            self.repository.create(user)
-            db.session.commit()
+            self.repository.create(
+                name=data['name'],
+                email=data['email'],
+                role_id=data['role_id'],
+                confirmed_at=dt.utcnow().isoformat(),
+                is_active=True,
+                password=self.hash_password(data['password'])
+            )
             return Success()
         except exc.IntegrityError as e:
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
@@ -140,4 +137,3 @@ class UsersService:
         except Exception as e:
             logging.error(e)
             return InternalServerError()
-

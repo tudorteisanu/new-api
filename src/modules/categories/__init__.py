@@ -1,7 +1,11 @@
 from src.app import api
 from .models import Category
-from src.modules.categories.resource import CategoryResource, CategoryOneResource, CategoryListResource
-from .resource import CategoriesPublicResource, CategoriesPublicListResource
+from .resource import CategoryResource
+from .resource import CategoryOneResource
+from .resource import CategoryListResource
+from .resource import CategoriesPublicResource
+from .resource import CategoriesPublicListResource
+
 resource = '/categories'
 
 api.add_resource(CategoryResource, resource)

@@ -1,5 +1,8 @@
 from src.app import api
-from src.modules.permissions.resource import PermissionResource, PermissionListResource, PermissionOneResource
+
+from .resource import PermissionResource
+from .resource import PermissionListResource
+from .resource import PermissionOneResource
 
 resource = '/permissions'
 

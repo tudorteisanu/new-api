@@ -1,5 +1,4 @@
 import logging
-
 from src.exceptions.permissions import PermissionsExceptions
 from src.modules.teacher.config.permissions import Permissions
 from src.modules.teacher.service import TeacherService

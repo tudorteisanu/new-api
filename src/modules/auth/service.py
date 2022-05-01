@@ -11,16 +11,15 @@ from src.services.mail.mail import send_forgot_password_email
 from src.services.mail.mail import send_info_email
 from src.services.mail.token import generate_confirmation_token, confirm_token
 
-from src.modules.users.models import User
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
 
-from src.modules.auth.serializer import LoginSerializer
-from src.modules.auth.serializer import RegisterSerializer
-from src.modules.auth.serializer import ChangePasswordSerializer
-from src.modules.auth.serializer import TokenSerializer
-from src.modules.auth.serializer import ResetPasswordSerializer
-from src.modules.auth.serializer import ForgotPasswordSerializer
+from .serializer import LoginSerializer
+from .serializer import RegisterSerializer
+from .serializer import ChangePasswordSerializer
+from .serializer import TokenSerializer
+from .serializer import ResetPasswordSerializer
+from .serializer import ForgotPasswordSerializer
 
 from src.services.http.errors import UnprocessableEntity
 from src.services.http.errors import NotFound
@@ -35,7 +34,7 @@ class AuthService:
         self.repository = UserRepository()
         self.role_repository = RoleRepository()
         self.request = request
-        t = Locales()
+        self.t = Locales()
 
     def login(self):
         data = self.request.json
@@ -124,11 +123,10 @@ class AuthService:
             if self.repository.find_one(email=data['email']) is not None:
                 return UnprocessableEntity(message="User exists")
 
-            new_user = User(
+            new_user = self.repository.create(
                 email=data['email'],
                 name=data['name'],
             )
-            self.repository.create(new_user)
 
             new_user.hash_password(data['password'])
             new_user.create_access_token()
@@ -370,4 +368,3 @@ class AuthService:
     @staticmethod
     def parse_minutes(seconds):
         return f"{seconds // 60:02d}:{seconds % 60:02d}"
-
