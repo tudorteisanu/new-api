@@ -11,41 +11,45 @@ from src.modules.users.models import User
 from src.modules.roles.models import Role
 from src.modules.teacher.serializer import CreateTeacherSerializer
 from datetime import datetime as dt
-
+from json import loads
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.localization import Locales
 
 
 class TeacherService:
     def __init__(self):
         self.repository = TeacherRepository()
         self.usersRepository = UserRepository()
+        self.t = Locales()
 
     def find(self):
-        headers = [
-            {"value": "id", "text": "ID"},
-            {"value": "first_name", "text": 'first name'},
-            {"value": "last_name", "text": 'Last name'},
-            {"value": "address", "text": 'Address'},
-            {"value": "user_name", "text": 'User name'}
-        ]
-
+        headers = ['id', "first_name", "last_name", "name_ru", "address"]
         params = request.args
+        filters = params.get('filter', None)
 
-        items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+        page = int(params.get('page', 1))
+        page_size = int(params.get('page_size', 20))
+
+        if filters is not None:
+            filters = loads(filters)
+
+        response = self.repository.paginate(page=page, page_size=page_size, filters=filters)
 
         resp = {
+            **response,
             "items": [
                 {
                     "first_name": item.first_name,
                     "last_name": item.last_name,
+                    "email": item.user.email if item.user else "",
                     "address": item.address,
-                    "user_name": item.user.name if item.user else '',
+                    "user_id": item.user.id if item.user else None,
                     "id": item.id,
-                } for item in items.items],
-            "pages": items.pages,
-            "total": items.total,
-            "headers": headers
+                } for item in response['items']],
+            "headers": [{
+                "value": item,
+                "text": self.t.translate(f'goods.fields.{item}')
+            } for item in headers]
         }
 
         return jsonify(resp)
@@ -74,9 +78,11 @@ class TeacherService:
             user.password = user.hash_password(data['password'])
             role = Role.query.filter_by(alias='guest').first()
             user.role_id = role.id
+
             db.session.add(user)
             db.session.commit()
-
+            model.user_id = user.id
+            db.session.commit()
             return Success()
         except exc.IntegrityError as e:
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")

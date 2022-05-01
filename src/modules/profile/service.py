@@ -118,7 +118,7 @@ class ProfileService:
 
     @staticmethod
     def update_positions(positions, teacher_id):
-        old_positions = TeacherDetails.query.filter_by(teacher_id=teacher_id).all()
+        old_positions = TeacherPositions.query.filter_by(teacher_id=teacher_id).all()
 
         for item in old_positions:
             if not any(el.get('id', None) == item.id for el in positions):

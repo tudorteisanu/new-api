@@ -1,5 +1,6 @@
 from src.app import db
 from src.modules.teacher.models import Teacher
+from src.modules.teacher.models import TeacherPositions
 
 
 class TeacherRepository(Teacher):
@@ -25,9 +26,31 @@ class TeacherRepository(Teacher):
         db.session.add(model)
         return True
 
-    def paginate(self, page, per_page):
-        return self.query \
-            .paginate(page=page, per_page=per_page, error_out=False)
+    def paginate(self, **kwargs):
+        query = self.query
+        page = kwargs.get('page', 1)
+        page_size = kwargs.get('page_size', 20)
+
+        if kwargs.get('filters', None) is not None:
+            for key in kwargs['filters']:
+                if key == 'degree_id':
+                    teachers_ids = [item.teacher_id for item in
+                                    TeacherPositions.query.filter_by(degree_id=kwargs["filters"][key]).all()]
+
+                    query = query.filter(Teacher.id.in_(teachers_ids))
+
+                elif hasattr(self, key):
+                    query = query.filter(getattr(self, key) == kwargs["filters"][key])
+
+        response = query.paginate(page=page, per_page=page_size, error_out=False)
+
+        return {
+            "items": response.items,
+            "pages": response.pages,
+            "total": response.total,
+            "page_size": page_size,
+            "page": page,
+        }
 
     @staticmethod
     def update(model, data):
@@ -45,4 +68,3 @@ class TeacherRepository(Teacher):
                 "last_name": item.last_name,
                 "email": item.user.email if item.user else ""
             } for item in self.query.all()]
-

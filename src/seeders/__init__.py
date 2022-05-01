@@ -3,6 +3,8 @@ from src.seeders.modules.roles import roles_seeder
 from src.seeders.modules.users import users_seeder
 from .modules.categories import categories_seeder
 from .modules.goods import goods_seeder
+from .modules.degrees import degree_seeder
+from .modules.positions import positions_seeder
 from datetime import datetime as dt
 
 
@@ -19,6 +21,8 @@ def seed_db():
         seeders = [
             roles_seeder,
             users_seeder,
+            degree_seeder,
+            positions_seeder,
             # categories_seeder,
             # goods_seeder
         ]

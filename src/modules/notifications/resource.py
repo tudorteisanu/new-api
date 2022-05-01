@@ -15,10 +15,7 @@ class NotificationResource(BaseResource):
     @auth_required()
     def get(self):
         try:
-            self.apply_permissions()
             return self.service.find()
-        except PermissionsExceptions as e:
-            return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
             return InternalServerError()
@@ -82,11 +79,20 @@ class NotificationListResource(BaseResource):
     @auth_required()
     def get(self):
         try:
-            self.apply_permissions()
             return self.service.get_list()
-        except PermissionsExceptions as e:
-            return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
             return InternalServerError()
-   
+
+
+class NotificationCountResource(BaseResource):
+    def __init__(self):
+        self.service = NotificationService()
+
+    @auth_required()
+    def get(self):
+        try:
+            return self.service.get_count()
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()

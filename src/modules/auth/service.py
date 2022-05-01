@@ -333,7 +333,7 @@ class AuthService:
             serializer = ChangePasswordSerializer(data)
 
             if not serializer.is_valid():
-                return serializer.errors, 422
+                return UnprocessableEntity(errors=serializer.errors)
 
             old_password = data.get('old_password', None)
             new_password = data.get('new_password', None)
