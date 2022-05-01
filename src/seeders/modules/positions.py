@@ -1,5 +1,6 @@
 from src.modules.positions.models import Position
 from src.app import db, app
+from faker import Faker
 
 data = [
     {
@@ -60,6 +61,10 @@ class PositionsSeeder:
             for item in data:
                 if not (Position.query.filter_by(name=item['name']).first()):
                     self.seeder.append(Position(name=item['name']))
+
+            for item in range(5000):
+                faker = Faker('ro_RO')
+                self.seeder.append(Position(name=faker.name()))
             db.session.add_all(self.seeder)
             db.session.commit()
 

@@ -9,6 +9,8 @@ from .repository import PositionRepository
 from .serializer import CreatePositionSerializer
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 
+from src.services.redis import redis_service, RedisKeys
+
 
 class PositionService:
     def __init__(self):
@@ -52,6 +54,8 @@ class PositionService:
             )
             self.repository.create(model)
             db.session.commit()
+
+            redis_service.set(RedisKeys.positions_list, self.repository.list())
             return Success()
         except exc.IntegrityError as e:
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
@@ -85,6 +89,8 @@ class PositionService:
 
             self.repository.update(model, data)
             db.session.commit()
+
+            redis_service.set(RedisKeys.positions_list, self.repository.list())
             return Success()
         except exc.IntegrityError as e:
             db.session.rollback()
@@ -104,6 +110,7 @@ class PositionService:
 
             self.repository.remove(model)
             db.session.commit()
+            redis_service.set(RedisKeys.positions_list, self.repository.list())
             return Success()
         except Exception as e:
             logging.error(e)
@@ -112,7 +119,12 @@ class PositionService:
 
     def get_list(self):
         try:
-            return self.repository.list()
+            if redis_service.get(RedisKeys.positions_list):
+                return redis_service.get(RedisKeys.positions_list)
+
+            items = self.repository.list()
+            redis_service.set(RedisKeys.positions_list, items)
+            return items
         except Exception as e:
             logging.error(e)
             return InternalServerError()

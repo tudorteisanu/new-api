@@ -1,5 +1,4 @@
 from flask import Flask
-from flask.views import MethodView
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_cors import CORS
@@ -8,6 +7,8 @@ from flask import request, g
 from flask_socketio import SocketIO
 from flask_jwt_extended import JWTManager
 from src.app.config import FlaskConfig
+from flask_redis import FlaskRedis
+
 
 app = Flask(__name__, template_folder='../../templates', static_folder="../static")
 app.config.from_object(FlaskConfig)
@@ -19,6 +20,9 @@ CORS(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 db.init_app(app)
+
+redis = FlaskRedis()
+redis.init_app(app)
 
 
 @app.before_request
