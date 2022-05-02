@@ -146,11 +146,13 @@ class NotificationService:
 
             self.read_notifications(items.items)
 
+            db.session.commit()
             return jsonify(resp)
 
         except Exception as e:
+            db.session.rollback()
             logging.error(e)
-            return InternalServerError()
+            raise InternalServerError()
 
     def get_count(self):
         try:
@@ -181,5 +183,3 @@ class NotificationService:
                     notification_id=item.id,
                     user_id=g.user.id
                 )
-
-        db.session.commit()

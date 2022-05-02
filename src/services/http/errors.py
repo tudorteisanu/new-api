@@ -78,7 +78,7 @@ class ForbiddenError(BaseError):
 
 class InternalServerError(BaseError):
     errors = None
-    message = "Forbidden"
+    message = "Internal server error"
     status = 500
 
 

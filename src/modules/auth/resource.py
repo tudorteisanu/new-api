@@ -1,8 +1,13 @@
 # utf-8
+import logging
+
 from flask_restful import Resource
 
+from src.exceptions.http import ValidationError, UnknownError
 from src.modules.auth.service import AuthService
 from src.services.http.auth_utils import auth_required
+from src.services.http.errors import InternalServerError
+from src.services.http.errors import UnprocessableEntity
 
 
 class LoginResource(Resource):
@@ -10,7 +15,14 @@ class LoginResource(Resource):
         self.service = AuthService()
 
     def post(self):
-        return self.service.login()
+        try:
+            return self.service.login()
+        # todo make the same for all modules
+        except ValidationError as e:
+            return UnprocessableEntity(errors=e.errors)
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
 
 
 class RegisterResource(Resource):
@@ -18,7 +30,13 @@ class RegisterResource(Resource):
         self.service = AuthService()
 
     def post(self):
-        return self.service.register()
+        try:
+            return self.service.register()
+        except ValidationError as e:
+            return UnprocessableEntity(errors=e.errors)
+        except UnknownError as e:
+            logging.error(e)
+            return InternalServerError()
 
 
 class ConfirmEmailResource(Resource):
