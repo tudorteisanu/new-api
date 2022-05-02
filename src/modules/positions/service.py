@@ -7,7 +7,7 @@ from src.app import db
 from .models import Position
 from .repository import PositionRepository
 from .serializer import CreatePositionSerializer
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 
 from src.services.redis import redis_service, RedisKeys
 

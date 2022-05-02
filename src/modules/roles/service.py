@@ -11,7 +11,7 @@ from src.modules.roles.repository import RoleRepository, RolePermissionsReposito
 from src.modules.roles.serializer import CreateRoleSerializer, PermissionsSerializer
 from src.services.permissions import permissions_service
 
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 
 
 class RoleService:

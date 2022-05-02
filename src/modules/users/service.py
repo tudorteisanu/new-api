@@ -10,7 +10,7 @@ from src.app import db
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
 
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 from src.modules.users.serializer import CreateUserSerializer
 
 

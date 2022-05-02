@@ -4,8 +4,14 @@ from .config.permissions import Permissions
 from .service import ProfileService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
-from src.services.http.errors import InternalServerError
+from src.services.http.response import InternalServerError
+from src.services.http.response import UnprocessableEntity
+from src.services.http.response import NotFound
 from flask import request
+
+from src.exceptions.http import UnknownError
+from src.exceptions.http import NotFoundException
+from src.exceptions.http import ValidationError
 
 
 class ProfileResource(BaseResource):
@@ -20,9 +26,11 @@ class ProfileResource(BaseResource):
             return self.service.show()
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
-        except Exception as e:
+        except UnknownError as e:
             logging.error(e)
             return InternalServerError()
+        except NotFoundException as e:
+            return NotFound(message=e.message)
 
     @auth_required()
     def put(self):
@@ -31,7 +39,9 @@ class ProfileResource(BaseResource):
             return self.service.update(request.json)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
-        except Exception as e:
+        except ValidationError as e:
+            return UnprocessableEntity(errors=e.errors)
+        except UnknownError as e:
             logging.error(e)
             return InternalServerError()
 
@@ -48,9 +58,11 @@ class ProfileOneResource(BaseResource):
             return self.service.show(user_id)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
-        except Exception as e:
+        except UnknownError as e:
             logging.error(e)
             return InternalServerError()
+        except NotFoundException as e:
+            return NotFound(message=e.message)
 
     @auth_required()
     def put(self, user_id):
@@ -59,6 +71,8 @@ class ProfileOneResource(BaseResource):
             return self.service.update(user_id, request.json)
         except PermissionsExceptions as e:
             return {"message": e.message}, 403
-        except Exception as e:
+        except ValidationError as e:
+            return UnprocessableEntity(errors=e.errors)
+        except UnknownError as e:
             logging.error(e)
             return InternalServerError()

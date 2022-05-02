@@ -8,10 +8,10 @@ from src.app import db
 from src.modules.permissions.repository import PermissionRepository
 from src.modules.permissions.serializer import CreatePermissionSerializer
 
-from src.services.http.errors import Success
-from src.services.http.errors import UnprocessableEntity
-from src.services.http.errors import InternalServerError
-from src.services.http.errors import NotFound
+from src.services.http.response import Success
+from src.services.http.response import UnprocessableEntity
+from src.services.http.response import InternalServerError
+from src.services.http.response import NotFound
 
 
 class PermissionService:

@@ -12,7 +12,7 @@ from src.modules.roles.models import Role
 from src.modules.teacher.serializer import CreateTeacherSerializer
 from datetime import datetime as dt
 from json import loads
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 from src.services.localization import Locales
 
 

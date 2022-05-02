@@ -5,7 +5,7 @@ from src.modules.roles.config.permissions import Permissions
 from src.modules.roles.service import RoleService, RolePermissionsService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
-from src.services.http.errors import InternalServerError
+from src.services.http.response import InternalServerError
 
 
 class RolesResource(BaseResource):

@@ -7,7 +7,7 @@ from src.app import db
 from .models import Degree
 from .repository import DegreeRepository
 from .serializer import CreateDegreeSerializer
-from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
+from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 
 
 class DegreeService:

@@ -7,10 +7,10 @@ from src.app import db
 from src.modules.categories.repository import CategoryRepository
 from src.modules.categories.serializer import CreateCategorySerializer
 
-from src.services.http.errors import Success
-from src.services.http.errors import UnprocessableEntity
-from src.services.http.errors import InternalServerError
-from src.services.http.errors import NotFound
+from src.services.http.response import Success
+from src.services.http.response import UnprocessableEntity
+from src.services.http.response import InternalServerError
+from src.services.http.response import NotFound
 
 from src.services.localization import Locales
 from src.modules.file import file_service

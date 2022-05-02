@@ -4,7 +4,7 @@ from src.exceptions.permissions import PermissionsExceptions
 from src.modules.users.service import UsersService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
-from src.services.http.errors import InternalServerError
+from src.services.http.response import InternalServerError
 from src.modules.users.config.permissions import Permissions
 
 

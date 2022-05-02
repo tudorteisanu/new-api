@@ -21,11 +21,11 @@ from .serializer import TokenSerializer
 from .serializer import ResetPasswordSerializer
 from .serializer import ForgotPasswordSerializer
 
-from src.services.http.errors import UnprocessableEntity
-from src.services.http.errors import NotFound
-from src.services.http.errors import UnauthorizedError
-from src.services.http.errors import InternalServerError
-from src.services.http.errors import Success
+from src.services.http.response import UnprocessableEntity
+from src.services.http.response import NotFound
+from src.services.http.response import UnauthorizedError
+from src.services.http.response import InternalServerError
+from src.services.http.response import Success
 from src.services.localization import Locales
 from ...exceptions.http import ValidationError, UnknownError
 

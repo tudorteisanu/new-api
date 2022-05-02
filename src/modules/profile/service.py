@@ -2,15 +2,18 @@ import logging
 
 from flask import jsonify, g
 from src.app.plugins import db
-from src.services.http.errors import Success
-from src.services.http.errors import UnprocessableEntity
-from src.services.http.errors import NotFound
-from .serializer import ProfileSerializer
+from src.services.http.response import Success
 
 from src.modules.teacher.repository import TeacherRepository
 from src.modules.teacher.repository import TeacherDetailsRepository
 from src.modules.teacher.repository import TeacherCourseRepository
 from src.modules.teacher.repository import TeacherPositionsRepository
+
+from src.exceptions.http import UnknownError
+from src.exceptions.http import NotFoundException
+from src.exceptions.http import ValidationError
+
+from .serializer import ProfileSerializer
 
 
 class ProfileService:
@@ -21,28 +24,31 @@ class ProfileService:
         self.teacher_detail_repository = TeacherDetailsRepository()
 
     def show(self, user_id=None):
-        if not user_id:
-            user_id = g.user.id
+        try:
+            if not user_id:
+                user_id = g.user.id
 
-        teacher = self.teacher_repository.find_one(user_id=user_id)
+            teacher = self.teacher_repository.find_one(user_id=user_id)
 
-        if not teacher:
-            return NotFound(message="Teacher not found")
+            if not teacher:
+                raise NotFoundException(message="Teacher not found")
 
-        resp = {
-            "teacher": {
-                "address": teacher.address,
-                "id": teacher.id,
-                "phone": teacher.phone,
-                "first_name": teacher.first_name,
-                "last_name": teacher.last_name,
-            },
-            "courses": self.get_teacher_courses(teacher.id),
-            "positions": self.get_teacher_positions(teacher.id),
-            "details": self.get_details(teacher.id)
-        }
+            resp = {
+                "teacher": {
+                    "address": teacher.address,
+                    "id": teacher.id,
+                    "phone": teacher.phone,
+                    "first_name": teacher.first_name,
+                    "last_name": teacher.last_name,
+                },
+                "courses": self.get_teacher_courses(teacher.id),
+                "positions": self.get_teacher_positions(teacher.id),
+                "details": self.get_details(teacher.id)
+            }
 
-        return jsonify(resp)
+            return jsonify(resp)
+        except Exception as e:
+            raise UnknownError(e)
 
     def update(self, data, user_id=None):
         try:
@@ -52,7 +58,7 @@ class ProfileService:
             serializer = ProfileSerializer(data=data)
 
             if not serializer.is_valid():
-                return UnprocessableEntity(errors=serializer.errors)
+                raise ValidationError(serializer.errors)
 
             teacher = self.teacher_repository.find_one(user_id=user_id)
 
@@ -73,10 +79,12 @@ class ProfileService:
 
             db.session.commit()
             return Success()
+        except ValidationError as e:
+            raise e
         except Exception as e:
             logging.error(e)
             db.session.rollback()
-            raise Exception('spam', 'eggs')
+            raise UnknownError()
 
     def get_teacher_courses(self, teacher_id):
         courses = self.teacher_course_repository.find(teacher_id=teacher_id)
@@ -111,8 +119,6 @@ class ProfileService:
     def update_details(self, details, teacher_id):
         old_details = self.teacher_detail_repository.find(teacher_id=teacher_id)
 
-        raise Exception('spam', 'eggs')
-        print('after raise')
         for item in old_details:
             if not any(el.get('id', None) == item.id for el in details):
                 db.session.delete(item)

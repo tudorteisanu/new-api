@@ -6,8 +6,8 @@ from flask_restful import Resource
 from src.exceptions.http import ValidationError, UnknownError
 from src.modules.auth.service import AuthService
 from src.services.http.auth_utils import auth_required
-from src.services.http.errors import InternalServerError
-from src.services.http.errors import UnprocessableEntity
+from src.services.http.response import InternalServerError
+from src.services.http.response import UnprocessableEntity
 
 
 class LoginResource(Resource):
