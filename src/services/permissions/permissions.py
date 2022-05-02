@@ -1,15 +1,18 @@
+import logging
 import os
 from json import loads, dumps
-from src.app import db
 from src.modules.permissions.repository import PermissionRepository
-from src.modules.roles.models import RolePermissions
-from src.modules.roles.models import Role
+from src.modules.roles.repository import RoleRepository
+from src.modules.roles.repository import RolePermissionsRepository
 
 
-class UpdatePermissions:
+class PermissionsService:
     def __init__(self):
         self.permission_repository = PermissionRepository()
+        self.role_repository = RoleRepository()
+        self.role_permission_repository = RolePermissionsRepository()
 
+    @staticmethod
     def load_perms(path):
         if os.path.exists(path):
             with open(path, 'r') as f:
@@ -17,33 +20,31 @@ class UpdatePermissions:
                 return loads(data)
         return None
 
-
-    def update_or_insert(perms):
+    def update_or_insert(self, perms):
         for item in perms:
-            perm = PermissionRepository.find_one(alias=item['alias'])
+            perm = self.permission_repository.find_one(alias=item['alias'])
 
             if perm is not None:
                 perm.name = item['name']
 
             else:
-                perm = Permission(name=item['name'], alias=item['alias'])
-                db.session.add(perm)
+                self.permission_repository.create(name=item['name'], alias=item['alias'])
 
     def add_all_perms(self):
-        all_roles = Role.query.filter_by(alias='admin').all()
+        all_roles = self.role_repository.find(alias='admin')
 
         for role in all_roles:
             permissions = self.permission_repository.find()
 
             for item in permissions:
-                if not RolePermissions.query.filter_by(role_id=role.id, permission_id=item.id).first():
-                    db.session.add(RolePermissions(role_id=role.id, permission_id=item.id))
+                if not self.role_permission_repository.find_one(role_id=role.id, permission_id=item.id):
+                    self.role_permission_repository.create(role_id=role.id, permission_id=item.id)
 
     def save_permissions_to_file(self, global_perms=True):
         if global_perms:
             self.add_all_perms()
 
-        roles = Role.query.all()
+        roles = self.role_repository.find()
         perms = {}
 
         for role in roles:
@@ -62,9 +63,6 @@ class UpdatePermissions:
                     perms = self.load_perms(f'{root_dir}/{item}/config/permissions.json')
                     self.update_or_insert(perms)
 
-            db.session.commit()
             self.save_permissions_to_file()
         except Exception as e:
-            print(e)
-            db.session.rollback()
-
+            logging.error(e)

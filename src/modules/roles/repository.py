@@ -23,6 +23,7 @@ class RoleRepository(Role):
     @staticmethod
     def create(user):
         db.session.add(user)
+        db.session.flush()
         return True
 
     def paginate(self, page, per_page, filters=None):
@@ -65,6 +66,8 @@ class RolePermissionsRepository(RolePermissions):
         return True
 
     @staticmethod
-    def create(user):
-        db.session.add(user)
-        return True
+    def create(**kwargs):
+        model = RolePermissions(**kwargs)
+        db.session.add(model)
+        db.session.flush()
+        return model

@@ -7,6 +7,7 @@ class FileRepository(File):
     def create(**kwargs):
         model = File(**kwargs)
         db.session.add(model)
+        db.session.flush()
         return model
 
     @staticmethod

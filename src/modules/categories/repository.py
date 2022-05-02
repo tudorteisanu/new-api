@@ -8,6 +8,6 @@ class CategoryRepository(Category, Repository):
     def create(**kwargs):
         model = Category(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model
 

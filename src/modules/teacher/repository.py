@@ -11,7 +11,7 @@ class TeacherRepository(Teacher, Repository):
     def create(**kwargs):
         model = Teacher(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model
 
 
@@ -20,7 +20,7 @@ class TeacherCourseRepository(TeacherCourse, Repository):
     def create(**kwargs):
         model = TeacherCourse(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model
 
 
@@ -29,7 +29,7 @@ class TeacherDetailsRepository(TeacherDetails, Repository):
     def create(**kwargs):
         model = TeacherDetails(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model
 
 
@@ -38,5 +38,5 @@ class TeacherPositionsRepository(TeacherPositions, Repository):
     def create(**kwargs):
         model = TeacherPositions(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model

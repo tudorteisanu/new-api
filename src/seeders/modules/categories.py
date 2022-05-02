@@ -72,7 +72,6 @@ class CategoriesSeeder:
             print('Categories seeder is running..')
             self.create_categories()
 
-
     def create_categories(self):
         for item in data:
             category = Category()

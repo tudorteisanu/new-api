@@ -68,7 +68,6 @@ class TeacherService:
             )
 
             self.repository.create(model)
-            db.session.commit()
 
             user = User()
             user.name = f"{data['first_name']} {data['last_name']}",
@@ -80,8 +79,8 @@ class TeacherService:
             user.role_id = role.id
 
             db.session.add(user)
-            db.session.commit()
             model.user_id = user.id
+            db.session.flush()
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:

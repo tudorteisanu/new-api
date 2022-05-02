@@ -10,6 +10,7 @@ class GoodsRepository(Good, Repository):
     def create(**kwargs):
         model = Good(**kwargs)
         db.session.add(model)
+        db.session.flush()
         return model
 
     @staticmethod

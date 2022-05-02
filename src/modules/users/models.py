@@ -51,6 +51,7 @@ class User(UserMixin, db.Model):
                 access_token=token
             )
             db.session.add(user_token)
+            db.session.flush()
         return user_token
 
     def create_access_token(self):
@@ -59,6 +60,7 @@ class User(UserMixin, db.Model):
         if not user_token:
             user_token = UserAuthTokens(user_id=self.id)
             db.session.add(user_token)
+            db.session.flush()
 
     def remove_token(self):
         user_token = UserAuthTokens()

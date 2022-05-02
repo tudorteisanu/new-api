@@ -21,7 +21,6 @@ class BaseError:
         else:
             return {"message": self.message}, self.status
 
-
     def __del__(self):
         self.data = None
         self.message = 'Success'
@@ -80,7 +79,7 @@ class ForbiddenError(BaseError):
 class InternalServerError(BaseError):
     errors = None
     message = "Forbidden"
-    status = 403
+    status = 500
 
 
 UnprocessableEntity = UnprocessableEntityError()

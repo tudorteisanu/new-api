@@ -15,7 +15,6 @@ POSTGRES = {
 
 
 class FlaskConfig(object):
-    PRODUCTION = environ.get('ENVIRONMENT', 'dev') == 'prod'
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'MY_SECRET_KEY'

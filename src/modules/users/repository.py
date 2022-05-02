@@ -8,7 +8,7 @@ class UserRepository(User, Repository):
     def create(**kwargs):
         model = User(**kwargs)
         db.session.add(model)
-        db.session.commit(model)
+        db.session.flush()
         return model
 
     def paginate(self, page, per_page, filters=None):

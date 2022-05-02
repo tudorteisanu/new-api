@@ -8,6 +8,7 @@ class PermissionRepository(Permission, Repository):
     def create(**kwargs):
         model = Permission(**kwargs)
         db.session.add(model)
+        db.session.flush()
         return model
 
     def paginate(self, page, per_page):

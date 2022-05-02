@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 from random import random
 from werkzeug.utils import secure_filename
@@ -36,7 +37,8 @@ class FileService:
             db.session.commit()
             return file_object.id
         except Exception as e:
-            print(e)
+            logging.error(e)
+            db.session.rollback()
             return None
 
     def save_file_from_object(self, filename, file_path):
@@ -53,7 +55,8 @@ class FileService:
             db.session.commit()
             return file_object.id
         except Exception as e:
-            print(e)
+            logging.error(e)
+            db.session.rollback()
             return None
 
     @staticmethod

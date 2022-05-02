@@ -24,6 +24,7 @@ class DegreeRepository(Degree):
     @staticmethod
     def create(model):
         db.session.add(model)
+        db.session.flush()
         return True
 
     def paginate(self, page, per_page):

@@ -1,3 +1,5 @@
+import logging
+
 from flask import jsonify, g
 from src.app.plugins import db
 from src.services.http.errors import Success
@@ -43,34 +45,38 @@ class ProfileService:
         return jsonify(resp)
 
     def update(self, data, user_id=None):
-        if not user_id:
-            user_id = g.user.id
+        try:
+            if not user_id:
+                user_id = g.user.id
 
-        serializer = ProfileSerializer(data=data)
+            serializer = ProfileSerializer(data=data)
 
-        if not serializer.is_valid():
-            return UnprocessableEntity(errors=serializer.errors)
+            if not serializer.is_valid():
+                return UnprocessableEntity(errors=serializer.errors)
 
-        teacher = self.teacher_repository.find_one(user_id=user_id)
+            teacher = self.teacher_repository.find_one(user_id=user_id)
 
-        if not teacher:
-            teacher = self.teacher_repository.create(user_id=user_id)
+            if not teacher:
+                teacher = self.teacher_repository.create(user_id=user_id)
 
-        if data.get('teacher', None):
-            self.update_teacher(teacher, data['teacher'])
+            if data.get('teacher', None):
+                self.update_teacher(teacher, data['teacher'])
 
-        if data.get('courses', None):
-            self.update_courses(data['courses'], teacher.id)
+            if data.get('courses', None):
+                self.update_courses(data['courses'], teacher.id)
 
-        if data.get('positions', None):
-            self.update_positions(data['positions'], teacher.id)
+            if data.get('positions', None):
+                self.update_positions(data['positions'], teacher.id)
 
-        if data.get('details', None):
-            self.update_details(data['details'], teacher.id)
+            if data.get('details', None):
+                self.update_details(data['details'], teacher.id)
 
-        db.session.commit()
-
-        return Success()
+            db.session.commit()
+            return Success()
+        except Exception as e:
+            logging.error(e)
+            db.session.rollback()
+            raise Exception('spam', 'eggs')
 
     def get_teacher_courses(self, teacher_id):
         courses = self.teacher_course_repository.find(teacher_id=teacher_id)
@@ -92,13 +98,24 @@ class ProfileService:
             "work_experience": item.work_experience,
         } for item in positions]
 
+    def get_details(self, teacher_id):
+        return [
+            {
+                "id": item.id,
+                "title": item.title,
+                "dates": item.dates,
+                "credits": item.credits
+            } for item in self.teacher_detail_repository.find(teacher_id=teacher_id)
+        ]
+
     def update_details(self, details, teacher_id):
         old_details = self.teacher_detail_repository.find(teacher_id=teacher_id)
 
+        raise Exception('spam', 'eggs')
+        print('after raise')
         for item in old_details:
             if not any(el.get('id', None) == item.id for el in details):
                 db.session.delete(item)
-                db.session.commit()
 
         for item in details:
             if item.get('id', None):
@@ -116,15 +133,12 @@ class ProfileService:
                 "credits": item.get('credits', None)
             })
 
-            db.session.commit()
-
     def update_positions(self, positions, teacher_id):
         old_positions = self.teacher_positions_repository.find(teacher_id=teacher_id)
 
         for item in old_positions:
             if not any(el.get('id', None) == item.id for el in positions):
                 db.session.delete(item)
-                db.session.commit()
 
         for item in positions:
             if item.get('id', None):
@@ -142,15 +156,12 @@ class ProfileService:
                 "work_experience": item['work_experience']
             })
 
-        db.session.commit()
-
     def update_courses(self, positions, teacher_id):
         old_data = self.teacher_course_repository.find(teacher_id=teacher_id)
 
         for item in old_data:
             if not any(el.get('id', None) == item.id for el in positions):
                 db.session.delete(item)
-                db.session.commit()
 
         for item in positions:
             if item.get('id', None):
@@ -168,18 +179,6 @@ class ProfileService:
                 "name": item.get('name', ''),
                 "description": item.get('description', ''),
             })
-
-        db.session.commit()
-
-    def get_details(self, teacher_id):
-        return [
-            {
-                "id": item.id,
-                "title": item.title,
-                "dates": item.dates,
-                "credits": item.credits
-            } for item in self.teacher_detail_repository.find(teacher_id=teacher_id)
-        ]
 
     @staticmethod
     def update_teacher(model, data):

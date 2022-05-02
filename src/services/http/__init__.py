@@ -4,17 +4,15 @@ from flask_restful import Resource
 
 from src.exceptions.permissions import PermissionsExceptions
 from flask import g
-from .permissions import check_permissions
-import os
 
 
 class BaseResource(Resource):
     permissions = {}
 
-    def apply_permissions(self):
-        if not os.path.exists('config/permissions.json'):
-            check_permissions()
+    def __init__(self):
+        self.permissions = {}
 
+    def apply_permissions(self):
         with open("config/permissions.json", 'r') as f:
             data = loads(f.read())
 

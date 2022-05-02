@@ -2,7 +2,7 @@ import os
 from src.app import app, db
 import argparse
 from src.seeders import seed_db
-from src.services.http.permissions import check_permissions
+from src.services.permissions import permissions_service
 
 
 parser = argparse.ArgumentParser(description='Script so useful.')
@@ -41,7 +41,7 @@ if args.seed:
     seed_db()
 
 if args.perms:
-    check_permissions()
+    permissions_service.check_permissions()
 
 if args.run:
     app.run()

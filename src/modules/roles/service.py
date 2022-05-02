@@ -1,4 +1,4 @@
-from json import dumps, loads
+from json import loads
 
 from flask import request
 from flask import jsonify
@@ -9,7 +9,7 @@ from src.app import db
 from src.modules.roles.models import Role, RolePermissions
 from src.modules.roles.repository import RoleRepository, RolePermissionsRepository
 from src.modules.roles.serializer import CreateRoleSerializer, PermissionsSerializer
-from src.services.http.permissions import save_permissions_to_file
+from src.services.permissions import permissions_service
 
 from src.services.http.errors import Success, UnprocessableEntity, InternalServerError, NotFound
 
@@ -102,9 +102,11 @@ class RoleService:
             return Success()
         except exc.IntegrityError as e:
             logging.error(e)
+            db.session.rollback()
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
         except Exception as e:
             logging.error(e)
+            db.session.rollback()
             return InternalServerError()
 
     def delete(self, user_id):
@@ -119,6 +121,7 @@ class RoleService:
             return Success()
         except Exception as e:
             logging.error(e)
+            db.session.rollback()
             return InternalServerError()
 
     def get_list(self):
@@ -132,6 +135,7 @@ class RoleService:
 class RolePermissionsService:
     def __init__(self):
         self.repository = RolePermissionsRepository()
+        self.permissions_service = permissions_service
 
     def update_permissions(self, model_id):
         try:
@@ -155,10 +159,11 @@ class RolePermissionsService:
                     self.repository.create(perm)
 
             db.session.commit()
-            save_permissions_to_file(False)
+            self.permissions_service.save_permissions_to_file(False)
             return Success()
         except Exception as e:
             logging.error(e)
+            db.session.rollback()
             return InternalServerError()
 
     def get_permissions(self, model_id):

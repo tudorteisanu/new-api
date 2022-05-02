@@ -8,5 +8,5 @@ class UserTokenRepository(UserAuthTokens, Repository):
     def create(**kwargs):
         model = UserAuthTokens(**kwargs)
         db.session.add(model)
-        db.session.commit()
+        db.session.flush()
         return model

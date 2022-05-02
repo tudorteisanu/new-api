@@ -112,9 +112,11 @@ class UsersService:
             return Success()
         except exc.IntegrityError as e:
             logging.error(e)
+            db.session.rollback()
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
         except Exception as e:
             logging.error(e)
+            db.session.rollback()
             return InternalServerError()
 
     def delete(self, user_id):
@@ -128,6 +130,7 @@ class UsersService:
             db.session.commit()
             return Success()
         except Exception as e:
+            db.session.rollback()
             logging.error(e)
             return InternalServerError()
 

@@ -182,4 +182,4 @@ class NotificationService:
                     user_id=g.user.id
                 )
 
-                db.session.commit()
+        db.session.commit()
