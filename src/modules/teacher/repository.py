@@ -1,42 +1,62 @@
+import logging
 from src.app import db
+
+from src.services.utils.repository import Repository
+from src.exceptions.database import SqlException
+
 from .models import Teacher
 from .models import TeacherPositions
 from .models import TeacherCourse
 from .models import TeacherDetails
-from src.services.utils.repository import Repository
 
 
 class TeacherRepository(Teacher, Repository):
     @staticmethod
     def create(**kwargs):
-        model = Teacher(**kwargs)
-        db.session.add(model)
-        db.session.flush()
-        return model
+        try:
+            model = Teacher(**kwargs)
+            db.session.add(model)
+            db.session.flush()
+            return model
+        except Exception as e:
+            logging.error(e)
+            raise SqlException(e)
 
 
 class TeacherCourseRepository(TeacherCourse, Repository):
     @staticmethod
     def create(**kwargs):
-        model = TeacherCourse(**kwargs)
-        db.session.add(model)
-        db.session.flush()
-        return model
+        try:
+            model = TeacherCourse(**kwargs)
+            db.session.add(model)
+            db.session.flush()
+            return model
+        except Exception as e:
+            logging.error(e)
+            raise SqlException(e)
 
 
 class TeacherDetailsRepository(TeacherDetails, Repository):
     @staticmethod
     def create(**kwargs):
-        model = TeacherDetails(**kwargs)
-        db.session.add(model)
-        db.session.flush()
-        return model
+        try:
+            model = TeacherDetails(**kwargs)
+            db.session.add(model)
+            db.session.flush()
+            return model
+        except Exception as e:
+            logging.error(e)
+            raise SqlException(e)
 
 
 class TeacherPositionsRepository(TeacherPositions, Repository):
     @staticmethod
     def create(**kwargs):
-        model = TeacherPositions(**kwargs)
-        db.session.add(model)
-        db.session.flush()
-        return model
+        try:
+            model = TeacherPositions(**kwargs)
+            db.session.add(model)
+            db.session.flush()
+            return model
+        except Exception as e:
+            logging.error(e)
+            raise SqlException(e)
