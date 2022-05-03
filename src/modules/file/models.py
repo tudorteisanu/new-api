@@ -42,3 +42,4 @@ class File(db.Model):
         if self.path is None:
             return ""
         return f'{environ.get("STATIC_PATH", "")}/{self.path}'
+

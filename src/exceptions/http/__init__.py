@@ -4,14 +4,14 @@ class ValidationError(Exception):
 
 
 class UnknownError(Exception):
-    def __init__(self, exception):
+    def __init__(self, exception=None):
         return exception
 
 
 class NotFoundException(Exception):
     message = None
 
-    def __init__(self, message):
+    def __init__(self, message=None):
         if message:
             self.message = message
 

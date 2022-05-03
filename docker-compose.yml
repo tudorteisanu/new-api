@@ -1,0 +1,37 @@
+version: "3.3"
+
+services:
+  api:
+    build: .
+    container_name: api
+    env_file:
+      - '.env'
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./:/var/www/html:delegated
+
+    networks:
+      - web
+      - backend
+  db:
+    image: postgres:13.6-alpine
+    container_name: pg-db
+    restart: unless-stopped
+    environment:
+      - "POSTGRES_DB=demo"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=123"
+
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+    networks:
+      - backend
+
+networks:
+  web:
+    external: true
+  backend:
+    external: true
