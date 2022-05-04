@@ -3,7 +3,7 @@ import logging
 
 from flask_restful import Resource
 
-from src.exceptions.http import ValidationError, UnknownError
+from src.exceptions.http import ValidationException, UnknownException
 from src.modules.auth.service import AuthService
 from src.services.http.auth_utils import auth_required
 from src.services.http.response import InternalServerError
@@ -18,7 +18,7 @@ class LoginResource(Resource):
         try:
             return self.service.login()
         # todo make the same for all modules
-        except ValidationError as e:
+        except ValidationException as e:
             return UnprocessableEntity(errors=e.errors)
         except Exception as e:
             logging.error(e)
@@ -32,9 +32,9 @@ class RegisterResource(Resource):
     def post(self):
         try:
             return self.service.register()
-        except ValidationError as e:
+        except ValidationException as e:
             return UnprocessableEntity(errors=e.errors)
-        except UnknownError as e:
+        except UnknownException as e:
             logging.error(e)
             return InternalServerError()
 

@@ -1,11 +1,16 @@
-class ValidationError(Exception):
+class ValidationException(Exception):
     def __init__(self, errors):
         self.errors = errors
 
 
-class UnknownError(Exception):
-    def __init__(self, exception=None):
-        return exception
+class UnknownException(Exception):
+    def __init__(self, exception=None, message=None):
+
+        if message:
+            self.message = message
+
+        if exception:
+            self.exception = exception
 
 
 class NotFoundException(Exception):

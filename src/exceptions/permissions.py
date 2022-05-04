@@ -3,6 +3,6 @@ class Error(Exception):
     pass
 
 
-class PermissionsExceptions(Error):
+class PermissionsException(Error):
     def __init__(self, message):
         self.message = message

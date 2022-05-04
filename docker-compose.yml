@@ -3,7 +3,6 @@ version: "3.3"
 services:
   api:
     build: .
-    container_name: api
     env_file:
       - '.env'
     ports:
@@ -17,7 +16,7 @@ services:
       - backend
   db:
     image: postgres:13.6-alpine
-    container_name: pg-db
+
     restart: unless-stopped
     environment:
       - "POSTGRES_DB=demo"
@@ -30,8 +29,23 @@ services:
     networks:
       - backend
 
+  redis:
+    image: "redis:alpine"
+
+    command: redis-server --requirepass sOmE_sEcUrE_pAsS
+
+    volumes:
+      - ./data/redis-data:/var/lib/redis
+      - ./data/redis.conf:/usr/local/etc/redis/redis.conf
+
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+    networks:
+      - backend
+
 networks:
   web:
     external: true
   backend:
-    external: true
+    driver: bridge

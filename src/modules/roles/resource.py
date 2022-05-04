@@ -1,6 +1,6 @@
 import logging
 
-from src.exceptions.permissions import PermissionsExceptions
+from src.exceptions.permissions import PermissionsException
 from src.modules.roles.config.permissions import Permissions
 from src.modules.roles.service import RoleService, RolePermissionsService
 from src.services.http import BaseResource
@@ -18,7 +18,7 @@ class RolesResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -29,7 +29,7 @@ class RolesResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.create()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -46,7 +46,7 @@ class RolesOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find_one(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -57,7 +57,7 @@ class RolesOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.edit(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -68,7 +68,7 @@ class RolesOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.delete(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -85,7 +85,7 @@ class RolePermissionsResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.get_permissions(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -96,7 +96,7 @@ class RolePermissionsResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.update_permissions(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -113,7 +113,7 @@ class RolesListResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.get_list()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)

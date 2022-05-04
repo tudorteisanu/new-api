@@ -1,6 +1,6 @@
 import logging
 
-from src.exceptions.permissions import PermissionsExceptions
+from src.exceptions.permissions import PermissionsException
 from src.modules.permissions.config.permissions import Permissions
 from src.modules.permissions.service import PermissionService
 
@@ -19,7 +19,7 @@ class PermissionResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -30,7 +30,7 @@ class PermissionResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.create()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -47,7 +47,7 @@ class PermissionOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find_one(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -58,7 +58,7 @@ class PermissionOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.edit(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -69,7 +69,7 @@ class PermissionOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.delete(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -86,7 +86,7 @@ class PermissionListResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.get_list()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)

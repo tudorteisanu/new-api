@@ -1,6 +1,6 @@
 import logging
 
-from src.exceptions.permissions import PermissionsExceptions
+from src.exceptions.permissions import PermissionsException
 from .config.permissions import Permissions
 from .service import CategoriesService
 
@@ -15,22 +15,22 @@ class CategoryResource(BaseResource):
         self.permissions = Permissions.index
 
     @auth_required()
-    def get(self):
+    def find(self):
         try:
             self.apply_permissions()
             return self.service.find()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
             return InternalServerError()
 
     @auth_required()
-    def post(self):
+    def create(self):
         try:
             self.apply_permissions()
             return self.service.create()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -47,7 +47,7 @@ class CategoryOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find_one(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -58,7 +58,7 @@ class CategoryOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.edit(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -69,7 +69,7 @@ class CategoryOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.delete(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -86,7 +86,7 @@ class CategoryListResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.get_list()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -100,7 +100,7 @@ class CategoriesPublicResource(BaseResource):
     def get(self):
         try:
             return self.service.public()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)

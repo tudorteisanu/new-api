@@ -1,5 +1,6 @@
 from .plugins import api, app, migrate, api, db, socketio
-from .plugins import redis
 from .config import FlaskConfig
+# from src.modules.categories import categories
+# import src.app.urls
 
-import src.app.urls
+# app.register_blueprint(categories)

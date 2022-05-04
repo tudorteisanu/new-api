@@ -34,7 +34,7 @@ class FileService:
                 name=file.filename
             )
 
-            db.session.commit()
+            db.session.flush()
             return file_object.id
         except Exception as e:
             logging.error(e)
@@ -52,7 +52,7 @@ class FileService:
                 name=filename
             )
 
-            db.session.commit()
+            db.session.flush()
             return file_object.id
         except Exception as e:
             logging.error(e)

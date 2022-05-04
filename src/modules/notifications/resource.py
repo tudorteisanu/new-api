@@ -1,5 +1,5 @@
 import logging
-from src.exceptions.permissions import PermissionsExceptions
+from src.exceptions.permissions import PermissionsException
 from .config.permissions import Permissions
 from .service import NotificationService
 from src.services.http import BaseResource
@@ -25,7 +25,7 @@ class NotificationResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.create()
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -42,7 +42,7 @@ class NotificationOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.find_one(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -53,7 +53,7 @@ class NotificationOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.edit(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)
@@ -64,7 +64,7 @@ class NotificationOneResource(BaseResource):
         try:
             self.apply_permissions()
             return self.service.delete(model_id)
-        except PermissionsExceptions as e:
+        except PermissionsException as e:
             return {"message": e.message}, 403
         except Exception as e:
             logging.error(e)

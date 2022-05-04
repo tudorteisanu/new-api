@@ -6,6 +6,7 @@ class BaseError:
 
     def __init__(self, **kwargs):
         self.errors = None
+        self.error = None
 
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
@@ -16,14 +17,24 @@ class BaseError:
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
 
+        response = {}
+
+        if self.error is not None:
+            response['error'] = self.error
+
         if self.errors is not None:
-            return {"message": self.message, "errors": self.errors}, self.status
-        else:
-            return {"message": self.message}, self.status
+            response['errors'] = self.errors
+
+        if self.errors is not None:
+            response["message"] = self.message
+
+        return response,  self.status
 
     def __del__(self):
         self.data = None
         self.message = 'Success'
+        self.error = None
+        self.errors = None
         self.status = 200
 
 
@@ -76,8 +87,14 @@ class ForbiddenError(BaseError):
     status = 403
 
 
-class InternalServerError(BaseError):
+class BadRequestError(BaseError):
     errors = None
+    message = "Bad request"
+    status = 400
+
+
+class InternalServerError(BaseError):
+    error = None
     message = "Internal server error"
     status = 500
 
@@ -86,5 +103,6 @@ UnprocessableEntity = UnprocessableEntityError()
 NotFound = NotFoundError()
 InternalServerError = InternalServerError()
 Forbidden = ForbiddenError()
-UnauthorizedError = UnauthorizedError()
+BadRequest = BadRequestError()
+Unauthorized = UnauthorizedError()
 Success = SuccessResponse()

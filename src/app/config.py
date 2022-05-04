@@ -39,3 +39,10 @@ class FlaskConfig(object):
     STATIC_PATH = environ.get('STATIC_PATH')
     FRONTEND_ADDRESS = environ.get('FRONTEND_ADDRESS')
     PERMISSIONS = "config/permissions.json"
+
+    REDIS_HOST = environ.get('REDIS_HOST', 'localhost')
+    REDIS_PORT = environ.get('REDIS_PORT', 6379)
+    REDIS_DB = environ.get('REDIS_DB', 0)
+    REDIS_PASSWORD = environ.get('REDIS_PASSWORD', '')
+
+    ENVIRONMENT = 'dev'
