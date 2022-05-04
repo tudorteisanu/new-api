@@ -23,13 +23,14 @@ class RolePermissions(db.Model):
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
-    permission_id = db.Column(db.Integer, db.ForeignKey('permission.id', ondelete='CASCADE'), nullable=False)
+    endpoint = db.Column(db.String, nullable=False)
+    method = db.Column(db.String, nullable=False)
 
     def get_permissions(self, role_id):
         return self.query.filter_by(role_id=role_id).all()
 
     def __repr__(self):
-        return f'Role permission {self.role_id}({self.permission_id})'
+        return f'{self.method}: ({self.endpoint} - {self.role_id}'
 
 
 

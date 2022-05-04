@@ -27,7 +27,7 @@ from src.services.http.response import UnauthorizedError
 from src.services.http.response import InternalServerError
 from src.services.http.response import Success
 from src.services.localization import Locales
-from ...exceptions.http import ValidationError, UnknownError
+from src.exceptions.http import ValidationException, UnknownException
 
 
 class AuthService:
@@ -42,7 +42,7 @@ class AuthService:
         serializer = LoginSerializer(data)
 
         if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+            raise ValidationException(serializer.errors)
 
         try:
             user = self.repository.find_one(email=data['email'])
@@ -119,7 +119,7 @@ class AuthService:
             serializer = RegisterSerializer(data)
 
             if not serializer.is_valid():
-                raise ValidationError(errors=serializer.errors)
+                raise ValidationException(errors=serializer.errors)
 
             if self.repository.find_one(email=data['email']) is not None:
                 return UnprocessableEntity(message="User exists")
@@ -144,12 +144,12 @@ class AuthService:
 
             db.session.commit()
             return Success(data=response)
-        except ValidationError as e:
+        except ValidationException as e:
             raise e
         except Exception as e:
             db.session.rollback()
             logging.error(e)
-            raise UnknownError()
+            raise UnknownException()
 
     def confirm_email(self):
         try:

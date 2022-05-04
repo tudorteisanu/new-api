@@ -1,15 +1,14 @@
 from json import loads
 
-from flask import request
+from flask import request, g
 from flask import jsonify
 from sqlalchemy import exc
 import logging
 
 from src.app import db
-from src.modules.roles.models import Role, RolePermissions
+from src.modules.roles.models import Role
 from src.modules.roles.repository import RoleRepository, RolePermissionsRepository
 from src.modules.roles.serializer import CreateRoleSerializer, PermissionsSerializer
-from src.services.permissions import permissions_service
 
 from src.services.http.response import Success, UnprocessableEntity, InternalServerError, NotFound
 
@@ -135,7 +134,6 @@ class RoleService:
 class RolePermissionsService:
     def __init__(self):
         self.repository = RolePermissionsRepository()
-        self.permissions_service = permissions_service
 
     def update_permissions(self, model_id):
         try:
@@ -148,18 +146,20 @@ class RolePermissionsService:
             old_permissions = self.repository.find(role_id=model_id)
 
             for item in old_permissions:
-                if item not in data['permissions']:
+                if not any(
+                        item.endpoint == rule['endpoint']
+                        and item.method == rule['method'] for rule in data['permissions']):
                     self.repository.remove(item)
 
             for item in data['permissions']:
-                if not self.repository.get(item):
-                    perm = RolePermissions()
-                    perm.role_id = model_id
-                    perm.permission_id = item
-                    self.repository.create(perm)
+                if not self.repository.find_one(endpoint=item['endpoint'], method=item['method'], role_id=model_id):
+                    self.repository.create(
+                        role_id=model_id,
+                        endpoint=item['endpoint'],
+                        method=item['method']
+                    )
 
             db.session.commit()
-            self.permissions_service.save_permissions_to_file(False)
             return Success()
         except Exception as e:
             logging.error(e)
@@ -169,8 +169,37 @@ class RolePermissionsService:
     def get_permissions(self, model_id):
         try:
             return [
-                item.permission_id for item in self.repository.find(role_id=model_id)
+                {"endpoint": item.endpoint, "method": item.method} for item in self.repository.find(role_id=model_id)
             ]
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    def find_one(self, endpoint, method, role_id):
+        try:
+            user = self.repository.find_one(method=method, endpoint=endpoint, role_id=role_id)
+
+            if not user:
+                return None
+
+            return {
+                "id": user.id
+            }
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
+
+    @staticmethod
+    def get_all_permissions():
+        try:
+            from src.app import app
+            response = []
+            for rule in app.url_map.iter_rules():
+                for method in rule.methods:
+                    if method not in ['HEAD', 'OPTIONS']:
+                        response.append({"endpoint": rule.endpoint, "method": method})
+
+            return response
         except Exception as e:
             logging.error(e)
             return InternalServerError()

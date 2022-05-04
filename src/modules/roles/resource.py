@@ -118,4 +118,22 @@ class RolesListResource(BaseResource):
         except Exception as e:
             logging.error(e)
             return InternalServerError()
+
+
+class RolesPermissionsListResource(BaseResource):
+    def __init__(self):
+        self.service = RoleService()
+        self.service_permissions = RolePermissionsService()
+        self.permissions = Permissions.list
+
+    @auth_required()
+    def get(self):
+        try:
+            self.apply_permissions()
+            return self.service_permissions.get_all_permissions()
+        except PermissionsException as e:
+            return {"message": e.message}, 403
+        except Exception as e:
+            logging.error(e)
+            return InternalServerError()
    

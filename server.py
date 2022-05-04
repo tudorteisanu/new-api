@@ -2,7 +2,23 @@ import os
 from src.app import app, db
 import argparse
 from src.seeders import seed_db
-from src.services.permissions import permissions_service
+from src.modules.roles.service import RolePermissionsRepository
+from src.modules.roles.service import RoleRepository
+
+roles_permissions_repository = RolePermissionsRepository()
+roles_repository = RoleRepository()
+
+
+def add_all_perms():
+    role = roles_repository.find_one(alias='admin')
+
+    for rule in app.url_map.iter_rules():
+        for method in rule.methods:
+            if method not in ['HEAD', 'OPTIONS']:
+                if not roles_permissions_repository.find_one(endpoint=rule.endpoint, method=method, role_id=role.id):
+                    roles_permissions_repository.create(endpoint=rule.endpoint, method=method, role_id=role.id)
+                    db.session.commit()
+    return True
 
 
 parser = argparse.ArgumentParser(description='Script so useful.')
@@ -33,6 +49,7 @@ if args.drop:
     db.create_all()
     db.session.commit()
 
+
 if args.migrate:
     os.system('flask db upgrade')
 
@@ -41,7 +58,7 @@ if args.seed:
     seed_db()
 
 if args.perms:
-    permissions_service.check_permissions()
+    add_all_perms()
 
 if args.run:
     app.run()
