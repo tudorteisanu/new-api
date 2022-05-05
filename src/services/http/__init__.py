@@ -65,8 +65,11 @@ class BaseResource(Resource):
                         raise PermissionsException(message='Not have enough permissions')
 
                     return True
+        except PermissionsException as e:
+            raise e
         except Exception as e:
             logging.error(e)
+            print(e)
             raise UnknownException()
 
     def generate_permissions_file(self):

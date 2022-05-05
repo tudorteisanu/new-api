@@ -17,7 +17,8 @@ POSTGRES = {
 class FlaskConfig(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = 'MY_SECRET_KEY'
+
+    SECRET_KEY = environ.get('SECRET_KEY', "secret_key")
 
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
     JWT_HEADER_TYPE = ""
@@ -29,7 +30,8 @@ class FlaskConfig(object):
     MAIL_USERNAME = environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = environ.get('MAIL_PASSWORD')
     MAIL_DEBUG = False
-    SECURITY_PASSWORD_SALT = 'some_salt'
+
+    SECURITY_PASSWORD_SALT = environ.get('SECURITY_PASSWORD_SALT', 'example_salt')
 
     DEBUG = True
     PORT = environ.get('PORT')
@@ -38,7 +40,6 @@ class FlaskConfig(object):
     BACKEND_ADDRESS = environ.get('BACKEND_ADDRESS')
     STATIC_PATH = environ.get('STATIC_PATH')
     FRONTEND_ADDRESS = environ.get('FRONTEND_ADDRESS')
-    PERMISSIONS = "config/permissions.json"
 
     REDIS_HOST = environ.get('REDIS_HOST', 'localhost')
     REDIS_PORT = environ.get('REDIS_PORT', 6379)
