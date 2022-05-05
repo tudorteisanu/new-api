@@ -14,6 +14,7 @@ services:
     networks:
       - web
       - backend
+
   db:
     image: postgres:13.6-alpine
 
@@ -32,7 +33,7 @@ services:
   redis:
     image: "redis:alpine"
 
-    command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    command: redis-server
 
     volumes:
       - ./data/redis-data:/var/lib/redis
@@ -40,6 +41,37 @@ services:
 
     environment:
       - REDIS_REPLICATION_MODE=master
+
+    networks:
+      - backend
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=mypass
+    networks:
+      - backend
+    ports:
+      - "5672:5672"
+
+  worker:
+    build: .
+
+    volumes:
+      - ./:/var/www/html
+
+    command: celery -A celery_app.celery worker --loglevel=INFO
+
+    links:
+      - "rabbitmq:rabbitmq"
+      - "redis:redis"
+
+    depends_on:
+      - rabbitmq
+      - redis
 
     networks:
       - backend

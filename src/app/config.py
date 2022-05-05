@@ -46,4 +46,9 @@ class FlaskConfig(object):
     REDIS_DB = environ.get('REDIS_DB', 0)
     REDIS_PASSWORD = environ.get('REDIS_PASSWORD', '')
 
+    RABBITMQ_HOST = environ.get('RABBITMQ_HOST', 'localhost')
+    RABBITMQ_PORT = environ.get('RABBITMQ_PORT', '5672')
+    RABBITMQ_USER = environ.get('RABBITMQ_USER', 'guest')
+    RABBITMQ_PASSWORD = environ.get('RABBITMQ_PASSWORD', 'mypass')
+
     ENVIRONMENT = 'dev'
