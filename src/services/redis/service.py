@@ -1,14 +1,7 @@
 import logging
 
 from json import dumps, loads
-from redis import Redis
-from src.app import FlaskConfig
-
-redis = Redis(
-    host=FlaskConfig.REDIS_HOST,
-    port=FlaskConfig.REDIS_PORT,
-    password=FlaskConfig.REDIS_PASSWORD
-)
+from .config import redis
 
 
 class RedisService:

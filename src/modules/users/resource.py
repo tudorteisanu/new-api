@@ -5,13 +5,11 @@ from src.modules.users.service import UsersService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.response import InternalServerError
-from src.modules.users.config.permissions import Permissions
 
 
 class UsersResource(BaseResource):
     def __init__(self):
         self.service = UsersService()
-        self.permissions = Permissions.index
 
     @auth_required()
     def get(self):
@@ -39,7 +37,6 @@ class UsersResource(BaseResource):
 class UsersOneResource(BaseResource):
     def __init__(self):
         self.service = UsersService()
-        self.permissions = Permissions.self
 
     @auth_required()
     def get(self, model_id):
@@ -71,7 +68,6 @@ class UsersOneResource(BaseResource):
 class UsersListResource(BaseResource):
     def __init__(self):
         self.service = UsersService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):

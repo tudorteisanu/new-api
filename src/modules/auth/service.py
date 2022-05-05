@@ -6,10 +6,10 @@ from flask import g
 from src.app import FlaskConfig
 from src.app import db
 
-from src.services.mail.mail import send_email_link
-from src.services.mail.mail import send_forgot_password_email
-from src.services.mail.mail import send_info_email
-from src.services.mail.token import generate_confirmation_token, confirm_token
+from src.services.mail import send_email_link
+from src.services.mail import send_forgot_password_email
+from src.services.mail import send_info_email
+from src.services.mail import generate_confirmation_token, confirm_token
 
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
@@ -23,11 +23,13 @@ from .serializer import ForgotPasswordSerializer
 
 from src.services.http.response import UnprocessableEntity
 from src.services.http.response import NotFound
-from src.services.http.response import UnauthorizedError
+from src.services.http.response import Unauthorized
 from src.services.http.response import InternalServerError
 from src.services.http.response import Success
 from src.services.localization import Locales
-from src.exceptions.http import ValidationException, UnknownException
+
+from src.exceptions.http import UnknownException
+from src.exceptions.http import ValidationException
 
 
 class AuthService:
@@ -70,7 +72,6 @@ class AuthService:
                     return NotFound()
 
                 user.create_token()
-                # login_user(user)
 
                 if user.login_attempts != 3:
                     self.repository.update(user, {
@@ -227,7 +228,7 @@ class AuthService:
         except Exception as e:
             logging.error(e)
             db.session.rollback()
-            return UnauthorizedError()
+            return Unauthorized()
 
     def forgot_password(self):
         try:

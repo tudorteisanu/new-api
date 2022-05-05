@@ -1,6 +1,5 @@
 import logging
 from src.exceptions.permissions import PermissionsException
-from .config.permissions import Permissions
 from .service import NotificationService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
@@ -10,7 +9,6 @@ from src.services.http.response import InternalServerError
 class NotificationResource(BaseResource):
     def __init__(self):
         self.service = NotificationService()
-        self.permissions = Permissions.index
 
     @auth_required()
     def get(self):
@@ -35,7 +33,6 @@ class NotificationResource(BaseResource):
 class NotificationOneResource(BaseResource):
     def __init__(self):
         self.service = NotificationService()
-        self.permissions = Permissions.self
 
     @auth_required()
     def get(self, model_id):
@@ -74,7 +71,6 @@ class NotificationOneResource(BaseResource):
 class NotificationListResource(BaseResource):
     def __init__(self):
         self.service = NotificationService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):

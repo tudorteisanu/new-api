@@ -1,8 +1,8 @@
 import logging
 
 from src.exceptions.permissions import PermissionsException
-from src.modules.roles.config.permissions import Permissions
-from src.modules.roles.service import RoleService, RolePermissionsService
+from src.modules.roles.service import RoleService
+from src.modules.roles.service import RolePermissionsService
 from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.response import InternalServerError
@@ -11,7 +11,6 @@ from src.services.http.response import InternalServerError
 class RolesResource(BaseResource):
     def __init__(self):
         self.service = RoleService()
-        self.permissions = Permissions.index
 
     @auth_required()
     def get(self):
@@ -39,7 +38,6 @@ class RolesResource(BaseResource):
 class RolesOneResource(BaseResource):
     def __init__(self):
         self.service = RoleService()
-        self.permissions = Permissions.self
 
     @auth_required()
     def get(self, model_id):
@@ -78,7 +76,6 @@ class RolesOneResource(BaseResource):
 class RolePermissionsResource(BaseResource):
     def __init__(self):
         self.service = RolePermissionsService()
-        self.permissions = Permissions.permissions
 
     @auth_required()
     def get(self, model_id):
@@ -106,7 +103,6 @@ class RolePermissionsResource(BaseResource):
 class RolesListResource(BaseResource):
     def __init__(self):
         self.service = RoleService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):
@@ -124,7 +120,6 @@ class RolesPermissionsListResource(BaseResource):
     def __init__(self):
         self.service = RoleService()
         self.service_permissions = RolePermissionsService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):

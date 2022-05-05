@@ -15,7 +15,6 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=get_timestamp)
     updated_at = db.Column(db.DateTime, default=get_timestamp)
-    blocked_columns = ['created_at', 'updated_at']
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
@@ -25,6 +24,7 @@ class User(UserMixin, db.Model):
     login_blocked_time = db.Column(db.DateTime)
     reset_password_at = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, server_default='False')
+    is_super_user = db.Column(db.Boolean, server_default='False')
     token = db.relationship("UserAuthTokens", uselist=False, cascade='delete, delete-orphan')
     role = db.relationship("Role", uselist=False, cascade='delete')
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=True)

@@ -1,8 +1,10 @@
+import logging
 import os.path
 from json import loads, dumps
 from flask import request
 from flask_restful import Resource
 
+from src.exceptions.http import UnknownException
 from src.exceptions.permissions import PermissionsException
 from src.modules.roles.service import RolePermissionsRepository
 from src.modules.roles.service import RoleRepository
@@ -23,49 +25,68 @@ class BaseResource(Resource):
         self.role_repository = role_repository
 
     def apply_permissions(self):
+        try:
+            endpoint = request.endpoint
+            method = request.method
 
-        endpoint = request.endpoint
-        method = request.method
+            if not g.user:
+                raise PermissionsException(message='Not have enough permissions')
 
-        if not g.user or not g.user.role_id:
-            raise PermissionsException(message='Not have enough permissions')
+            if g.user.is_super_user:
+                return True
 
-        # if not os.path.exists("config/permissions.json"):
+            if not g.user.role_id:
+                raise PermissionsException(message='Not have enough permissions')
 
-        permission = self.role_permissions_repository.find_one(endpoint=endpoint, method=method, role_id=g.user.role_id)
+            if not os.path.exists("config/permissions.json"):
 
-        if not permission:
-            raise PermissionsException(message='Not have enough permissions')
+                permission = self.role_permissions_repository.find_one(
+                    endpoint=endpoint,
+                    method=method,
+                    role_id=g.user.role_id
+                )
 
-        self.generate_permissions_file()
-        # else:
-        #     print(endpoint)
-        #     with open("config/permissions.json", 'r') as f:
-        #         data = loads(f.read())
-        #         items = data.get(g.user.role.alias, None)
-        #
-        #         if not items:
-        #             raise PermissionsException(message='Not have enough permissions')
-        #
-        #         if items.get(method, None) and endpoint not in items[method]:
-        #             raise PermissionsException(message='Not have enough permissions')
-        #
-        #         return True
+                if not permission:
+                    raise PermissionsException(message='Not have enough permissions')
+
+                self.generate_permissions_file()
+            else:
+                with open("config/permissions.json", 'r') as f:
+                    data = loads(f.read())
+                    items = data.get(g.user.role.alias, None)
+
+                    if not items:
+                        raise PermissionsException(message='Not have enough permissions')
+
+                    if not items.get(endpoint, None):
+                        raise PermissionsException(message='Not have enough permissions')
+
+                    if method not in items[endpoint]:
+                        raise PermissionsException(message='Not have enough permissions')
+
+                    return True
+        except Exception as e:
+            logging.error(e)
+            raise UnknownException()
 
     def generate_permissions_file(self):
-        roles = self.role_repository.find()
-        obj = {}
+        try:
+            roles = self.role_repository.find()
+            obj = {}
 
-        for role in roles:
-            obj[role.alias] = {}
+            for role in roles:
+                obj[role.alias] = {}
 
-            permissions = self.role_permissions_repository.find(role_id=g.user.role_id)
+                permissions = self.role_permissions_repository.find(role_id=g.user.role_id)
 
-            for permission in permissions:
-                if not obj[role.alias].get(permission.method, None):
-                    obj[role.alias][permission.method] = []
+                for permission in permissions:
 
-                obj[role.alias][permission.method].append(permission.endpoint)
+                    if not obj[role.alias].get(permission.endpoint, None):
+                        obj[role.alias][permission.endpoint] = []
 
-        with open("config/permissions.json", 'w') as f:
-            f.write(dumps(obj))
+                    obj[role.alias][permission.endpoint].append(permission.method)
+
+            with open("config/permissions.json", 'w') as f:
+                f.write(dumps(obj))
+        except Exception as e:
+            raise e

@@ -1,9 +1,6 @@
-from .redis import RedisService
+from .service import RedisService
+from .keys import RedisKeys
 
 redis_service = RedisService()
 
 
-class RedisKeys:
-    positions_list = 'positions_list'
-    degrees_list = 'degrees_list'
-    teachers_list = 'teachers_list'

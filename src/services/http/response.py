@@ -1,4 +1,4 @@
-class BaseError:
+class BaseResponse:
     __abstract__ = True
     errors = None
     message = "Success"
@@ -64,45 +64,45 @@ class SuccessResponse:
         self.message = 'Success'
 
 
-class UnprocessableEntityError(BaseError):
+class UnprocessableEntityErrorResponse(BaseResponse):
     message = 'Unprocessable entity'
     status = 422
 
 
-class NotFoundError(BaseError):
+class NotFoundErrorResponse(BaseResponse):
     errors = None
     message = "Not found"
     status = 404
 
 
-class UnauthorizedError(BaseError):
+class UnauthorizedErrorResponse(BaseResponse):
     errors = None
     message = "Unauthorized"
     status = 401
 
 
-class ForbiddenError(BaseError):
+class ForbiddenErrorResponse(BaseResponse):
     errors = None
     message = "Forbidden"
     status = 403
 
 
-class BadRequestError(BaseError):
+class BadRequestErrorResponse(BaseResponse):
     errors = None
     message = "Bad request"
     status = 400
 
 
-class InternalServerError(BaseError):
+class InternalServerErrorResponse(BaseResponse):
     error = None
     message = "Internal server error"
     status = 500
 
 
-UnprocessableEntity = UnprocessableEntityError()
-NotFound = NotFoundError()
-InternalServerError = InternalServerError()
-Forbidden = ForbiddenError()
-BadRequest = BadRequestError()
-Unauthorized = UnauthorizedError()
+UnprocessableEntity = UnprocessableEntityErrorResponse()
+NotFound = NotFoundErrorResponse()
+InternalServerError = InternalServerErrorResponse()
+Forbidden = ForbiddenErrorResponse()
+BadRequest = BadRequestErrorResponse()
+Unauthorized = UnauthorizedErrorResponse()
 Success = SuccessResponse()

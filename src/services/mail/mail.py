@@ -1,19 +1,7 @@
 import logging
 from threading import Thread
-
-from src.app import app
-from flask_mail import Message
-from flask_mail import Mail
+from .config import send_message
 from flask import render_template
-
-mail = Mail(app)
-
-
-def send_message(**kwargs):
-    msg = Message(**kwargs)
-
-    with app.app_context():
-        mail.send(msg)
 
 
 def send_email_link(email, link, recipient=''):

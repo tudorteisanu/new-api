@@ -5,14 +5,12 @@ from src.services.http import BaseResource
 from src.services.http.auth_utils import auth_required
 from src.services.http.response import InternalServerError
 
-from .config.permissions import Permissions
 from .service import GoodsService
 
 
 class GoodsResource(BaseResource):
     def __init__(self):
         self.service = GoodsService()
-        self.permissions = Permissions.index
 
     @auth_required()
     def get(self):
@@ -40,7 +38,6 @@ class GoodsResource(BaseResource):
 class GoodsOneResource(BaseResource):
     def __init__(self):
         self.service = GoodsService()
-        self.permissions = Permissions.self
 
     @auth_required()
     def get(self, model_id):
@@ -79,7 +76,6 @@ class GoodsOneResource(BaseResource):
 class GoodsListResource(BaseResource):
     def __init__(self):
         self.service = GoodsService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):

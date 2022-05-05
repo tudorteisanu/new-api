@@ -7,7 +7,8 @@ data = [
     {
         "name": "Root",
         "email": 'root@domain.com',
-        "password": "12345678"
+        "password": "12345678",
+        "is_super_user": True
     },
     {
         "name": "Test user",
@@ -36,6 +37,10 @@ class UsersSeeder:
                 user.role_id = role.id
                 user.confirmed_at = dt.now().isoformat()
                 user.password_hash = user.hash_password(item['password'])
+
+                if item.get('is_super_user', None):
+                    user.is_super_user = item.get('is_super_user', None)
+
                 self.users_seeder.append(user)
 
     def __call__(self):

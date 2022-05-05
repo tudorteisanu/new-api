@@ -1,7 +1,6 @@
 import logging
 
 from src.exceptions.permissions import PermissionsException
-from .config.permissions import Permissions
 from .service import CategoriesService
 
 from src.services.http import BaseResource
@@ -12,7 +11,6 @@ from src.services.http.response import InternalServerError
 class CategoryResource(BaseResource):
     def __init__(self):
         self.service = CategoriesService()
-        self.permissions = Permissions.index
 
     @auth_required()
     def find(self):
@@ -40,7 +38,6 @@ class CategoryResource(BaseResource):
 class CategoryOneResource(BaseResource):
     def __init__(self):
         self.service = CategoriesService()
-        self.permissions = Permissions.self
 
     @auth_required()
     def get(self, model_id):
@@ -79,7 +76,6 @@ class CategoryOneResource(BaseResource):
 class CategoryListResource(BaseResource):
     def __init__(self):
         self.service = CategoriesService()
-        self.permissions = Permissions.list
 
     @auth_required()
     def get(self):

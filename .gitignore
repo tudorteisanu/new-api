@@ -8,3 +8,4 @@ logs/*
 .env*
 static/categories
 static/goods
+data/
