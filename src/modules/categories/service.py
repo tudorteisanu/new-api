@@ -7,7 +7,6 @@ from src.app import db
 from src.exceptions.http import UnknownException, ValidationException
 from src.modules.categories.repository import CategoryRepository
 from src.modules.categories.serializer import CreateCategorySerializer
-from src.modules.categories.tasks import save
 
 from src.services.http.response import Success
 from src.services.http.response import UnprocessableEntity
@@ -39,8 +38,8 @@ class CategoriesService:
                     "name_en": item.name_en,
                     "name_ru": item.name_ru,
                     "image": {
-                       "url": item.image.get_url() if item.image else '',
-                       "name": item.image.name if item.image else ''
+                        "url": item.image.get_url() if item.image else '',
+                        "name": item.image.name if item.image else ''
                     }
                 } for item in items['items']],
             "headers": [{
@@ -59,12 +58,19 @@ class CategoriesService:
                 raise ValidationException(errors=serializer.errors)
 
             file = request.files.get('image', None)
-            result = save(data, file)
+
+            self.repository.create(
+                name_ro=data['name_ro'],
+                name_en=data['name_en'],
+                name_ru=data['name_ru'],
+                file_id=self.file_service.save_file(file, 'categories') or None
+            )
+
+            db.session.commit()
             return Success()
         except exc.IntegrityError as e:
             raise ValidationException(message=f"{e.orig.diag.message_detail}")
         except Exception as e:
-            print('eeeerrro')
             db.session.rollback()
             logging.error(e)
             raise UnknownException()
@@ -75,6 +81,7 @@ class CategoriesService:
 
             if not model:
                 return NotFound(message=self.t.translate('categories.validation.not_found'))
+
             response = {
                 "name_ro": model.name_ro,
                 "name_en": model.name_en,
