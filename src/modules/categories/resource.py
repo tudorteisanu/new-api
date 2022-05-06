@@ -13,7 +13,7 @@ class CategoryResource(BaseResource):
         self.service = CategoriesService()
 
     @auth_required()
-    def find(self):
+    def get(self):
         try:
             self.apply_permissions()
             return self.service.find()
@@ -24,7 +24,7 @@ class CategoryResource(BaseResource):
             return InternalServerError()
 
     @auth_required()
-    def create(self):
+    def post(self):
         try:
             self.apply_permissions()
             return self.service.create()

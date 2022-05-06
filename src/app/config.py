@@ -13,6 +13,20 @@ POSTGRES = {
     'port': environ.get('PG_PORT', 5432),
 }
 
+REDIS_CONFIG = {
+    "host": environ.get('REDIS_HOST', 'localhost'),
+    "port": environ.get('REDIS_PORT', 6379),
+    "db": environ.get('REDIS_DB', 0),
+    "password": environ.get('REDIS_PASSWORD', '')
+}
+
+RABBITMQ_CONFIG = {
+    "host": environ.get('RABBITMQ_HOST', 'localhost'),
+    "port": environ.get('RABBITMQ_PORT', '5672'),
+    "user": environ.get('RABBITMQ_USER', 'guest'),
+    "password": environ.get('RABBITMQ_PASSWORD', 'mypass')
+}
+
 
 class FlaskConfig(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
@@ -41,14 +55,7 @@ class FlaskConfig(object):
     STATIC_PATH = environ.get('STATIC_PATH')
     FRONTEND_ADDRESS = environ.get('FRONTEND_ADDRESS')
 
-    REDIS_HOST = environ.get('REDIS_HOST', 'localhost')
-    REDIS_PORT = environ.get('REDIS_PORT', 6379)
-    REDIS_DB = environ.get('REDIS_DB', 0)
-    REDIS_PASSWORD = environ.get('REDIS_PASSWORD', '')
-
-    RABBITMQ_HOST = environ.get('RABBITMQ_HOST', 'localhost')
-    RABBITMQ_PORT = environ.get('RABBITMQ_PORT', '5672')
-    RABBITMQ_USER = environ.get('RABBITMQ_USER', 'guest')
-    RABBITMQ_PASSWORD = environ.get('RABBITMQ_PASSWORD', 'mypass')
+    REDIS_URI = 'redis://%(host)s:%(port)s' % REDIS_CONFIG
+    RABBITMQ_URI = 'amqp://%(user)s:%(password)s@%(host)s:%(port)s//' % RABBITMQ_CONFIG
 
     ENVIRONMENT = 'dev'

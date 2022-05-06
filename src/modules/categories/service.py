@@ -4,8 +4,10 @@ from sqlalchemy import exc
 import logging
 
 from src.app import db
+from src.exceptions.http import UnknownException, ValidationException
 from src.modules.categories.repository import CategoryRepository
 from src.modules.categories.serializer import CreateCategorySerializer
+from src.modules.categories.tasks import save
 
 from src.services.http.response import Success
 from src.services.http.response import UnprocessableEntity
@@ -26,9 +28,10 @@ class CategoriesService:
         headers = ['id', "name_ro", "name_en", "name_ru", "image", "author"]
         params = request.args
         items = self.repository \
-            .paginate(int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
-
+            .paginate(page=int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
+        print(items['items'], 'items')
         resp = {
+            **items,
             "items": [
                 {
                     "id": item.id,
@@ -39,16 +42,13 @@ class CategoriesService:
                        "url": item.image.get_url() if item.image else '',
                        "name": item.image.name if item.image else ''
                     }
-                } for item in items.items],
-            "pages": items.pages,
-            "total": items.total,
+                } for item in items['items']],
             "headers": [{
                 "value": item,
                 "text": self.t.translate(f'categories.fields.{item}')
             } for item in headers]
         }
-
-        return jsonify(resp)
+        return resp
 
     def create(self):
         try:
@@ -56,25 +56,18 @@ class CategoriesService:
             serializer = CreateCategorySerializer(data)
 
             if not serializer.is_valid():
-                return UnprocessableEntity(errors=serializer.errors)
+                raise ValidationException(errors=serializer.errors)
 
             file = request.files.get('image', None)
-
-            self.repository.create(
-                name_ro=data['name_ro'],
-                name_en=data['name_en'],
-                name_ru=data['name_ru'],
-                file_id=self.file_service.save_file(file, 'categories') or None
-            )
-
-            db.session.commit()
+            result = save(data, file)
             return Success()
         except exc.IntegrityError as e:
-            return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
+            raise ValidationException(message=f"{e.orig.diag.message_detail}")
         except Exception as e:
+            print('eeeerrro')
             db.session.rollback()
             logging.error(e)
-            return InternalServerError()
+            raise UnknownException()
 
     def find_one(self, model_id):
         try:
@@ -167,7 +160,7 @@ class CategoriesService:
         page = int(params.get('page', 1))
         page_size = int(params.get('page_size', 20))
         items = self.repository \
-            .paginate(page, per_page=page_size)
+            .paginate(page=page, per_page=page_size)
 
         resp = {
             "items": [

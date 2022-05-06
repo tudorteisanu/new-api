@@ -5,7 +5,7 @@ deploy.sh
 .idea/
 config/permissions.json
 logs/*
-.env*
+.env
 static/categories
 static/goods
 data/

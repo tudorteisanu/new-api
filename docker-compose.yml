@@ -29,6 +29,7 @@ services:
 
     networks:
       - backend
+      - web
 
   redis:
     image: "redis:alpine"
@@ -43,7 +44,7 @@ services:
       - REDIS_REPLICATION_MODE=master
 
     networks:
-      - backend
+      - web
     ports:
       - "6379:6379"
 
@@ -53,7 +54,7 @@ services:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=mypass
     networks:
-      - backend
+      - web
     ports:
       - "5672:5672"
 
@@ -61,7 +62,7 @@ services:
     build: .
 
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www/html:delegated
 
     command: celery -A celery_app.celery worker --loglevel=INFO
 
@@ -74,7 +75,7 @@ services:
       - redis
 
     networks:
-      - backend
+      - web
 
 networks:
   web:
