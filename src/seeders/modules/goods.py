@@ -16,15 +16,14 @@ class GoodsSeeder:
 
     def __init__(self):
         self.name = __name__
-
+        self.file_service = file_service
 
     def __call__(self, count=50):
         with app.app_context():
             print('Goods seeder is running..')
-            self.seed_goods(count)
+            self.seed(count)
 
-
-    def seed_goods(self, count):
+    def seed(self, count):
         categories = [item[0] for item in Category.query.with_entities(Category.id).all()]
 
         for item in range(count):
@@ -71,7 +70,7 @@ class GoodsSeeder:
 
     def get_file_id(self, item):
         file_path, filename = self.get_random_file(item)
-        return file_service.save_file_from_object(filename, file_path)
+        return self.file_service.save_file_from_object(filename, file_path)
 
 
 goods_seeder = GoodsSeeder()

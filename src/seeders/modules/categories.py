@@ -65,7 +65,7 @@ class CategoriesSeeder:
     def __init__(self):
         self.fake_url = 'https://picsum.photos/300'
         self.name = __name__
-
+        self.file_service = file_service
 
     def __call__(self):
         with app.app_context():
@@ -74,17 +74,22 @@ class CategoriesSeeder:
 
     def create_categories(self):
         for item in data:
-            category = Category()
-            category.name_ro = item['name_ro']
-            category.name_en = item['name_en']
-            category.name_ru = item['name_ru']
-            category.created_at = dt.utcnow().isoformat()
-            category.updated_at = dt.utcnow().isoformat()
-            category.file_id = self.get_file_id(item)
-            category.author_id = None
+            if not Category.query.filter_by(
+                    name_ro=item['name_ro'],
+                    name_en=item['name_en'],
+                    name_ru=item['name_ru']
+            ).first():
+                category = Category()
+                category.name_ro = item['name_ro']
+                category.name_en = item['name_en']
+                category.name_ru = item['name_ru']
+                category.created_at = dt.utcnow().isoformat()
+                category.updated_at = dt.utcnow().isoformat()
+                category.file_id = self.get_file_id(item)
+                category.author_id = None
 
-            db.session.add(category)
-            db.session.commit()
+                db.session.add(category)
+                db.session.commit()
 
     def get_random_file(self, item):
         response = requests.get(self.fake_url)
@@ -97,7 +102,7 @@ class CategoriesSeeder:
 
     def get_file_id(self, item):
         file_path, filename = self.get_random_file(item)
-        return file_service.save_file_from_object(filename, file_path)
+        return self.file_service.save_file_from_object(filename, file_path)
 
 
 categories_seeder = CategoriesSeeder()
