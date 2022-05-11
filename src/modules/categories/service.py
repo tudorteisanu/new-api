@@ -28,7 +28,7 @@ class CategoriesService:
         params = request.args
         items = self.repository \
             .paginate(page=int(params.get('page', 1)), per_page=int(params.get('per_page', 20)))
-        print(items['items'], 'items')
+
         resp = {
             **items,
             "items": [
@@ -38,9 +38,8 @@ class CategoriesService:
                     "name_en": item.name_en,
                     "name_ru": item.name_ru,
                     "image": {
-                        "url": item.image.get_url() if item.image else '',
-                        "name": item.image.name if item.image else ''
-                    }
+                        "url": item.image.get_url() if item.image else None
+                    } if item.image else None
                 } for item in items['items']],
             "headers": [{
                 "value": item,
@@ -57,19 +56,21 @@ class CategoriesService:
             if not serializer.is_valid():
                 raise ValidationException(errors=serializer.errors)
 
-            file = request.files.get('image', None)
-
-            self.repository.create(
+            category = self.repository.create(
                 name_ro=data['name_ro'],
                 name_en=data['name_en'],
                 name_ru=data['name_ru'],
-                file_id=self.file_service.save_file(file, 'categories') or None
             )
+
+            file = request.files.get('image', None)
+
+            if file:
+                category.file_id = self.file_service.save_file(file, 'categories') or None
 
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
-            raise ValidationException(message=f"{e.orig.diag.message_detail}")
+            raise ValidationException()
         except Exception as e:
             db.session.rollback()
             logging.error(e)
@@ -86,14 +87,8 @@ class CategoriesService:
                 "name_ro": model.name_ro,
                 "name_en": model.name_en,
                 "name_ru": model.name_ru,
-                "image": {
-                    "url": model.image.get_url() if model.image else '',
-                    "name": model.image.name if model.image else ''
-                }
+                "image": model.image.get_url() if model.image else None
             }
-
-            if model.image:
-                response['image'] = model.image.dict()
 
             return response
         except Exception as e:
@@ -108,12 +103,12 @@ class CategoriesService:
             if not model:
                 return NotFound()
 
+            self.repository.update(model, data)
             file = request.files.get('image', None)
 
             if file:
                 model.file_id = self.file_service.save_file(file, 'categories') or None
 
-            self.repository.update(model, data)
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
@@ -170,16 +165,13 @@ class CategoriesService:
             .paginate(page=page, per_page=page_size)
 
         resp = {
+            **items,
             "items": [
                 {
                     "id": item.id,
                     "name": getattr(item, f'name_{g.language}'),
                     "url": item.image.get_url() if item.image else ""
-                } for item in items.items],
-            "pages": items.pages,
-            "total": items.total,
-            "page_size": page_size,
-            "page": page,
+                } for item in items['items']],
             "headers": [{
                 "value": item,
                 "text": self.t.translate(f'categories.fields.{item}')

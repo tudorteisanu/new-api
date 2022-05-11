@@ -45,7 +45,7 @@ class Repository:
         try:
             query = self.query
             page = kwargs.get('page', 1)
-            page_size = kwargs.get('page_size', 20)
+            page_size = kwargs.get('page_size', 16)
 
             if kwargs.get('filters', None) is not None:
                 for key in kwargs['filters']:

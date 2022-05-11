@@ -16,10 +16,4 @@ class CategoryRepository(Category, Repository):
             raise e
 
     def list(self):
-        return [
-            {
-                "value": item.id,
-                "text": item.name_ro
-            } for item in self.query.with_entities(Category.id, Category.name_ro).all()
-        ]
-
+        return self.query.all()

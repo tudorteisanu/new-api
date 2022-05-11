@@ -20,8 +20,8 @@ def seed_db():
         seeders = [
             roles_seeder,
             users_seeder,
-            # categories_seeder,
-            # goods_seeder
+            categories_seeder,
+            goods_seeder
         ]
 
         print('-------------------- Starts seed Database. --------------------')

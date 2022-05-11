@@ -32,8 +32,16 @@ class Good(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True, default=set_author)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id', ondelete='CASCADE'), nullable=True)
     file_id = db.Column(db.Integer, db.ForeignKey('file.id', ondelete='CASCADE'), nullable=True)
-    image = db.relationship("File", backref=backref("good_image", uselist=False))
+    images = db.relationship("GoodFile", backref=backref("good_images"))
+    file = db.relationship("File", backref=backref("good_file"), uselist=False)
     category = db.relationship("Category", backref=backref("good_category", uselist=False))
 
     def __repr__(self):
         return f'Category - {self.id}'
+
+
+class GoodFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    file = db.relationship("File", backref=backref("categories.file"), uselist=False)
+    file_id = db.Column(db.Integer, db.ForeignKey('file.id', ondelete='CASCADE'), nullable=False)
+    good_id = db.Column(db.Integer, db.ForeignKey('good.id', ondelete='CASCADE'), nullable=False)
