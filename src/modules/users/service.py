@@ -71,7 +71,7 @@ class UsersService:
             )
 
             user.password = user.hash_password(data['password'])
-
+            db.session.commit()
             return Success()
         except exc.IntegrityError as e:
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
