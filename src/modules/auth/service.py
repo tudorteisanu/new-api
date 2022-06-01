@@ -28,7 +28,7 @@ from src.services.http.response import InternalServerError
 from src.services.http.response import Success
 from src.services.localization import Locales
 
-from src.exceptions.http import UnknownException
+from src.exceptions.http import UnknownException, NotFoundException
 from src.exceptions.http import ValidationException
 
 
@@ -44,75 +44,75 @@ class AuthService:
         serializer = LoginSerializer(data)
 
         if not serializer.is_valid():
-            raise ValidationException(serializer.errors)
+            raise ValidationException(errors=serializer.errors)
 
-        try:
-            user = self.repository.find_one(email=data['email'])
+        user = self.repository.find_one(email=data['email'])
 
-            if not user:
-                return NotFound()
+        if not user:
+            raise NotFoundException()
 
-            if user.login_blocked_time:
-                if user.login_blocked_time > datetime.now():
-                    difference = user.login_blocked_time - datetime.now()
-                    message = f"Возможность входа в аккаунт временно заблокированно." \
-                              f" Осталось времени блокировки: {self.parse_minutes(difference.seconds)}."
-                    return UnprocessableEntity(message=message)
-                else:
-                    self.repository.update(user, {
-                        "login_attempts": 3,
-                        "login_blocked_time": None
-                    })
+        if user.login_blocked_time:
+            if user.login_blocked_time > datetime.now():
+                difference = user.login_blocked_time - datetime.now()
+                message = f"Возможность входа в аккаунт временно заблокированно." \
+                          f" Осталось времени блокировки: {self.parse_minutes(difference.seconds)}."
 
-            if user.check_password(data['password']):
-                if not user.confirmed_at:
-                    return UnprocessableEntity(message='User not confirmed')
-
-                if not user.is_active:
-                    return NotFound()
-
-                user.create_token()
-
-                if user.login_attempts != 3:
-                    self.repository.update(user, {
-                        "login_attempts": 3
-                    })
-
-                if user.reset_password_at:
-                    self.repository.update(user, {
-                        "reset_password_at": None,
-                        "reset_code": None
-                    })
-
-                db.session.commit()
-
-                response = {
-                    "user": {
-                        "id": user.id,
-                        "name": user.name,
-                        "email": user.email,
-                        "role": {
-                            "id": user.role_id,
-                            "alias": user.role.alias,
-                            "name": user.role.name,
-                        } if user.role else None
-                    },
-                    "token": user.token.access_token
-                }
-
-                return Success(data=response)
+                raise ValidationException(message=message)
             else:
-                user.login_attempts = user.login_attempts - 1
+                self.repository.update(user, {
+                    "login_attempts": 3,
+                    "login_blocked_time": None
+                })
 
-                if user.login_attempts == 0:
-                    user.login_blocked_time = datetime.now() + timedelta(minutes=15)
-                message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
-                db.session.commit()
-                return UnprocessableEntity(message=message)
-        except Exception as e:
-            db.session.rollback()
-            logging.error(e)
-            return InternalServerError()
+        print('sss')
+        if user.check_password(data['password']):
+            if not user.confirmed_at:
+                raise ValidationException(message='User not confirmed')
+
+            if not user.is_active:
+                raise NotFoundException()
+
+            user.create_token()
+
+            if user.login_attempts != 3:
+                self.repository.update(user, {
+                    "login_attempts": 3
+                })
+
+            if user.reset_password_at:
+                self.repository.update(user, {
+                    "reset_password_at": None,
+                    "reset_code": None
+                })
+
+            db.session.commit()
+
+            response = {
+                "user": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "role": {
+                        "id": user.role_id,
+                        "alias": user.role.alias,
+                        "name": user.role.name,
+                    } if user.role else None
+                },
+                "token": user.token.access_token
+            }
+
+            return Success(data=response)
+        else:
+            user.login_attempts = user.login_attempts - 1
+
+            if user.login_attempts == 0:
+                user.login_blocked_time = datetime.now() + timedelta(minutes=15)
+
+            message = f"Вы ввели неверны пароль. Возможные попытки: {user.login_attempts}, по истечению которых, ваш аккаунт будет временно заблокирован"
+            db.session.commit()
+
+            print(ValidationException(message=message))
+            raise ValidationException(message=message)
 
     def register(self):
         try:

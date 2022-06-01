@@ -62,14 +62,16 @@ class UsersService:
             if not serializer.is_valid():
                 return UnprocessableEntity(errors=serializer.errors)
 
-            self.repository.create(
+            user = self.repository.create(
                 name=data['name'],
                 email=data['email'],
                 role_id=data['role_id'],
                 confirmed_at=dt.utcnow().isoformat(),
                 is_active=True,
-                password=self.hash_password(data['password'])
             )
+
+            user.password = user.hash_password(data['password'])
+
             return Success()
         except exc.IntegrityError as e:
             return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")

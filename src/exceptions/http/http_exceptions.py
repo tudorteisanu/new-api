@@ -1,6 +1,7 @@
 class ValidationException(Exception):
-    def __init__(self, errors):
+    def __init__(self, errors=None, message=None):
         self.errors = errors
+        self.message = message
 
 
 class UnknownException(Exception):

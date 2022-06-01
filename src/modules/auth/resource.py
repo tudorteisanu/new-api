@@ -17,9 +17,9 @@ class LoginResource(Resource):
     def post(self):
         try:
             return self.service.login()
-        # todo make the same for all modules
         except ValidationException as e:
-            return UnprocessableEntity(errors=e.errors)
+            print(e.message)
+            return UnprocessableEntity(errors=e.errors, message=e.message)
         except Exception as e:
             logging.error(e)
             return InternalServerError()

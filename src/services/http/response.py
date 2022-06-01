@@ -1,8 +1,8 @@
 class BaseResponse:
     __abstract__ = True
     errors = None
-    message = "Success"
-    status = 200
+    message = ""
+    status = 0
 
     def __init__(self, **kwargs):
         self.errors = None
@@ -11,11 +11,13 @@ class BaseResponse:
         for (key, value) in kwargs.items():
             self.__setattr__(key, value)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, **kwargs):
         self.errors = None
+        print(kwargs)
 
-        for (key, value) in kwargs.items():
-            self.__setattr__(key, value)
+        if kwargs.get('error'):
+            self.error = kwargs.get('error')
+
 
         response = {}
 
@@ -27,7 +29,7 @@ class BaseResponse:
 
         if self.errors is not None:
             response["message"] = self.message
-
+        print(response)
         return response,  self.status
 
     def __del__(self):
