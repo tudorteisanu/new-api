@@ -7,6 +7,7 @@ import logging
 from datetime import datetime as dt
 
 from src.app import db
+from src.exceptions.http import ValidationException, UnknownException
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
 
@@ -59,8 +60,9 @@ class UsersService:
         try:
             data = request.json
             serializer = CreateUserSerializer(data)
+
             if not serializer.is_valid():
-                return UnprocessableEntity(errors=serializer.errors)
+                raise ValidationException(errors=serializer.errors)
 
             user = self.repository.create(
                 name=data['name'],
@@ -74,11 +76,14 @@ class UsersService:
             db.session.commit()
             return Success()
         except exc.IntegrityError as e:
-            return UnprocessableEntity(message=f"{e.orig.diag.message_detail}")
+            raise ValidationException(message=f"{e.orig.diag.message_detail}")
+        except ValidationException as e:
+            print(e, 'service')
+            raise e
         except Exception as e:
             db.session.rollback()
             logging.error(e)
-            return InternalServerError()
+            raise UnknownException()
 
     def find_one(self, user_id):
         try:

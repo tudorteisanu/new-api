@@ -13,11 +13,15 @@ class BaseResponse:
 
     def __call__(self, **kwargs):
         self.errors = None
-        print(kwargs)
-
-        if kwargs.get('error'):
+        print(kwargs, 'kwargs')
+        if kwargs.get('error', None):
             self.error = kwargs.get('error')
 
+        if kwargs.get('errors', None):
+            self.errors = kwargs.get('errors')
+
+        if kwargs.get('message', None):
+            self.message = kwargs.get('message')
 
         response = {}
 
@@ -27,9 +31,9 @@ class BaseResponse:
         if self.errors is not None:
             response['errors'] = self.errors
 
-        if self.errors is not None:
+        if self.message is not None:
             response["message"] = self.message
-        print(response)
+
         return response,  self.status
 
     def __del__(self):
@@ -60,10 +64,6 @@ class SuccessResponse:
             return {"message": self.message}, self.status
 
         return self.data, self.status
-
-    def __del__(self):
-        self.data = None
-        self.message = 'Success'
 
 
 class UnprocessableEntityErrorResponse(BaseResponse):
