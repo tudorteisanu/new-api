@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, server_default='False')
     is_super_user = db.Column(db.Boolean, server_default='False')
     token = db.relationship("UserAuthTokens", uselist=False, cascade='delete, delete-orphan')
-    role = db.relationship("Role", uselist=False, cascade='delete')
+    role = db.relationship("Role", uselist=False)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=True)
 
     def __repr__(self):

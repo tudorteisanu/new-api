@@ -7,7 +7,7 @@ import logging
 from datetime import datetime as dt
 
 from src.app import db
-from src.exceptions.http import ValidationException, UnknownException
+from src.exceptions.http import ValidationException, UnknownException, NotFoundException
 from src.modules.users.repository import UserRepository
 from src.modules.roles.repository import RoleRepository
 
@@ -127,7 +127,7 @@ class UsersService:
             user = self.repository.get(user_id)
 
             if not user:
-                return NotFound()
+                raise NotFoundException()
 
             self.repository.remove(user)
             db.session.commit()
