@@ -95,11 +95,7 @@ class UsersService:
             return {
                 "name": user.name,
                 "email": user.email,
-                "role": {
-                    "id": user.role_id,
-                    "alias": user.role.alias,
-                    "name": user.role.name,
-                } if user.role else None,
+                "role_id":  user.role_id,
                 "id": user.id
             }
         except Exception as e:
