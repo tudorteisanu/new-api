@@ -82,7 +82,7 @@ class CheckResetTokenResource(Resource):
 
 
 class CheckAuthResource(Resource):
-    @auth_required
+    @auth_required()
     def get(self):
         return True
 
