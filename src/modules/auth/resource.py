@@ -81,6 +81,12 @@ class CheckResetTokenResource(Resource):
         return self.service.check_reset_token()
 
 
+class CheckAuthResource(Resource):
+    @auth_required
+    def get(self):
+        return True
+
+
 class ResetPasswordResource(Resource):
     def __init__(self):
         self.service = AuthService()
